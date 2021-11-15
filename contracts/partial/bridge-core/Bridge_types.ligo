@@ -1,20 +1,6 @@
-type token_id_t         is nat;
 type chain_id_t         is nat;
 type asset_id_t         is nat;
 type native_address_t   is bytes;
-
-type token_t            is [@layout:comb] record[
-  address                 : address;
-  id                      : token_id_t;
-]
-
-type wrapped_t          is nat
-
-type asset_standard_t   is
-| Fa12                    of address
-| Fa2                     of token_t
-| Tez
-| Wrapped                 of wrapped_t
 
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
@@ -34,9 +20,21 @@ type wrapped_token_t    is [@layout:comb] record[
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
 type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
 
+type validator_set_t    is set(address);
+
+type balance_map_t      is map(token_id_t, nat);
+
+type account_t          is [@layout:comb] record [
+    balances              : balance_map_t;
+    permits               : set(address);
+  ]
+
+type ledger_t           is big_map(address, account_t)
+
 type storage_t          is [@layout:comb] record[
   owner                   : address;
   validator               : address;
+  validators              : validator_set_t;
   fee_oracle              : address;
   fee_collector           : address;
   bridge_managers         : managers_set_t;
@@ -47,6 +45,7 @@ type storage_t          is [@layout:comb] record[
   wrapped_token_count     : nat;
   wrapped_token_infos     : wrapped_token_map_t;
   wrapped_token_ids       : wrapped_token_ids_map_t;
+  ledger                  : ledger_t;
   enabled                 : bool;
 ]
 
@@ -81,5 +80,12 @@ type remove_asset__t      is asset_id_t
 
 type new_asset_t        is new_asset_standard_t;
 
+type lock_asset_t       is [@layout:comb] record[
+  chain_id                : chain_id_t;
+  lock_id                 : nat;
+  asset                   : asset_standard_t;
+  lock_amount             : nat;
+  receiver                : bytes;
+]
 
 const no_operations : list(operation) = nil;
