@@ -1,7 +1,7 @@
 type token_id_t         is nat;
 type chain_id_t         is nat;
 type asset_id_t         is nat;
-type vendor_address_t   is bytes;
+type native_address_t   is bytes;
 
 type token_t            is [@layout:comb] record[
   address                 : address;
@@ -28,7 +28,7 @@ type managers_set_t     is set(address);
 
 type wrapped_token_t    is [@layout:comb] record[
   chain_id                : chain_id_t;
-  vendor_token_address    : vendor_address_t;
+  native_token_address    : native_address_t;
 ]
 
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
