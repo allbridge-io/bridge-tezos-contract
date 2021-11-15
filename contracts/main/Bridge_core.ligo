@@ -20,5 +20,5 @@ function main(
   | Update_manager (params) -> (no_operations, update_manager(params, s))
   | Stop_bridge             -> (no_operations, stop_bridge(s))
   | Stop_asset (params)     -> (no_operations, stop_asset(params, s))
-  | Add_asset (params)      -> (no_operations, add_asset(params.chain_id, params.asset_type, s))
+  | Add_asset (params)      -> (no_operations, add_asset(params, s))
   end

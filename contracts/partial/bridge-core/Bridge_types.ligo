@@ -8,10 +8,7 @@ type token_t            is [@layout:comb] record[
   id                      : token_id_t;
 ]
 
-type wrapped_t          is [@layout:comb] record[
-  id                      : token_id_t;
-  address                 : vendor_address_t;
-]
+type wrapped_t          is nat
 
 type asset_standard_t   is
 | Fa12                    of address
@@ -20,7 +17,6 @@ type asset_standard_t   is
 | Wrapped                 of wrapped_t
 
 type asset_t            is [@layout:comb] record[
-  chain_id                : chain_id_t;
   asset_type              : asset_standard_t;
   locked_amount           : nat;
   enabled                 : bool;
@@ -33,10 +29,10 @@ type managers_set_t     is set(address);
 type wrapped_token_t    is [@layout:comb] record[
   chain_id                : chain_id_t;
   vendor_token_address    : vendor_address_t;
-  locked_amount           : nat;
 ]
 
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
+type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -48,7 +44,8 @@ type storage_t          is [@layout:comb] record[
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   wrapped_token_count     : nat;
-  wrapped_tokens          : wrapped_token_map_t;
+  wrapped_token_infos     : wrapped_token_map_t;
+  wrapped_token_ids       : wrapped_token_ids_map_t;
   enabled                 : bool;
 ]
 
@@ -77,11 +74,8 @@ type new_asset_standard_t is
 | Fa12_                     of address
 | Fa2_                      of token_t
 | Tez_
-| Wrapped_                  of vendor_address_t
+| Wrapped_                  of wrapped_token_t
 
-type new_asset_t        is [@layout:comb] record[
-  chain_id                : chain_id_t;
-  asset_type              : new_asset_standard_t;
-]
+type new_asset_t        is new_asset_standard_t;
 
 const no_operations : list(operation) = nil;

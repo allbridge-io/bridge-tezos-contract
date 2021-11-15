@@ -71,7 +71,6 @@ function stop_asset(
 
 (* Add new asset entrypoint *)
 function add_asset(
-  const chain_id_        : chain_id_t;
   const asset_type       : new_asset_standard_t;
   var s                  : storage_t)
                          : storage_t is
@@ -79,7 +78,6 @@ function add_asset(
     (* Checking user is bridge manager *)
     is_manager(s.bridge_managers);
     var new_asset := record[
-      chain_id = chain_id_;
       asset_type = Fa12(Tezos.self_address);
       locked_amount = 0n;
       enabled = True;
@@ -87,23 +85,12 @@ function add_asset(
 
     case asset_type of
     | Fa12_ (address_) -> new_asset.asset_type := Fa12(address_)
-    | Fa2_ (record[address=address_; id=id]) -> new_asset.asset_type := Fa2(record[
-        address = address_;
-        id = id;
-      ])
+    | Fa2_ (info) -> new_asset.asset_type := Fa2(info)
     | Tez_ -> new_asset.asset_type := Tez
-    | Wrapped_ (address_) -> {
-      new_asset.asset_type := Wrapped(record[
-        id = s.wrapped_token_count;
-        address = address_;
-      ]);
-
-      const new_wrapped_token = record[
-        chain_id = chain_id_;
-        vendor_token_address = address_;
-        locked_amount = 0n;
-      ];
-      s.wrapped_tokens[s.wrapped_token_count] := new_wrapped_token;
+    | Wrapped_ (info) -> {
+      new_asset.asset_type := Wrapped(s.wrapped_token_count);
+      s.wrapped_token_infos[s.wrapped_token_count] := info;
+      s.wrapped_token_ids[info] := s.wrapped_token_count;
       s.wrapped_token_count := s.wrapped_token_count + 1n;
     }
     end;
