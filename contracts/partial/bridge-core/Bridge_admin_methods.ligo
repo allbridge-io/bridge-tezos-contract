@@ -83,6 +83,9 @@ function add_asset(
       enabled = True;
     ];
 
+    (* Сheck that such an asset has not been added already *)
+    is_uniq(new_asset, s.bridge_asset_ids);
+
     case asset_type of
     | Fa12_ (address_) -> new_asset.asset_type := Fa12(address_)
     | Fa2_ (info) -> new_asset.asset_type := Fa2(info)
@@ -96,6 +99,7 @@ function add_asset(
     end;
 
     s.bridge_assets[s.asset_count] := new_asset;
+    s.bridge_asset_ids[new_asset] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s

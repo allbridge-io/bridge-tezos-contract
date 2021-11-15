@@ -27,6 +27,16 @@ function get_asset(
   | None -> failwith("Bridge-core/wrong-asset-id")
   end;
 
+(* Helper function for to check uniqueness *)
+function is_uniq(
+  const asset           : asset_t;
+  const asset_map       : asset_map_ids_t)
+                        : unit is
+  case asset_map[asset] of
+  | Some(_) -> failwith("Bridge-core/asset-already-exists")
+  | None -> unit
+  end;
+
 (* Helper function for get wrapped token *)
 function get_wrapped_token(
   const token_id         : token_id_t;

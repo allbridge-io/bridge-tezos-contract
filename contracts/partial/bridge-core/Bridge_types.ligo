@@ -23,6 +23,7 @@ type asset_t            is [@layout:comb] record[
 ]
 
 type asset_map_t        is big_map(asset_id_t, asset_t)
+type asset_map_ids_t    is big_map(asset_t, asset_id_t)
 
 type managers_set_t     is set(address);
 
@@ -30,7 +31,6 @@ type wrapped_token_t    is [@layout:comb] record[
   chain_id                : chain_id_t;
   native_token_address    : native_address_t;
 ]
-
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
 type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
 
@@ -43,6 +43,7 @@ type storage_t          is [@layout:comb] record[
   stop_managers           : managers_set_t;
   asset_count             : nat;
   bridge_assets           : asset_map_t;
+  bridge_asset_ids        : asset_map_ids_t;
   wrapped_token_count     : nat;
   wrapped_token_infos     : wrapped_token_map_t;
   wrapped_token_ids       : wrapped_token_ids_map_t;
@@ -76,6 +77,9 @@ type new_asset_standard_t is
 | Tez_
 | Wrapped_                  of wrapped_token_t
 
+type remove_asset__t      is asset_id_t
+
 type new_asset_t        is new_asset_standard_t;
+
 
 const no_operations : list(operation) = nil;
