@@ -15,7 +15,7 @@
     "yarn": "^1.22.10"
   },
   "scripts": {
-    "clean": "rm -rf ./build",
+    "clean": "rm -rf ./builds",
     "compile": "yarn clean && node scripts/cli.js compile && node scripts/cli.js compileTest",
     "migrate": "yarn compile && node scripts/cli.js migrate",
     "test": "yarn compile && mocha --bail",
