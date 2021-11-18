@@ -158,3 +158,21 @@ function get_oracle_fee(
   | Some(fee) -> fee
   | None -> failwith("Bridge-core/oracle-fee-404")
   end
+
+(* Helper function to check bridge status *)
+function is_bridge_enabled(
+  const status          : bool)
+                        : unit is
+  case status of
+  | True -> unit
+  | False -> failwith("Bridge-core/bridge-disabled")
+  end;
+
+(* Helper function to check asset status *)
+function is_asset_enabled(
+  const status          : bool)
+                        : unit is
+  case status of
+  | True -> unit
+  | False -> failwith("Bridge-core/asset-disabled")
+  end;

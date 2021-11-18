@@ -4,7 +4,12 @@ function lock_asset(
   var s                : storage_t)
                        : return_t is
   block {
+    (* Check bridge status *)
+    is_bridge_enabled(s.enabled);
+
     var asset := get_asset(params.asset_id, s.bridge_assets);
+    (* Check asset status *)
+    is_asset_enabled(asset.enabled);
 
     const fee = get_oracle_fee(
       record[
@@ -62,7 +67,12 @@ function unlock_asset(
   var s                 : storage_t)
                         : return_t is
   block {
+    (* Check bridge status *)
+    is_bridge_enabled(s.enabled);
+
     var asset := get_asset(params.asset_id, s.bridge_assets);
+    (* Check asset status *)
+    is_asset_enabled(asset.enabled);
 
     const fee = case s.validators contains Tezos.sender of
     | True -> get_oracle_fee(
