@@ -78,16 +78,6 @@ function wrap_transfer(
     end;
 
 (* Helper to check permissions *)
-function is_owner (
-  const owner           : address)
-                        : unit is
-  block {
-    if Tezos.sender =/= owner
-    then failwith("Bridge-core/not-owner")
-    else skip;
-} with unit
-
-(* Helper to check permissions *)
 function is_manager (
   const manager         : address)
                         : unit is

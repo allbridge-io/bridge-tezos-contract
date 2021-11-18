@@ -57,7 +57,6 @@ type change_address_t   is
 | Change_fee_oracle       of address
 | Change_fee_collector    of address
 
-
 type new_asset_standard_t is
 | Fa12_                     of address
 | Fa2_                      of token_t

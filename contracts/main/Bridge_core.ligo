@@ -1,6 +1,7 @@
 #include "../partial/Common_types.ligo"
 #include "../partial/bridge-core/Bridge_types.ligo"
 #include "../partial/bridge-core/Bridge_fa2_types.ligo"
+#include "../partial/Common_utils.ligo"
 #include "../partial/bridge-core/Bridge_utils.ligo"
 #include "../partial/bridge-core/Bridge_admin_methods.ligo"
 #include "../partial/bridge-core/Bridge_exchange_methods.ligo"
