@@ -9,30 +9,11 @@ function change_address(
 
     case changed_address of
     | Change_owner (address_) -> s.owner := address_
+    | Change_bridge_manager (address_) -> s.bridge_manager := address_
+    | Change_stop_manager (address_) -> s.stop_manager := address_
     | Change_validator (address_) -> s.validator := address_
     | Change_fee_oracle (address_) -> s.fee_oracle := address_
     | Change_fee_collector (address_) -> s.fee_collector := address_
-    end;
-  } with s
-
-(* Update managers entrypoint *)
-function update_manager(
-  const param           : update_managers_t;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    (* Permission check *)
-    is_owner(s.owner);
-
-    case param of
-    | Update_bridge_manager (record[add=add; manager=address_]) -> case add of
-      | True  -> s.bridge_managers := Set.add(address_, s.bridge_managers)
-      | False -> s.bridge_managers := Set.remove(address_, s.bridge_managers)
-      end
-    | Update_stop_manager (record[add=add; manager=address_]) -> case add of
-      | True  -> s.stop_managers := Set.add(address_, s.stop_managers)
-      | False -> s.stop_managers := Set.remove(address_, s.stop_managers)
-      end
     end;
   } with s
 
@@ -42,7 +23,7 @@ function stop_bridge(
                         : storage_t is
   block {
     (* Checking user is stop manager *)
-    is_manager(s.stop_managers);
+    is_manager(s.stop_manager);
 
     case s.enabled of
     | True -> s.enabled := False
@@ -57,7 +38,7 @@ function stop_asset(
                         : storage_t is
   block {
     (* Checking user is bridge manager *)
-    is_manager(s.bridge_managers);
+    is_manager(s.bridge_manager);
 
     var asset := get_asset(asset_id, s.bridge_assets);
 
@@ -76,7 +57,7 @@ function add_asset(
                          : storage_t is
   block {
     (* Checking user is bridge manager *)
-    is_manager(s.bridge_managers);
+    is_manager(s.bridge_manager);
     var new_asset := record[
       asset_type = Fa12(Tezos.self_address);
       locked_amount = 0n;

@@ -11,8 +11,6 @@ type asset_t            is [@layout:comb] record[
 type asset_map_t        is big_map(asset_id_t, asset_t)
 type asset_map_ids_t    is big_map(asset_t, asset_id_t)
 
-type managers_set_t     is set(address);
-
 type wrapped_token_t    is [@layout:comb] record[
   chain_id                : chain_id_t;
   native_token_address    : native_address_t;
@@ -33,12 +31,12 @@ type ledger_t           is big_map(address, account_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
+  bridge_manager          : address;
+  stop_manager            : address;
   validator               : address;
   validators              : validator_set_t;
   fee_oracle              : address;
   fee_collector           : address;
-  bridge_managers         : managers_set_t;
-  stop_managers           : managers_set_t;
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   bridge_asset_ids        : asset_map_ids_t;
@@ -51,24 +49,14 @@ type storage_t          is [@layout:comb] record[
 
 type return_t           is list (operation) * storage_t
 
-type update_address_t   is
-| Add                     of address
-| Remove                  of address
-
 type change_address_t   is
 | Change_owner            of address
+| Change_bridge_manager   of address
+| Change_stop_manager     of address
 | Change_validator        of address
 | Change_fee_oracle       of address
 | Change_fee_collector    of address
 
-type update_manager_t   is [@layout:comb] record[
-  add                     : bool;
-  manager                 : address
-]
-
-type update_managers_t  is
-| Update_bridge_manager   of update_manager_t
-| Update_stop_manager     of update_manager_t
 
 type new_asset_standard_t is
 | Fa12_                     of address

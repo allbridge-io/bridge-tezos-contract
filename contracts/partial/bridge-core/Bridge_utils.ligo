@@ -89,9 +89,9 @@ function is_owner (
 
 (* Helper to check permissions *)
 function is_manager (
-  const managers        : managers_set_t)
+  const manager         : address)
                         : unit is
-  case managers contains Tezos.sender of
+  case (Tezos.sender =/= manager) of
   | True -> failwith("Bridge-core/not-manager")
   | False -> unit
   end;
