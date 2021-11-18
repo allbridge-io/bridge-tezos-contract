@@ -27,3 +27,12 @@ type fa2_transfer_param_t is [@layout:comb] record [
 type fa2_transfer_t     is list(fa2_transfer_param_t)
 
 type fa12_transfer_t    is michelson_pair(address, "from", michelson_pair(address, "to", nat, "value"), "")
+
+type calculate_fee_t    is [@layout:comb] record[
+  amount                  : nat;
+  token                   : asset_standard_t;
+  abr_balance             : nat;
+  abr_total_supply        : nat;
+]
+
+type response_fee_t     is nat;

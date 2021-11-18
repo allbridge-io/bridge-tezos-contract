@@ -52,30 +52,30 @@ function transfer_fa2(
     get_transfer_fa2_contract(contract_address)
   );
 
-// function wrap_transfer(
-//   const sender_          : address;
-//   const receiver         : address;
-//   const amount_          : nat;
-//   const token            : asset_standard_t)
-//                          : operation is
-//     case token of
-//     | Fa12(address_) -> Tezos.transaction(
-//         (sender_,
-//         (receiver, amount_)),
-//         0mutez,
-//         get_transfer_fa12_contract(address_))
-//     | Fa2(token_) -> transfer_fa2(
-//         sender_,
-//         receiver,
-//         amount_,
-//         token_.id,
-//         token_.address)
-//     | Tez -> Tezos.transaction(
-//         unit,
-//         amount_ * 1mutez,
-//         (get_contract(receiver) : contract(unit)))
-//     | Wrapped(_) -> 
-//     end;
+function wrap_transfer(
+  const sender_          : address;
+  const receiver         : address;
+  const amount_          : nat;
+  const token            : asset_standard_t)
+                         : operation is
+    case token of
+    | Fa12(address_) -> Tezos.transaction(
+        (sender_,
+        (receiver, amount_)),
+        0mutez,
+        get_transfer_fa12_contract(address_))
+    | Fa2(token_) -> transfer_fa2(
+        sender_,
+        receiver,
+        amount_,
+        token_.id,
+        token_.address)
+    | Tez -> Tezos.transaction(
+        unit,
+        amount_ * 1mutez,
+        (get_contract(receiver) : contract(unit)))
+    | _ -> failwith("Bridge-core/no-transfering-asset")
+    end;
 
 (* Helper to check permissions *)
 function is_owner (
@@ -158,3 +158,13 @@ function get_balance_by_token(
   | None -> 0n
   | Some(v) -> v
   end
+
+(* Helper view function to get fee *)
+function get_oracle_fee(
+  const _get_fee_param  : calculate_fee_t)
+                        : nat is // : option(response_fee_t) is
+    1n
+  // case (Tezos.call_view("calculate_fee", get_fee_param)) of
+  // | Some(fee) -> fee
+  // | None -> failwith("Bridge-core/oracle-fee-404")
+  // end

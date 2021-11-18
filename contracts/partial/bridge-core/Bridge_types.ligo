@@ -76,16 +76,24 @@ type new_asset_standard_t is
 | Tez_
 | Wrapped_                  of wrapped_token_t
 
-type remove_asset__t      is asset_id_t
+type remove_asset__t    is asset_id_t
 
 type new_asset_t        is new_asset_standard_t;
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
   lock_id                 : nat;
-  asset                   : asset_standard_t;
-  lock_amount             : nat;
+  asset_id                : asset_id_t;
+  amount                  : nat;
   receiver                : bytes;
+]
+
+type unlock_asset_t     is [@layout:comb] record[
+  chain_id                : chain_id_t;
+  lock_id                 : nat;
+  asset_id                : asset_id_t;
+  amount                  : nat;
+  receiver                : address;
 ]
 
 const no_operations : list(operation) = nil;
