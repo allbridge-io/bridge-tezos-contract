@@ -161,10 +161,10 @@ function get_balance_by_token(
 
 (* Helper view function to get fee *)
 function get_oracle_fee(
-  const _get_fee_param  : calculate_fee_t)
-                        : nat is // : option(response_fee_t) is
-    1n
-  // case (Tezos.call_view("calculate_fee", get_fee_param)) of
-  // | Some(fee) -> fee
-  // | None -> failwith("Bridge-core/oracle-fee-404")
-  // end
+  const get_fee_param  : calculate_fee_t;
+  const oracle_address : address)
+                       : response_fee_t is
+  case (Tezos.call_view("calculate_fee", get_fee_param, oracle_address) : option(response_fee_t)) of
+  | Some(fee) -> fee
+  | None -> failwith("Bridge-core/oracle-fee-404")
+  end

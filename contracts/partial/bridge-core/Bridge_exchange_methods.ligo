@@ -12,7 +12,8 @@ function lock_asset(
         token = asset.asset_type;
         abr_balance = 1n;//abr_balance;
         abr_total_supply = 1n//abt_total_supply
-      ]
+      ],
+      s.fee_oracle
     );
     var operations := no_operations;
     case asset.asset_type of
@@ -65,13 +66,13 @@ function unlock_asset(
 
     const fee = case s.validators contains Tezos.sender of
     | True -> get_oracle_fee(
-        record[
-          amount = params.amount;
-          token = asset.asset_type;
-          abr_balance = 1n;//abr_balance;
-          abr_total_supply = 1n//abt_total_supply
-        ]
-      )
+      record[
+        amount = params.amount;
+        token = asset.asset_type;
+        abr_balance = 1n;//abr_balance;
+        abr_total_supply = 1n//abt_total_supply
+      ],
+      s.fee_oracle)
     | False -> 0n
     end;
 
