@@ -27,11 +27,11 @@ function is_validated_unlock(
   | None -> unit
   end
 
-(* helper function to check sender is trust sender *)
-function is_trust_sender(
-  const trust_sender    : address)
+(* helper function to check sender is bridge-core contract *)
+function is_bridge(
+  const bridge          : address)
                         : unit is
-  case Tezos.sender = trust_sender of
+  case Tezos.sender = bridge of
   | True -> unit
-  | False -> failwith("Validator-bridge/not-trust-sender")
+  | False -> failwith("Validator-bridge/not-bridge")
   end

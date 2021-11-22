@@ -8,7 +8,7 @@ function change_address(
     is_owner(s.owner);
     case param of
     | Change_owner(address_) -> s.owner := address_
-    | Change_trust_sender(address_) -> s.trust_sender := address_
+    | Change_bridge(address_) -> s.bridge := address_
     end;
   } with s
 

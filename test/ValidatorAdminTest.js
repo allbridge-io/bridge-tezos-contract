@@ -38,32 +38,26 @@ describe("Validator Admin tests", async function () {
       await validator.updateStorage();
       strictEqual(validator.storage.owner, bob.pkh);
     });
-    it("Should allow change trust sender", async function () {
+    it("Should allow change bridge address", async function () {
       Tezos.setSignerProvider(signerBob);
 
-      await validator.сhangeAddress("change_trust_sender", bob.pkh);
+      await validator.сhangeAddress("change_bridge", bob.pkh);
       await validator.updateStorage();
-      strictEqual(validator.storage.trust_sender, bob.pkh);
+      strictEqual(validator.storage.bridge, bob.pkh);
     });
   });
   describe("Testing entrypoint: Change_validator_pk", async function () {
     it("Shouldn't changing validator pk if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(
-        validator.сhangeAddress(
-          "change_validator_pk",
-          "edpkurPsQ8eUApnLUJ9ZPDvu98E8VNj4KtJa1aZr16Cr5ow5VHKnz4",
-        ),
-        err => {
-          strictEqual(err.message, "Validator-bridge/not-owner");
-          return true;
-        },
-      );
+      await rejects(validator.сhangeValidatorPK(bob.pk), err => {
+        strictEqual(err.message, "Validator-bridge/not-owner");
+        return true;
+      });
     });
     it("Should allow change validator_pk", async function () {
       Tezos.setSignerProvider(signerBob);
 
-      await validator.сhangeValidatorPK("change_validator_pk", bob.pk);
+      await validator.сhangeValidatorPK(bob.pk);
       await validator.updateStorage();
       strictEqual(validator.storage.validator_pk, bob.pk);
     });

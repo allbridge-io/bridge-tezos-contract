@@ -4,7 +4,8 @@ function validate_lock(
   var s                 : storage_t)
                         : storage_t is
   block {
-    is_trust_sender(s.trust_sender);
+    (* Check sender is bridge-core conract *)
+    is_bridge(s.bridge);
 
     if params.destination_chain_id = tezos_chain_id
     then failwith("Validator-bridge/wrong-destination-chain-id")
@@ -21,7 +22,10 @@ function validate_unlock(
   var s                 : storage_t)
                         : storage_t is
   block {
-    is_trust_sender(s.trust_sender);
+    (* Check sender is bridge-core conract *)
+    is_bridge(s.bridge);
+
+    (* Сheck if such an unlock was created earlier *)
     is_validated_unlock(params.lock_id, s.validated_unlocks);
 
     const kessak_params : bytes = Crypto.keccak(Bytes.pack(
