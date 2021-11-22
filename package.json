@@ -1,5 +1,5 @@
 {
-  "name": "Bridge-core",
+  "name": "bridge-core",
   "version": "1.0.0",
   "description": "Bridge",
   "dependencies": {
@@ -18,8 +18,9 @@
     "clean": "rm -rf ./builds",
     "compile": "yarn clean && node scripts/cli.js compile && node scripts/cli.js compileTest",
     "migrate": "yarn compile && node scripts/cli.js migrate",
-    "test": "yarn compile && mocha --bail",
-    "start-sandbox": "docker run --rm --name my-sandbox -e flextesa_node_cors_origin='*' -e block_time=1 --detach -p 8732:20000 tqtezos/flextesa:20210602 granabox start"
+    "test": "mocha --bail",
+    "start-sandbox": "docker run --rm --name dev-sandbox -e flextesa_node_cors_origin='*' -e block_time=1 --detach -p 8732:20000 tqtezos/flextesa:20211025 hangzbox start",
+    "stop-sandbox": "docker kill dev-sandbox"
   },
   "repository": {
     "type": "git",
