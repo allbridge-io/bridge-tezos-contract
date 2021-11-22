@@ -17,6 +17,21 @@ function change_address(
     end;
   } with s
 
+(* Update validators set entrypoint *)
+function update_validators(
+  const param           : update_validators_t;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    (* Permission check *)
+    is_owner(s.owner);
+
+    case param of
+    | Add_validator(address_) -> s.validators := Set.add(address_, s.validators)
+    | Remove_validator(address_) -> s.validators := Set.remove(address_, s.validators)
+    end;
+  } with s
+
 (* Stop bridge protocol entrypoint *)
 function stop_bridge(
   var s                 : storage_t)
@@ -52,20 +67,20 @@ function stop_asset(
 
 (* Add new asset entrypoint *)
 function add_asset(
-  const asset_type       : new_asset_standard_t;
+  const asset_type       : new_asset_t;
   var s                  : storage_t)
                          : storage_t is
   block {
     (* Checking user is bridge manager *)
     is_manager(s.bridge_manager);
+    (* Check bridge status *)
+    is_bridge_enabled(s.enabled);
+
     var new_asset := record[
       asset_type = Fa12(Tezos.self_address);
       locked_amount = 0n;
       enabled = True;
     ];
-
-    (* Сheck that such an asset has not been added already *)
-    is_uniq(new_asset, s.bridge_asset_ids);
 
     case asset_type of
     | Fa12_ (address_) -> new_asset.asset_type := Fa12(address_)
@@ -78,6 +93,9 @@ function add_asset(
       s.wrapped_token_count := s.wrapped_token_count + 1n;
     }
     end;
+
+    (* Сheck that such an asset has not been added already *)
+    is_uniq(new_asset, s.bridge_asset_ids);
 
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[new_asset] := s.asset_count;

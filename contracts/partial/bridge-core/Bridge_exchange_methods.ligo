@@ -42,13 +42,13 @@ function lock_asset(
      }
     | _ -> {
       operations := wrap_transfer(
-        Tezos.sender,
+        Tezos.source,
         Tezos.self_address,
-        params.amount,
+        abs(params.amount - fee),
         asset.asset_type
       ) # operations;
       operations := wrap_transfer(
-        Tezos.sender,
+        Tezos.source,
         s.fee_collector,
         fee,
         asset.asset_type
@@ -58,6 +58,20 @@ function lock_asset(
     end;
 
     s.bridge_assets[params.asset_id] := asset;
+
+    var validate_lock := record[
+      lock_id = params.lock_id;
+      sender = Tezos.sender;
+      recipient = params.receiver;
+      amount = params.amount;
+      asset = transform_asset(asset.asset_type, s.wrapped_token_infos);
+      destination_chain_id = params.chain_id
+    ];
+    operations := Tezos.transaction(
+      validate_lock,
+      0mutez,
+      get_lock_contract(s.validator)
+    ) # operations;
 
   } with (operations, s)
 
@@ -74,16 +88,22 @@ function unlock_asset(
     (* Check asset status *)
     is_asset_enabled(asset.enabled);
 
-    const fee = case s.validators contains Tezos.sender of
-    | True -> get_oracle_fee(
-      record[
-        amount = params.amount;
-        token = asset.asset_type;
-        abr_balance = 1n;//abr_balance;
-        abr_total_supply = 1n//abt_total_supply
-      ],
-      s.fee_oracle)
-    | False -> 0n
+    var sender_ := Tezos.sender;
+    var fee := 0n;
+    case s.validators contains Tezos.sender of
+    | True -> {
+      fee := get_oracle_fee(
+        record[
+          amount = params.amount;
+          token = asset.asset_type;
+          abr_balance = 1n;//abr_balance;
+          abr_total_supply = 1n//abt_total_supply
+        ],
+        s.fee_oracle
+      );
+
+      }
+    | False -> skip
     end;
 
     params.amount := abs(params.amount - fee);
@@ -108,17 +128,35 @@ function unlock_asset(
       operations := wrap_transfer(
         Tezos.self_address,
         params.receiver,
-        params.amount,
+        abs(params.amount - fee),
         asset.asset_type
       ) # operations;
-      operations := wrap_transfer(
-        Tezos.sender,
-        s.fee_collector,
-        fee,
-        asset.asset_type
-      ) # operations;
+      if fee > 0n
+      then {
+        operations := wrap_transfer(
+          Tezos.sender,
+          s.fee_collector,
+          fee,
+          asset.asset_type
+        ) # operations}
+      else skip;
       asset.locked_amount := abs(asset.locked_amount - params.amount);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
+
+    var validate_unlock := record[
+      lock_id = params.lock_id;
+      recipient = params.receiver;
+      amount = params.amount;
+      chain_from_id = params.chain_id;
+      asset = transform_asset(asset.asset_type, s.wrapped_token_infos);
+      signature = params.signature;
+    ];
+
+    operations := Tezos.transaction(
+      validate_unlock,
+      0mutez,
+      get_unlock_contract(s.validator)
+    ) # operations;
   } with (operations, s)

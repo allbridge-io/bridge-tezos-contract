@@ -19,5 +19,14 @@ type change_fee_t       is
 | Change_base_fee         of nat
 | Change_fee_multiper     of nat
 
+type calculate_fee_t    is [@layout:comb] record[
+  amount                  : nat;
+  token                   : asset_standard_t;
+  abr_balance             : nat;
+  abr_total_supply        : nat;
+]
+
+type response_fee_t     is nat;
+
 const no_operations : list(operation) = nil;
 const bp = 10000n;

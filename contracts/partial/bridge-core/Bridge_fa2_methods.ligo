@@ -23,7 +23,7 @@ function iterate_transfer (
         else skip;
 
         if transfer.amount = 0n
-        then failwith("Vault/zero-amount-in")
+        then failwith("Bridge-core/zero-amount-in")
         else skip;
 
         (* Balance check *)

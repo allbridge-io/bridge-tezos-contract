@@ -78,6 +78,15 @@ function wrap_transfer(
     end;
 
 (* Helper to check permissions *)
+function is_owner (
+  const owner           : address)
+                        : unit is
+  case (Tezos.sender =/= owner) of
+  | True -> failwith("Bridge-core/not-owner")
+  | False -> unit
+  end;
+
+(* Helper to check permissions *)
 function is_manager (
   const manager         : address)
                         : unit is
@@ -175,4 +184,35 @@ function is_asset_enabled(
   case status of
   | True -> unit
   | False -> failwith("Bridge-core/asset-disabled")
+  end;
+
+function transform_asset(
+  const asset           : asset_standard_t;
+  const wrapped_map     : wrapped_token_map_t)
+                        : standard_asset_t is
+  case asset of
+  | Fa12(address_) -> Fa12_(address_)
+  | Fa2(token) -> Fa2_(token)
+  | Tez -> Tez_
+  | Wrapped(token_id) -> Wrapped_(get_wrapped_token(token_id, wrapped_map))
+  end
+
+function get_lock_contract(
+  const validator       : address)
+                        : contract(validate_lock_t) is
+  case (Tezos.get_entrypoint_opt(
+    "%validate_lock",
+    validator)        : option(contract(validate_lock_t))) of
+  | Some(contr) -> contr
+  | None -> failwith("Bridge-core/not-validator-lock")
+  end;
+
+function get_unlock_contract(
+  const validator       : address)
+                        : contract(validate_unlock_t) is
+  case (Tezos.get_entrypoint_opt(
+    "%validate_unlock",
+    validator)        : option(contract(validate_unlock_t))) of
+  | Some(contr) -> contr
+  | None -> failwith("Bridge-core/not-validator-unlock")
   end;
