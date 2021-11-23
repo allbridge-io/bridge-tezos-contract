@@ -25,12 +25,8 @@ module.exports = class BridgeCore {
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
-    await this.validator.сhangeAddress(
-      "change_trust_sender",
-      this.feeOracle.address,
-    );
+    await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
-    console.log("oracle", this.feeOracle.address);
 
     return this;
   }
@@ -91,15 +87,38 @@ module.exports = class BridgeCore {
     }
     await confirmOperation(Tezos, operation.hash);
   }
-  async lockAsset(chainId, lockId, assetId, amount, receiver) {
+  async lockAsset(chainId, lockId, assetId, amount, receiver, tezAmount = 0) {
     const operation = await this.contract.methods
       .lock_asset(chainId, lockId, assetId, amount, receiver)
-      .send();
+      .send({ amount: tezAmount });
+
     await confirmOperation(Tezos, operation.hash);
   }
   async unlockAsset(chainId, lockId, assetId, amount, receiver, signature) {
     const operation = await this.contract.methods
       .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async getBalance(address, tokenId) {
+    await this.updateStorage();
+    const account = await this.storage.ledger.get(address);
+    const balance = await account.balances.get(tokenId.toString());
+
+    try {
+      return balance.toNumber();
+    } catch (e) {
+      return 0;
+    }
+  }
+  async transfer(from, receiver, amount) {
+    const operation = await this.contract.methods
+      .transfer([
+        {
+          from_: from,
+          txs: [{ to_: receiver, token_id: 0, amount: amount }],
+        },
+      ])
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

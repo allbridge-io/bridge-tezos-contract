@@ -18,5 +18,4 @@ module.exports = {
   wrapped_token_ids: MichelsonMap.fromLiteral({}),
   ledger: MichelsonMap.fromLiteral({}),
   enabled: true,
-  test: bob.pkh,
 };

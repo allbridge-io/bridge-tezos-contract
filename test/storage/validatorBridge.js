@@ -8,5 +8,4 @@ module.exports = {
   validator_pk: alice.pk,
   validated_locks: MichelsonMap.fromLiteral({}),
   validated_unlocks: MichelsonMap.fromLiteral({}),
-  test: alice.pkh,
 };
