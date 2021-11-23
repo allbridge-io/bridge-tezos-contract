@@ -13,8 +13,8 @@ function iterate_transfer (
       block {
         var operations := result.0;
         var s := result.1;
-        var sender_account : account_t := get_account(trx_params.from_, s);
-        var sender_balance := get_balance_by_token(sender_account, transer.token_id);
+        var sender_account : account_t := get_account(trx_params.from_, s.ledger);
+        var sender_balance := get_balance_by_token(sender_account, transfer.token_id);
 
         (* Check permissions *)
         if trx_params.from_ =/= Tezos.sender
@@ -38,7 +38,7 @@ function iterate_transfer (
 
         (* Create or get destination account *)
         var destination_account : account_t :=
-          get_account(transfer.to_, s);
+          get_account(transfer.to_, s.ledger);
         var destination_balance := get_balance_by_token(destination_account, transfer.token_id);
 
         (* Update destination account *)
@@ -77,7 +77,7 @@ function iterate_update_operators(
 
       var account : account_t := get_account(param.owner, s.ledger);
       (* Remove operator *)
-      ledger.permits := Set.remove(param.operator, account.permits);
+      account.permits := Set.remove(param.operator, account.permits);
 
       (* Update storage *)
       s.ledger[param.owner] := account;
@@ -99,12 +99,12 @@ function get_balance_of(
       block {
         (* Retrieve the asked account from the storage *)
         const account : account_t = get_account(request.owner, s.ledger);
-        const balance = get_balance_by_token(request.token_id, account);
+        const balance_ = get_balance_by_token(account, request.token_id);
 
         (* Form the response *)
         var response : balance_of_response_t := record [
             request = request;
-            balance = balance;
+            balance = balance_;
           ];
       } with response # l;
 
