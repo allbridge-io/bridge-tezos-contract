@@ -4,6 +4,7 @@
 #include "../partial/bridge-core/Bridge_utils.ligo"
 #include "../partial/bridge-core/Bridge_admin_methods.ligo"
 #include "../partial/bridge-core/Bridge_exchange_methods.ligo"
+#include "../partial/bridge-core/Bridge_fa2_methods.ligo"
 
 type parameter_t        is
   | Change_address        of change_address_t
@@ -13,6 +14,9 @@ type parameter_t        is
   | Add_asset             of new_asset_t
   | Lock_asset            of lock_asset_t
   | Unlock_asset          of unlock_asset_t
+  | Transfer              of transfer_params_t
+  | Update_operators      of update_operator_params_t
+  | Balance_of            of balance_params_t
 
 function main(
   const action          : parameter_t;
@@ -28,4 +32,9 @@ function main(
 
   | Lock_asset (params)   -> lock_asset(params, s)
   | Unlock_asset (params) -> unlock_asset(params, s)
+
+  (* Fa2 methods *)
+  | Transfer (params)          -> transfer(s, params)
+  | Update_operators (params)  -> (no_operations, update_operators(s, params))
+  | Balance_of (params)        -> (get_balance_of(s, params), s)
   end

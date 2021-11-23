@@ -1,6 +1,6 @@
 (* Lock asset entrypoint *)
 function lock_asset(
-  const params          : lock_asset_t;
+  const params         : lock_asset_t;
   var s                : storage_t)
                        : return_t is
   block {
@@ -11,15 +11,7 @@ function lock_asset(
     (* Check asset status *)
     is_asset_enabled(asset.enabled);
 
-    const fee = get_oracle_fee(
-      record[
-        amount = params.amount;
-        token = asset.asset_type;
-        abr_balance = 1n;//abr_balance;
-        abr_total_supply = 1n//abt_total_supply
-      ],
-      s.fee_oracle
-    );
+    var locked_amount := 0n;
     var operations := no_operations;
     case asset.asset_type of
     | Wrapped(token_id) -> {
@@ -29,41 +21,79 @@ function lock_asset(
       if params.amount > account_balance
       then failwith("Bridge-core/insufficient-balance")
       else skip;
-
       account.balances[token_id] := abs(account_balance - params.amount);
       s.ledger[Tezos.sender] := account;
 
       var fee_collector_account := get_account(s.fee_collector, s.ledger);
       const collector_balance = get_balance_by_token(fee_collector_account, token_id);
+
+      const fee = get_oracle_fee(
+        record[
+          amount = params.amount;
+          token = asset.asset_type;
+          abr_balance = 1n;//abr_balance;
+          abr_total_supply = 1n//abt_total_supply
+        ],
+        s.fee_oracle);
+      locked_amount := abs(params.amount - fee);
       fee_collector_account.balances[token_id] := collector_balance + fee;
       s.ledger[s.fee_collector] := fee_collector_account;
 
-      asset.locked_amount := abs(asset.locked_amount - params.amount);
+      asset.locked_amount := abs(asset.locked_amount - locked_amount);
      }
-    | _ -> {
+    | Tez -> {
+      const tez_amount = Tezos.amount / 1mutez;
+      const fee = get_oracle_fee(
+        record[
+          amount = tez_amount;
+          token = asset.asset_type;
+          abr_balance = 1n;//abr_balance;
+          abr_total_supply = 1n//abt_total_supply
+        ],
+        s.fee_oracle);
+      locked_amount := abs(tez_amount - fee);
+
       operations := wrap_transfer(
-        Tezos.source,
         Tezos.self_address,
-        abs(params.amount - fee),
-        asset.asset_type
-      ) # operations;
-      operations := wrap_transfer(
-        Tezos.source,
         s.fee_collector,
         fee,
         asset.asset_type
       ) # operations;
-      asset.locked_amount := asset.locked_amount + params.amount;
+      asset.locked_amount := asset.locked_amount + locked_amount;
+    }
+    | _ -> {
+      const fee = get_oracle_fee(
+        record[
+          amount = params.amount;
+          token = asset.asset_type;
+          abr_balance = 1n;//abr_balance;
+          abr_total_supply = 1n//abt_total_supply
+        ],
+        s.fee_oracle);
+      locked_amount := abs(params.amount - fee);
+      operations := wrap_transfer(
+        Tezos.sender,
+        Tezos.self_address,
+        locked_amount,
+        asset.asset_type
+      ) # operations;
+      operations := wrap_transfer(
+        Tezos.sender,
+        s.fee_collector,
+        fee,
+        asset.asset_type
+      ) # operations;
+
+      asset.locked_amount := asset.locked_amount + locked_amount;
     }
     end;
-
     s.bridge_assets[params.asset_id] := asset;
 
     var validate_lock := record[
       lock_id = params.lock_id;
       sender = Tezos.sender;
       recipient = params.receiver;
-      amount = params.amount;
+      amount = locked_amount;
       asset = transform_asset(asset.asset_type, s.wrapped_token_infos);
       destination_chain_id = params.chain_id
     ];
@@ -77,7 +107,7 @@ function lock_asset(
 
 (* Unlock asset entrypoint *)
 function unlock_asset(
-  var params            : unlock_asset_t;
+  const params          : unlock_asset_t;
   var s                 : storage_t)
                         : return_t is
   block {
@@ -87,12 +117,8 @@ function unlock_asset(
     var asset := get_asset(params.asset_id, s.bridge_assets);
     (* Check asset status *)
     is_asset_enabled(asset.enabled);
-
-    var sender_ := Tezos.sender;
-    var fee := 0n;
-    case s.validators contains Tezos.sender of
-    | True -> {
-      fee := get_oracle_fee(
+    const fee = case s.validators contains Tezos.sender of
+    | True -> get_oracle_fee(
         record[
           amount = params.amount;
           token = asset.asset_type;
@@ -100,13 +126,10 @@ function unlock_asset(
           abr_total_supply = 1n//abt_total_supply
         ],
         s.fee_oracle
-      );
-
-      }
-    | False -> skip
+      )
+    | False -> 0n
     end;
-
-    params.amount := abs(params.amount - fee);
+    const unlocked_amount = abs(params.amount - fee);
 
     var operations := no_operations;
     case asset.asset_type of
@@ -114,7 +137,7 @@ function unlock_asset(
       var receiver_account := get_account(params.receiver, s.ledger);
       const receiver_balance = get_balance_by_token(receiver_account, token_id);
 
-      receiver_account.balances[token_id] := receiver_balance + params.amount;
+      receiver_account.balances[token_id] := receiver_balance + unlocked_amount;
       s.ledger[params.receiver] := receiver_account;
 
       asset.locked_amount := asset.locked_amount + params.amount;
@@ -128,7 +151,7 @@ function unlock_asset(
       operations := wrap_transfer(
         Tezos.self_address,
         params.receiver,
-        abs(params.amount - fee),
+        unlocked_amount,
         asset.asset_type
       ) # operations;
       if fee > 0n

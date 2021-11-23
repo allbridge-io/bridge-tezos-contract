@@ -9,7 +9,6 @@ type storage_t          is [@layout:comb] record[
   validator_pk            : key;
   validated_locks         : lock_map_t;
   validated_unlocks       : unlock_map_t;
-  test: address;
 ]
 
 type change_address_t   is
