@@ -14,7 +14,7 @@ type wrapped_token_t    is [@layout:comb] record[
 type storage_t          is bytes;
 
 
-type standard_asset_t   is
+type asset_standard_t   is
 | Fa12_                     of address
 | Fa2_                      of token_t
 | Tez_
@@ -25,7 +25,7 @@ type get_keccak_t        is [@layout:comb] record[
   recipient               : address;
   amount                  : nat;
   chain_from_id           : bytes;
-  asset                   : standard_asset_t;
+  asset                   : asset_standard_t;
 ]
 
 type parameter_t        is

@@ -17,19 +17,11 @@ function iterate_transfer (
         var sender_balance := get_balance_by_token(sender_account, transfer.token_id);
 
         (* Check permissions *)
-        if trx_params.from_ =/= Tezos.sender
-          and not Set.mem (Tezos.sender, sender_account.permits )
-        then failwith("FA2_NOT_OPERATOR")
-        else skip;
-
-        if transfer.amount = 0n
-        then failwith("Bridge-core/zero-amount-in")
-        else skip;
+        assert_with_error(trx_params.from_ = Tezos.sender
+          or Set.mem(Tezos.sender, sender_account.permits), "FA2_NOT_OPERATOR");
 
         (* Balance check *)
-        if sender_balance < transfer.amount
-        then failwith("FA2_INSUFFICIENT_BALANCE")
-        else skip;
+        assert_with_error(sender_balance >= transfer.amount, "FA2_INSUFFICIENT_BALANCE");
 
         (* Update sender account *)
         sender_balance := abs(sender_balance - transfer.amount);
@@ -58,9 +50,7 @@ function iterate_update_operators(
     case params of
     | Add_operator(param) -> block {
       (* Check an owner *)
-      if Tezos.sender =/= param.owner
-      then failwith("FA2_NOT_OWNER")
-      else skip;
+      assert_with_error(Tezos.sender = param.owner, "FA2_NOT_OWNER");
 
       var account : account_t := get_account(param.owner, s.ledger);
       (* Add operator *)
@@ -71,9 +61,7 @@ function iterate_update_operators(
     }
     | Remove_operator(param) -> block {
       (* Check an owner *)
-      if Tezos.sender =/= param.owner
-      then failwith("FA2_NOT_OWNER")
-      else skip;
+      assert_with_error(Tezos.sender = param.owner, "FA2_NOT_OWNER");
 
       var account : account_t := get_account(param.owner, s.ledger);
       (* Remove operator *)

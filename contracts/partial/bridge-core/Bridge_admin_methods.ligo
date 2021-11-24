@@ -55,7 +55,7 @@ function stop_asset(
     (* Checking user is bridge manager *)
     is_manager(s.bridge_manager);
 
-    var asset := get_asset(asset_id, s.bridge_assets);
+    var asset := unwrap(s.bridge_assets[asset_id], "Asset doesn't exist");
 
     case asset.enabled of
     | True -> asset.enabled := False
@@ -74,28 +74,25 @@ function add_asset(
     (* Checking user is bridge manager *)
     is_manager(s.bridge_manager);
     (* Check bridge status *)
-    is_bridge_enabled(s.enabled);
+    assert_with_error(s.enabled, "Bridge-core/bridge-disabled");
 
     var new_asset := record[
-      asset_type = Fa12(Tezos.self_address);
+      asset_type = asset_type;
       locked_amount = 0n;
       enabled = True;
     ];
-
     case asset_type of
-    | Fa12_ (address_) -> new_asset.asset_type := Fa12(address_)
-    | Fa2_ (info) -> new_asset.asset_type := Fa2(info)
-    | Tez_ -> new_asset.asset_type := Tez
-    | Wrapped_ (info) -> {
-      new_asset.asset_type := Wrapped(s.wrapped_token_count);
+    | Wrapped (info) -> {
+      assert_none(s.wrapped_token_ids[info], "Wrapped asset exist");
       s.wrapped_token_infos[s.wrapped_token_count] := info;
       s.wrapped_token_ids[info] := s.wrapped_token_count;
       s.wrapped_token_count := s.wrapped_token_count + 1n;
     }
+    | _ -> skip
     end;
 
     (* Сheck that such an asset has not been added already *)
-    is_uniq(new_asset, s.bridge_asset_ids);
+    assert_none(s.bridge_asset_ids[new_asset], "Bridge exist");
 
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[new_asset] := s.asset_count;
