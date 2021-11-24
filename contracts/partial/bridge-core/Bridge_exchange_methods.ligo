@@ -22,11 +22,7 @@ function lock_asset(
       account.balances[token_id] := abs(account_balance - params.amount);
       s.ledger[Tezos.sender] := account;
 
-      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector],
-        record [
-          balances = (map[]: balance_map_t);
-          permits = (set[]: set(address));
-        ]);
+      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector], new_account);
       const collector_balance = unwrap_or(fee_collector_account.balances[token_id], 0n);
 
       const fee = get_oracle_fee(
@@ -136,11 +132,7 @@ function unlock_asset(
     case asset.asset_type of
     | Wrapped(info) -> {
       const token_id = unwrap(s.wrapped_token_ids[info], err_token_not_supported);
-      var receiver_account := unwrap_or(s.ledger[Tezos.sender],
-        record [
-          balances = (map[]: balance_map_t);
-          permits = (set[]: set(address));
-        ]);
+      var receiver_account := unwrap_or(s.ledger[Tezos.sender], new_account);
       const receiver_balance = unwrap_or(receiver_account.balances[token_id], 0n);
 
       receiver_account.balances[token_id] := receiver_balance + unlocked_amount;
@@ -148,11 +140,7 @@ function unlock_asset(
 
       asset.locked_amount := asset.locked_amount + params.amount;
 
-      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector],
-        record [
-          balances = (map[]: balance_map_t);
-          permits = (set[]: set(address));
-        ]);
+      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector], new_account);
       const collector_balance = unwrap(fee_collector_account.balances[token_id], err_zero_balance);
       fee_collector_account.balances[token_id] := collector_balance + fee;
       s.ledger[s.fee_collector] := fee_collector_account;

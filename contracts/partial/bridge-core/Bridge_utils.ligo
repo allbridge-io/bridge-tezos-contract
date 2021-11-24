@@ -16,15 +16,6 @@ function unwrap(
   | None -> failwith(error)
   end;
 
-function assert_none(
-  const param           : option(_a);
-  const error           : string)
-                        : unit is
-  case param of
-  | Some(_) -> failwith(error)
-  | None -> unit
-  end;
-
 (* Create tranfer tx param *)
 function wrap_fa2_transfer_trx(
   const from_         : address;
@@ -89,24 +80,6 @@ function wrap_transfer(
         (get_contract(receiver) : contract(unit)))
     | _ -> failwith(err_non_transferable_asset)
     end;
-
-(* Helper to check permissions *)
-function check_permission(
-  const address_        : address;
-  const error           : string)
-                        : unit is
-  case Tezos.sender = address_ of
-  | True -> unit
-  | False -> failwith(error)
-  end
-
-(* Helper function to get acount balance by token *)
-function get_balance_by_token(
-  const user            : account_t;
-  const token_id        : token_id_t)
-                        : nat is
-  unwrap_or(user.balances[token_id], 0n)
-
 
 (* Helper view function to get fee *)
 function get_oracle_fee(

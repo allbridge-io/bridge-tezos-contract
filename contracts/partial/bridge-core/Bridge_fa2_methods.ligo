@@ -13,8 +13,10 @@ function iterate_transfer (
       block {
         var operations := result.0;
         var s := result.1;
-        var sender_account : account_t := get_account(trx_params.from_, s.ledger);
-        var sender_balance := get_balance_by_token(sender_account, transfer.token_id);
+        var sender_account : account_t :=
+          unwrap_or(s.ledger[trx_params.from_], new_account);
+        var sender_balance :=
+          unwrap_or(sender_account.balances[transfer.token_id], 0n);
 
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
@@ -30,8 +32,9 @@ function iterate_transfer (
 
         (* Create or get destination account *)
         var destination_account : account_t :=
-          get_account(transfer.to_, s.ledger);
-        var destination_balance := get_balance_by_token(destination_account, transfer.token_id);
+          unwrap_or(s.ledger[transfer.to_], new_account);
+        var destination_balance :=
+          unwrap_or(destination_account.balances[transfer.token_id], 0n);
 
         (* Update destination account *)
         destination_balance := destination_balance + transfer.amount;
@@ -52,7 +55,7 @@ function iterate_update_operators(
       (* Check an owner *)
       assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
 
-      var account : account_t := get_account(param.owner, s.ledger);
+      var account : account_t := unwrap_or(s.ledger[param.owner], new_account);
       (* Add operator *)
       account.permits := Set.add(param.operator, account.permits);
 
@@ -63,7 +66,7 @@ function iterate_update_operators(
       (* Check an owner *)
       assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
 
-      var account : account_t := get_account(param.owner, s.ledger);
+      var account : account_t := unwrap_or(s.ledger[param.owner], new_account);
       (* Remove operator *)
       account.permits := Set.remove(param.operator, account.permits);
 
@@ -86,8 +89,8 @@ function get_balance_of(
                         : list(balance_of_response_t) is
       block {
         (* Retrieve the asked account from the storage *)
-        const account : account_t = get_account(request.owner, s.ledger);
-        const balance_ = get_balance_by_token(account, request.token_id);
+        const account : account_t = unwrap_or(s.ledger[request.owner], new_account);
+        const balance_ = unwrap_or(account.balances[request.token_id], 0n);
 
         (* Form the response *)
         var response : balance_of_response_t := record [

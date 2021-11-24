@@ -4,8 +4,7 @@ function change_address(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
+    check_permission(s.owner, err_not_owner);
     case param of
     | Change_owner(address_) -> s.owner := address_
     | Change_bridge(address_) -> s.bridge := address_
@@ -18,7 +17,6 @@ function change_validator_pk(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
+    check_permission(s.owner, err_not_owner);
     s.validator_pk := new_key;
   } with s
