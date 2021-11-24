@@ -2,7 +2,7 @@ const { Tezos, signerAlice, alice } = require("../utils/cli");
 
 const { migrate } = require("../../scripts/helpers");
 const { confirmOperation } = require("../../scripts/confirmation");
-
+const { Tzip16Module, tzip16 } = require("@taquito/tzip16");
 const bridgeStorage = require("../storage/bridgeCore");
 
 const feeOracle = require("./feeOracleWrapper");
@@ -22,7 +22,7 @@ module.exports = class BridgeCore {
     bridgeStorage.fee_oracle = this.feeOracle.address;
     bridgeStorage.validator = this.validator.address;
     const deployedContract = await migrate(Tezos, "Bridge_core", bridgeStorage);
-    this.contract = await Tezos.contract.at(deployedContract);
+    this.contract = await Tezos.contract.at(deployedContract, tzip16);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
     await this.validator.сhangeAddress("change_bridge", this.address);
@@ -103,9 +103,9 @@ module.exports = class BridgeCore {
   async getBalance(address, tokenId) {
     await this.updateStorage();
     const account = await this.storage.ledger.get(address);
-    const balance = await account.balances.get(tokenId.toString());
 
     try {
+      const balance = await account.balances.get(tokenId.toString());
       return balance.toNumber();
     } catch (e) {
       return 0;
@@ -121,5 +121,64 @@ module.exports = class BridgeCore {
       ])
       .send();
     await confirmOperation(Tezos, operation.hash);
+  }
+  async getKeccak(params) {
+    let operation;
+
+    switch (params.assetType) {
+      case "fa12_":
+        operation = await this.contract.views
+          .get_keccak(
+            params.lockId,
+            params.recipient,
+            params.amount,
+            params.chainFromId,
+            "fa12_",
+            params.tokenAddress,
+          )
+          .read();
+        break;
+      case "fa2_":
+        operation = await this.contract.views
+          .get_keccak(
+            params.lockId,
+            params.recipient,
+            params.amount,
+            params.chainFromId,
+            "fa2_",
+            params.tokenAddress,
+            params.tokenId,
+          )
+          .read();
+        break;
+      case "tez_":
+        operation = await this.contract.views
+          .get_keccak(
+            params.lockId,
+            params.recipient,
+            params.amount,
+            params.chainFromId,
+            "tez_",
+            null,
+          )
+          .read();
+        break;
+      case "wrapped_":
+        operation = await this.contract.views
+          .get_keccak(
+            params.lockId,
+            params.recipient,
+            params.amount,
+            params.chainFromId,
+            "wrapped_",
+            params.chainId,
+            params.tokenAddress,
+          )
+          .read();
+        break;
+    }
+    await confirmOperation(Tezos, operation.hash);
+    await this.updateStorage();
+    return this.storage.kessak_bytes;
   }
 };

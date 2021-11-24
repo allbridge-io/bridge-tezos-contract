@@ -42,4 +42,144 @@ module.exports = class Validator {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
+  async validateLock(
+    lockId,
+    sender,
+    amount,
+    receiver,
+    destinationChainId,
+    assetType,
+    tokenAddress = null,
+    tokenId = null,
+  ) {
+    let operation;
+    switch (assetType) {
+      case "fa12_":
+        operation = await this.contract.methods
+          .validate_lock(
+            lockId,
+            sender,
+            receiver,
+            amount,
+            "fa12_",
+            tokenAddress,
+            destinationChainId,
+          )
+          .send();
+        break;
+      case "fa2_":
+        operation = await this.contract.methods
+          .validate_lock(
+            lockId,
+            sender,
+            receiver,
+            amount,
+            "fa2_",
+            tokenAddress,
+            tokenId,
+            destinationChainId,
+          )
+          .send();
+        break;
+      case "tez_":
+        operation = await this.contract.methods
+          .validate_lock(
+            lockId,
+            sender,
+            receiver,
+            amount,
+            "tez_",
+            null,
+            destinationChainId,
+          )
+          .send();
+        break;
+      case "wrapped_":
+        operation = await this.contract.methods
+          .validate_lock(
+            lockId,
+            sender,
+            receiver,
+            amount,
+            "wrapped_",
+            tokenId,
+            tokenAddress,
+            destinationChainId,
+          )
+          .send();
+        break;
+    }
+
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async validateUnlock(
+    lockId,
+    receiver,
+    amount,
+    chainFromId,
+    signature,
+    assetType,
+    tokenAddress = null,
+    tokenId = null,
+  ) {
+    let operation;
+    switch (assetType) {
+      case "fa12_":
+        operation = await this.contract.methods
+          .validate_unlock(
+            lockId,
+            receiver,
+            amount,
+            chainFromId,
+            "fa12_",
+            tokenAddress,
+            signature,
+          )
+          .send();
+        break;
+      case "fa2_":
+        operation = await this.contract.methods
+          .validate_unlock(
+            lockId,
+            receiver,
+            amount,
+            chainFromId,
+            "fa2_",
+            tokenAddress,
+            tokenId,
+            signature,
+          )
+          .send();
+        break;
+      case "tez_":
+        operation = await this.contract.methods
+          .validate_unlock(
+            lockId,
+            receiver,
+            amount,
+            chainFromId,
+            "tez_",
+            null,
+            signature,
+          )
+          .send();
+        break;
+      case "wrapped_":
+        operation = await this.contract.methods
+          .validate_unlock(
+            lockId,
+            receiver,
+            amount,
+            chainFromId,
+            "wrapped_",
+            tokenId,
+            tokenAddress,
+            signature,
+          )
+          .send();
+        break;
+    }
+
+    await confirmOperation(Tezos, operation.hash);
+  }
 };

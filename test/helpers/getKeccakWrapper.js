@@ -10,10 +10,11 @@ module.exports = class GetBytes {
 
   constructor() {}
   async init() {
-    const deployedContract = await migrate(Tezos, "GetBytes", {
-      kessak_bytes: Buffer.from("dsads", "ascii").toString("hex"),
-      some_field: 1,
-    });
+    const deployedContract = await migrate(
+      Tezos,
+      "GetKeccak",
+      Buffer.from("dsads", "ascii").toString("hex"),
+    );
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
@@ -27,13 +28,13 @@ module.exports = class GetBytes {
     return updatedStorage;
   }
 
-  async getBytes(params) {
+  async getKeccak(params) {
     let operation;
 
     switch (params.assetType) {
       case "fa12_":
         operation = await this.contract.methods
-          .get_bytes(
+          .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
@@ -45,7 +46,7 @@ module.exports = class GetBytes {
         break;
       case "fa2_":
         operation = await this.contract.methods
-          .get_bytes(
+          .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
@@ -58,7 +59,7 @@ module.exports = class GetBytes {
         break;
       case "tez_":
         operation = await this.contract.methods
-          .add_asset(
+          .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
@@ -70,7 +71,7 @@ module.exports = class GetBytes {
         break;
       case "wrapped_":
         operation = await this.contract.methods
-          .get_bytes(
+          .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
@@ -84,6 +85,6 @@ module.exports = class GetBytes {
     }
     await confirmOperation(Tezos, operation.hash);
     await this.updateStorage();
-    return this.storage.kessak_bytes;
+    return this.storage;
   }
 };
