@@ -1,5 +1,6 @@
 #include "../partial/Common_types.ligo"
 #include "../partial/oracle/Oracle_types.ligo"
+#include "../partial/oracle/Oracle_errors.ligo"
 #include "../partial/oracle/Oracle_utils.ligo"
 #include "../partial/oracle/Oracle_admin_methods.ligo"
 #include "../partial/oracle/Oracle_methods.ligo"

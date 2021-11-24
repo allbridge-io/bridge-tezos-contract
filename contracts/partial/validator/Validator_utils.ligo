@@ -3,7 +3,7 @@ function is_owner (
   const owner           : address)
                         : unit is
   case (Tezos.sender =/= owner) of
-  | True -> failwith("Validator-bridge/not-owner")
+  | True -> failwith(err_not_owner)
   | False -> unit
   end;
 
@@ -13,7 +13,7 @@ function is_validated_lock(
   const lock_map        : lock_map_t)
                         : unit is
   case lock_map[lock_id] of
-  | Some(_) -> failwith("Validator-bridge/lock-already-exists")
+  | Some(_) -> failwith(err_lock_exist)
   | None -> unit
   end
 
@@ -23,7 +23,7 @@ function is_validated_unlock(
   const lock_map        : unlock_map_t)
                         : unit is
   case lock_map[lock_id] of
-  | Some(_) -> failwith("Validator-bridge/unlock-already-exists")
+  | Some(_) -> failwith(err_unlock_exist)
   | None -> unit
   end
 
@@ -33,5 +33,5 @@ function is_bridge(
                         : unit is
   case Tezos.sender = bridge of
   | True -> unit
-  | False -> failwith("Validator-bridge/not-bridge")
+  | False -> failwith(err_not_bridge)
   end

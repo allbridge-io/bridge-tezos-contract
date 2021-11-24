@@ -4,8 +4,7 @@ function change_address(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
+    check_permission(s.owner, err_not_owner);
 
     case changed_address of
     | Change_owner (address_) -> s.owner := address_
@@ -23,8 +22,7 @@ function update_validators(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
+    check_permission(s.owner, err_not_owner);
 
     case param of
     | Add_validator(address_) -> s.validators := Set.add(address_, s.validators)
@@ -37,8 +35,7 @@ function stop_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Checking user is stop manager *)
-    is_manager(s.stop_manager);
+    check_permission(s.stop_manager, err_not_manager);
 
     case s.enabled of
     | True -> s.enabled := False
@@ -52,10 +49,9 @@ function stop_asset(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Checking user is bridge manager *)
-    is_manager(s.bridge_manager);
+    check_permission(s.bridge_manager, err_not_manager);
 
-    var asset := unwrap(s.bridge_assets[asset_id], "Asset doesn't exist");
+    var asset := unwrap(s.bridge_assets[asset_id], err_asset_not_exist);
 
     case asset.enabled of
     | True -> asset.enabled := False
@@ -71,10 +67,9 @@ function add_asset(
   var s                  : storage_t)
                          : storage_t is
   block {
-    (* Checking user is bridge manager *)
-    is_manager(s.bridge_manager);
+    check_permission(s.bridge_manager, err_not_manager);
     (* Check bridge status *)
-    assert_with_error(s.enabled, "Bridge-core/bridge-disabled");
+    assert_with_error(s.enabled, err_bridge_disabled);
 
     var new_asset := record[
       asset_type = asset_type;
@@ -83,7 +78,9 @@ function add_asset(
     ];
     case asset_type of
     | Wrapped (info) -> {
-      assert_none(s.wrapped_token_ids[info], "Wrapped asset exist");
+      (* Check if the asset exists *)
+      assert_none(s.wrapped_token_ids[info], err_wrapped_exist);
+
       s.wrapped_token_infos[s.wrapped_token_count] := info;
       s.wrapped_token_ids[info] := s.wrapped_token_count;
       s.wrapped_token_count := s.wrapped_token_count + 1n;
@@ -92,7 +89,7 @@ function add_asset(
     end;
 
     (* Сheck that such an asset has not been added already *)
-    assert_none(s.bridge_asset_ids[new_asset], "Bridge exist");
+    assert_none(s.bridge_asset_ids[new_asset], err_bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[new_asset] := s.asset_count;

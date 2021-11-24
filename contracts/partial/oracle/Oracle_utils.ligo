@@ -5,7 +5,7 @@ function get_fee_per_token(
                         : nat is
   case token_fee_map[token] of
   | Some(fee) -> fee
-  | None -> failwith("Oracle-fee/wrong-token")
+  | None -> failwith(err_token_not_exist)
   end
 
 (* Helper to check permissions *)
@@ -13,6 +13,6 @@ function is_owner (
   const owner           : address)
                         : unit is
   case (Tezos.sender =/= owner) of
-  | True -> failwith("Oracle-fee/not-owner")
+  | True -> failwith(err_not_owner)
   | False -> unit
   end;

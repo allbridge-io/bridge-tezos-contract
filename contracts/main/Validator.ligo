@@ -1,5 +1,6 @@
 #include "../partial/Common_types.ligo"
 #include "../partial/validator/Validator_types.ligo"
+#include "../partial/validator/Validator_errors.ligo"
 #include "../partial/validator/Validator_utils.ligo"
 #include "../partial/validator/Validator_admin_methods.ligo"
 #include "../partial/validator/Validator_methods.ligo"

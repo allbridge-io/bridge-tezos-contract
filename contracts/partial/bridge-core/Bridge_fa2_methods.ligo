@@ -18,10 +18,10 @@ function iterate_transfer (
 
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
-          or Set.mem(Tezos.sender, sender_account.permits), "FA2_NOT_OPERATOR");
+          or Set.mem(Tezos.sender, sender_account.permits), err_fa2_not_operator);
 
         (* Balance check *)
-        assert_with_error(sender_balance >= transfer.amount, "FA2_INSUFFICIENT_BALANCE");
+        assert_with_error(sender_balance >= transfer.amount, err_fa2_low_balance);
 
         (* Update sender account *)
         sender_balance := abs(sender_balance - transfer.amount);
@@ -50,7 +50,7 @@ function iterate_update_operators(
     case params of
     | Add_operator(param) -> block {
       (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, "FA2_NOT_OWNER");
+      assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
 
       var account : account_t := get_account(param.owner, s.ledger);
       (* Add operator *)
@@ -61,7 +61,7 @@ function iterate_update_operators(
     }
     | Remove_operator(param) -> block {
       (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, "FA2_NOT_OWNER");
+      assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
 
       var account : account_t := get_account(param.owner, s.ledger);
       (* Remove operator *)

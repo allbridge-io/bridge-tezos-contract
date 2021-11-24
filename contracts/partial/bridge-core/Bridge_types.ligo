@@ -100,3 +100,7 @@ type calculate_fee_t    is [@layout:comb] record[
 type response_fee_t     is nat;
 
 const no_operations : list(operation) = nil;
+const new_account = record [
+  balances = (map[]: balance_map_t);
+  permits = (set[]: set(address))
+];

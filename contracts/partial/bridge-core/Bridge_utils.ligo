@@ -1,4 +1,3 @@
-
 function unwrap_or(
   const param           : option(_a);
   const default         : _a)
@@ -61,7 +60,7 @@ function transfer_fa2(
     0mutez,
     unwrap(
       (Tezos.get_entrypoint_opt("%transfer", contract_address) : option(contract(fa2_transfer_t))),
-      "Fee-Collector/not-dep-contract")
+      err_transfer_not_found)
   );
 
 function wrap_transfer(
@@ -77,7 +76,7 @@ function wrap_transfer(
         0mutez,
         unwrap(
           (Tezos.get_entrypoint_opt("%transfer", address_) : option(contract(fa12_transfer_t))),
-          "Fee-Collector/not-dep-contract"))
+          err_transfer_not_found))
     | Fa2(token_) -> transfer_fa2(
         sender_,
         receiver,
@@ -88,38 +87,17 @@ function wrap_transfer(
         unit,
         amount_ * 1mutez,
         (get_contract(receiver) : contract(unit)))
-    | _ -> failwith("Bridge-core/no-transfering-asset")
+    | _ -> failwith(err_non_transferable_asset)
     end;
 
 (* Helper to check permissions *)
-function is_owner (
-  const owner           : address)
-                        : unit is
-  case (Tezos.sender =/= owner) of
-  | True -> failwith("Bridge-core/not-owner")
-  | False -> unit
-  end;
-
-(* Helper to check permissions *)
-function is_manager (
-  const manager         : address)
-                        : unit is
-  case (Tezos.sender =/= manager) of
-  | True -> failwith("Bridge-core/not-manager")
-  | False -> unit
-  end;
-
-(* Helper function for get account *)
-function get_account(
+function check_permission(
   const address_        : address;
-  const ledger          : ledger_t)
-                        : account_t is
-  case ledger[address_] of
-  | None -> record[
-      balances = (Map.empty: balance_map_t);
-      permits  = (set[]: set(address));
-    ]
-  | Some(acc) -> acc
+  const error           : string)
+                        : unit is
+  case Tezos.sender = address_ of
+  | True -> unit
+  | False -> failwith(error)
   end
 
 (* Helper function to get acount balance by token *)
@@ -127,20 +105,18 @@ function get_balance_by_token(
   const user            : account_t;
   const token_id        : token_id_t)
                         : nat is
-  case user.balances[token_id] of
-  | None -> 0n
-  | Some(v) -> v
-  end
+  unwrap_or(user.balances[token_id], 0n)
+
 
 (* Helper view function to get fee *)
 function get_oracle_fee(
   const get_fee_param  : calculate_fee_t;
   const oracle_address : address)
                        : response_fee_t is
-  case (Tezos.call_view("calculate_fee", get_fee_param, oracle_address) : option(response_fee_t)) of
-  | Some(fee) -> fee
-  | None -> failwith("Bridge-core/oracle-fee-404")
-  end
+  unwrap(
+    (Tezos.call_view("calculate_fee", get_fee_param, oracle_address) : option(response_fee_t)),
+    err_oracle_not_found
+  )
 
 function get_lock_contract(
   const validator       : address)
@@ -149,7 +125,7 @@ function get_lock_contract(
     "%validate_lock",
     validator)        : option(contract(validate_lock_t))) of
   | Some(contr) -> contr
-  | None -> failwith("Bridge-core/not-validator-lock")
+  | None -> failwith(err_not_validator_lock)
   end;
 
 function get_unlock_contract(
@@ -159,5 +135,5 @@ function get_unlock_contract(
     "%validate_unlock",
     validator)        : option(contract(validate_unlock_t))) of
   | Some(contr) -> contr
-  | None -> failwith("Bridge-core/not-validator-unlock")
+  | None -> failwith(err_not_validator_unlock)
   end;

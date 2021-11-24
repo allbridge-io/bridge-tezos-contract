@@ -8,7 +8,7 @@ function validate_lock(
     is_bridge(s.bridge);
 
     if params.destination_chain_id = tezos_chain_id
-    then failwith("Validator-bridge/wrong-destination-chain-id")
+    then failwith(err_wrong_chain_id)
     else skip;
 
     is_validated_lock(params.lock_id, s.validated_locks);
@@ -39,7 +39,7 @@ function validate_unlock(
     ));
 
     case Crypto.check(s.validator_pk, params.signature, kessak_params) of
-    | False -> failwith("Validator-bridge/signature-not-validated")
+    | False -> failwith(err_invalid_signature)
     | True -> skip
     end;
 
