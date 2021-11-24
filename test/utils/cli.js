@@ -1,6 +1,6 @@
 const { TezosToolkit } = require("@taquito/taquito");
 const { InMemorySigner } = require("@taquito/signer");
-
+const { Tzip16Module } = require("@taquito/tzip16");
 const { alice, bob } = require("../../scripts/sandbox/accounts");
 
 const env = require("../../env");
@@ -12,5 +12,5 @@ const signerAlice = new InMemorySigner(networkConfig.secretKey);
 const signerBob = new InMemorySigner(bob.sk);
 
 Tezos.setSignerProvider(signerAlice);
-
+Tezos.addExtension(new Tzip16Module());
 module.exports = { Tezos, signerAlice, signerBob, alice, bob };
