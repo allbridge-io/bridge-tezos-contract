@@ -1,10 +1,5 @@
 const { Tezos, signerAlice, signerBob } = require("./utils/cli");
-const {
-  rejects,
-  strictEqual,
-  deepStrictEqual,
-  notStrictEqual,
-} = require("assert");
+const { rejects, strictEqual } = require("assert");
 const Validator = require("./helpers/validatorWrapper");
 const Token = require("./helpers/tokenWrapper");
 
