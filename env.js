@@ -25,7 +25,7 @@ module.exports = {
       rpc: "https://granadanet.smartpy.io",
       port: 443,
       network_id: "*",
-      secretKey: dev.pkh,
+      secretKey: alice.pkh,
     },
     mainnet: {
       host: "https://mainnet.smartpy.io",
