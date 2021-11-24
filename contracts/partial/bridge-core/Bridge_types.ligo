@@ -54,6 +54,7 @@ type storage_t          is [@layout:comb] record[
   wrapped_token_ids       : wrapped_token_ids_map_t;
   ledger                  : ledger_t;
   enabled                 : bool;
+  metadata                : big_map(string, bytes);
 ]
 
 type return_t           is list (operation) * storage_t

@@ -44,4 +44,12 @@ type validate_unlock_t  is [@layout:comb] record[
   signature               : signature;
 ]
 
+type get_keccak_t       is [@layout:comb] record[
+  lock_id                 : nat;
+  recipient               : address;
+  amount                  : nat;
+  chain_from_id           : bytes;
+  asset                   : standard_asset_t;
+]
+
 const tezos_chain_id : chain_id_t = 0x4e6574586451707263566b70615755;

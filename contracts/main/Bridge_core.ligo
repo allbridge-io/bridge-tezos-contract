@@ -5,6 +5,7 @@
 #include "../partial/bridge-core/Bridge_admin_methods.ligo"
 #include "../partial/bridge-core/Bridge_exchange_methods.ligo"
 #include "../partial/bridge-core/Bridge_fa2_methods.ligo"
+#include "../partial/bridge-core/Bridge_views.ligo"
 
 type parameter_t        is
   | Change_address        of change_address_t

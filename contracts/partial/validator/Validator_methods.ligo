@@ -29,13 +29,13 @@ function validate_unlock(
     is_validated_unlock(params.lock_id, s.validated_unlocks);
 
     const kessak_params : bytes = Crypto.keccak(Bytes.pack(
-      record[
+      (record[
         lock_id       = params.lock_id;
         recipient     = params.recipient;
         amount        = params.amount;
         chain_from_id = params.chain_from_id;
         asset         = params.asset;
-      ]
+      ] : get_keccak_t)
     ));
 
     case Crypto.check(s.validator_pk, params.signature, kessak_params) of

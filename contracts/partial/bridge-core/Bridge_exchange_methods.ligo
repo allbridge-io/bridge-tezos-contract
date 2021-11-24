@@ -157,7 +157,7 @@ function unlock_asset(
       if fee > 0n
       then {
         operations := wrap_transfer(
-          Tezos.sender,
+          Tezos.self_address,
           s.fee_collector,
           fee,
           asset.asset_type
