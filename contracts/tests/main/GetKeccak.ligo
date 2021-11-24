@@ -37,7 +37,7 @@ const no_operations : list(operation) = nil
 
 function get_keccak (
   const params          : get_keccak_t;
-  var s                 : storage_t)
+  var _s                : storage_t)
                         : storage_t is
   block {
     const kessak_bytes : bytes = Crypto.keccak(Bytes.pack(params));

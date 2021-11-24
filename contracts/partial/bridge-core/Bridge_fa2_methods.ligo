@@ -18,7 +18,7 @@ function iterate_transfer (
 
         (* Check permissions *)
         if trx_params.from_ =/= Tezos.sender
-          and Set.mem (Tezos.sender, sender_account.permits )
+          and not Set.mem (Tezos.sender, sender_account.permits )
         then failwith("FA2_NOT_OPERATOR")
         else skip;
 
