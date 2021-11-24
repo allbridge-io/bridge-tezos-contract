@@ -1,20 +1,30 @@
-(* Helper to get the entrypoint of transfer fa12 contract *)
-function get_transfer_fa12_contract(
-  const token_address   : address)
-                        : contract(fa12_transfer_t) is
-  case (Tezos.get_entrypoint_opt("%transfer", token_address) : option(contract(fa12_transfer_t))) of
-  | Some(contr) -> contr
-  | None -> failwith("Fee-Collector/not-dep-fa12-contract")
-  end
 
-(* Helper to get the entrypoint of transfer fa2 contract *)
-function get_transfer_fa2_contract(
-  const token_address   : address)
-                        : contract(fa2_transfer_t) is
-  case (Tezos.get_entrypoint_opt("%transfer", token_address) : option(contract(fa2_transfer_t))) of
-  | Some(contr) -> contr
-  | None -> failwith("Fee-Collector/not-dep-contract")
-  end
+function unwrap_or(
+  const param           : option(_a);
+  const default         : _a)
+                        : _a is
+  case param of
+  | Some(instance) -> instance
+  | None -> default
+  end;
+
+function unwrap(
+  const param           : option(_a);
+  const error           : string)
+                        : _a is
+  case param of
+  | Some(instance) -> instance
+  | None -> failwith(error)
+  end;
+
+function assert_none(
+  const param           : option(_a);
+  const error           : string)
+                        : unit is
+  case param of
+  | Some(_) -> failwith(error)
+  | None -> unit
+  end;
 
 (* Create tranfer tx param *)
 function wrap_fa2_transfer_trx(
@@ -49,7 +59,9 @@ function transfer_fa2(
       amount_,
       token_id),
     0mutez,
-    get_transfer_fa2_contract(contract_address)
+    unwrap(
+      (Tezos.get_entrypoint_opt("%transfer", contract_address) : option(contract(fa2_transfer_t))),
+      "Fee-Collector/not-dep-contract")
   );
 
 function wrap_transfer(
@@ -63,7 +75,9 @@ function wrap_transfer(
         (sender_,
         (receiver, amount_)),
         0mutez,
-        get_transfer_fa12_contract(address_))
+        unwrap(
+          (Tezos.get_entrypoint_opt("%transfer", address_) : option(contract(fa12_transfer_t))),
+          "Fee-Collector/not-dep-contract"))
     | Fa2(token_) -> transfer_fa2(
         sender_,
         receiver,
@@ -93,46 +107,6 @@ function is_manager (
   case (Tezos.sender =/= manager) of
   | True -> failwith("Bridge-core/not-manager")
   | False -> unit
-  end;
-
-(* Helper function for get bridge asset *)
-function get_asset(
-  const asset_id         : asset_id_t;
-  const asset_map        : asset_map_t)
-                         : asset_t is
-  case asset_map[asset_id] of
-  | Some(asset) -> asset
-  | None -> failwith("Bridge-core/wrong-asset-id")
-  end;
-
-(* Helper function for get bridge asset id *)
-function get_asset_id(
-  const asset            : asset_t;
-  const asset_map        : asset_map_ids_t)
-                         : nat is
-  case asset_map[asset] of
-  | Some(id) -> id
-  | None -> failwith("Bridge-core/wrong-asset")
-  end;
-
-(* Helper function for to check uniqueness *)
-function is_uniq(
-  const asset           : asset_t;
-  const asset_map       : asset_map_ids_t)
-                        : unit is
-  case asset_map[asset] of
-  | Some(_) -> failwith("Bridge-core/asset-already-exists")
-  | None -> unit
-  end;
-
-(* Helper function for get wrapped token *)
-function get_wrapped_token(
-  const token_id         : token_id_t;
-  const wraped_map       : wrapped_token_map_t)
-                         : wrapped_token_t is
-  case wraped_map[token_id] of
-  | Some(token) -> token
-  | None -> failwith("Bridge-core/wrong-token-id")
   end;
 
 (* Helper function for get account *)
@@ -166,35 +140,6 @@ function get_oracle_fee(
   case (Tezos.call_view("calculate_fee", get_fee_param, oracle_address) : option(response_fee_t)) of
   | Some(fee) -> fee
   | None -> failwith("Bridge-core/oracle-fee-404")
-  end
-
-(* Helper function to check bridge status *)
-function is_bridge_enabled(
-  const status          : bool)
-                        : unit is
-  case status of
-  | True -> unit
-  | False -> failwith("Bridge-core/bridge-disabled")
-  end;
-
-(* Helper function to check asset status *)
-function is_asset_enabled(
-  const status          : bool)
-                        : unit is
-  case status of
-  | True -> unit
-  | False -> failwith("Bridge-core/asset-disabled")
-  end;
-
-function transform_asset(
-  const asset           : asset_standard_t;
-  const wrapped_map     : wrapped_token_map_t)
-                        : standard_asset_t is
-  case asset of
-  | Fa12(address_) -> Fa12_(address_)
-  | Fa2(token) -> Fa2_(token)
-  | Tez -> Tez_
-  | Wrapped(token_id) -> Wrapped_(get_wrapped_token(token_id, wrapped_map))
   end
 
 function get_lock_contract(

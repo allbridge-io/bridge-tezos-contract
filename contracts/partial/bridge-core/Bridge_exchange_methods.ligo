@@ -4,28 +4,30 @@ function lock_asset(
   var s                : storage_t)
                        : return_t is
   block {
-    (* Check bridge status *)
-    is_bridge_enabled(s.enabled);
+    var asset := unwrap(s.bridge_assets[params.asset_id], "Asset not allowed");
 
-    var asset := get_asset(params.asset_id, s.bridge_assets);
-    (* Check asset status *)
-    is_asset_enabled(asset.enabled);
+    assert_with_error(asset.enabled, "Bridge-core/asset-disabled");
+    assert_with_error(s.enabled, "Bridge-core/bridge-disabled");
 
     var locked_amount := 0n;
     var operations := no_operations;
     case asset.asset_type of
-    | Wrapped(token_id) -> {
-      var account := get_account(Tezos.sender, s.ledger);
-      const account_balance = get_balance_by_token(account, token_id);
+    | Wrapped(info) -> {
+      const token_id = unwrap(s.wrapped_token_ids[info], "Token isn't supported");
+      var account := unwrap(s.ledger[Tezos.sender], "Account doesn't exist");
+      const account_balance = unwrap(account.balances[token_id], "Zero balance");
 
-      if params.amount > account_balance
-      then failwith("Bridge-core/insufficient-balance")
-      else skip;
+      assert_with_error(params.amount <= account_balance, "Bridge-core/insufficient-balance");
+
       account.balances[token_id] := abs(account_balance - params.amount);
       s.ledger[Tezos.sender] := account;
 
-      var fee_collector_account := get_account(s.fee_collector, s.ledger);
-      const collector_balance = get_balance_by_token(fee_collector_account, token_id);
+      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector],
+        record [
+          balances = (map[]: balance_map_t);
+          permits = (set[]: set(address));
+        ]);
+      const collector_balance = unwrap(fee_collector_account.balances[token_id], "Zero balance");
 
       const fee = get_oracle_fee(
         record[
@@ -94,7 +96,7 @@ function lock_asset(
       sender = Tezos.sender;
       recipient = params.receiver;
       amount = locked_amount;
-      asset = transform_asset(asset.asset_type, s.wrapped_token_infos);
+      asset = asset.asset_type;
       destination_chain_id = params.chain_id
     ];
     operations := Tezos.transaction(
@@ -111,39 +113,47 @@ function unlock_asset(
   var s                 : storage_t)
                         : return_t is
   block {
-    (* Check bridge status *)
-    is_bridge_enabled(s.enabled);
+    var asset := unwrap(s.bridge_assets[params.asset_id], "Asset not allowed");
 
-    var asset := get_asset(params.asset_id, s.bridge_assets);
-    (* Check asset status *)
-    is_asset_enabled(asset.enabled);
-    const fee = case s.validators contains Tezos.sender of
-    | True -> get_oracle_fee(
-        record[
-          amount = params.amount;
-          token = asset.asset_type;
-          abr_balance = 1n;//abr_balance;
-          abr_total_supply = 1n//abt_total_supply
-        ],
-        s.fee_oracle
-      )
-    | False -> 0n
-    end;
+    assert_with_error(s.enabled, "Bridge-core/bridge-disabled");
+    assert_with_error(asset.enabled, "Bridge-core/asset-disabled");
+
+    const fee = if s.validators contains Tezos.sender
+      then get_oracle_fee(
+          record[
+            amount = params.amount;
+            token = asset.asset_type;
+            abr_balance = 1n;//abr_balance;
+            abr_total_supply = 1n//abt_total_supply
+          ],
+          s.fee_oracle
+        )
+      else 0n;
+
     const unlocked_amount = abs(params.amount - fee);
 
     var operations := no_operations;
     case asset.asset_type of
-    | Wrapped(token_id) -> {
-      var receiver_account := get_account(params.receiver, s.ledger);
-      const receiver_balance = get_balance_by_token(receiver_account, token_id);
+    | Wrapped(info) -> {
+      const token_id = unwrap(s.wrapped_token_ids[info], "Token isn't supported");
+      var receiver_account := unwrap_or(s.ledger[Tezos.sender],
+        record [
+          balances = (map[]: balance_map_t);
+          permits = (set[]: set(address));
+        ]);
+      const receiver_balance = unwrap_or(receiver_account.balances[token_id], 0n);
 
       receiver_account.balances[token_id] := receiver_balance + unlocked_amount;
       s.ledger[params.receiver] := receiver_account;
 
       asset.locked_amount := asset.locked_amount + params.amount;
 
-      var fee_collector_account := get_account(s.fee_collector, s.ledger);
-      const collector_balance = get_balance_by_token(fee_collector_account, token_id);
+      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector],
+        record [
+          balances = (map[]: balance_map_t);
+          permits = (set[]: set(address));
+        ]);
+      const collector_balance = unwrap(fee_collector_account.balances[token_id], "Zero balance");
       fee_collector_account.balances[token_id] := collector_balance + fee;
       s.ledger[s.fee_collector] := fee_collector_account;
      }
@@ -173,7 +183,7 @@ function unlock_asset(
       recipient = params.receiver;
       amount = params.amount;
       chain_from_id = params.chain_id;
-      asset = transform_asset(asset.asset_type, s.wrapped_token_infos);
+      asset = asset.asset_type;
       signature = params.signature;
     ];
 

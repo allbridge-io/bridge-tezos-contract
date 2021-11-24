@@ -71,7 +71,7 @@ type update_validators_t is
 | Add_validator            of address
 | Remove_validator         of address
 
-type new_asset_t        is standard_asset_t;
+type new_asset_t        is asset_standard_t;
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
