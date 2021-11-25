@@ -142,10 +142,10 @@ function add_asset(
     end;
 
     (* Сheck that such an asset has not been added already *)
-    assert_none(s.bridge_asset_ids[new_asset], err_bridge_exist);
+    assert_none(s.bridge_asset_ids[asset_type], err_bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
-    s.bridge_asset_ids[new_asset] := s.asset_count;
+    s.bridge_asset_ids[asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s
