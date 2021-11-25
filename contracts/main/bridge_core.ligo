@@ -1,13 +1,13 @@
-#include "../partial/Common_types.ligo"
-#include "../partial/bridge-core/Bridge_types.ligo"
-#include "../partial/bridge-core/Bridge_fa2_types.ligo"
-#include "../partial/bridge-core/Bridge_errors.ligo"
-#include "../partial/Common_utils.ligo"
-#include "../partial/bridge-core/Bridge_utils.ligo"
-#include "../partial/bridge-core/Bridge_admin_methods.ligo"
-#include "../partial/bridge-core/Bridge_exchange_methods.ligo"
-#include "../partial/bridge-core/Bridge_fa2_methods.ligo"
-#include "../partial/bridge-core/Bridge_views.ligo"
+#include "../partial/common_types.ligo"
+#include "../partial/bridge-core/bridge_types.ligo"
+#include "../partial/bridge-core/bridge_fa2_types.ligo"
+#include "../partial/bridge-core/bridge_errors.ligo"
+#include "../partial/common_utils.ligo"
+#include "../partial/bridge-core/bridge_utils.ligo"
+#include "../partial/bridge-core/bridge_admin_methods.ligo"
+#include "../partial/bridge-core/bridge_exchange_methods.ligo"
+#include "../partial/bridge-core/bridge_fa2_methods.ligo"
+#include "../partial/bridge-core/bridge_views.ligo"
 
 type parameter_t        is
   | Change_owner          of address

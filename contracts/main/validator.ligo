@@ -1,9 +1,9 @@
-#include "../partial/Common_types.ligo"
-#include "../partial/validator/Validator_types.ligo"
-#include "../partial/validator/Validator_errors.ligo"
-#include "../partial/Common_utils.ligo"
-#include "../partial/validator/Validator_admin_methods.ligo"
-#include "../partial/validator/Validator_methods.ligo"
+#include "../partial/common_types.ligo"
+#include "../partial/validator/validator_types.ligo"
+#include "../partial/validator/validator_errors.ligo"
+#include "../partial/common_utils.ligo"
+#include "../partial/validator/validator_admin_methods.ligo"
+#include "../partial/validator/validator_methods.ligo"
 
 type parameter_t        is
   | Change_owner          of address

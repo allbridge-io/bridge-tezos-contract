@@ -1,10 +1,10 @@
-#include "../partial/Common_types.ligo"
-#include "../partial/oracle/Oracle_types.ligo"
-#include "../partial/oracle/Oracle_errors.ligo"
-#include "../partial/oracle/Oracle_utils.ligo"
-#include "../partial/Common_utils.ligo"
-#include "../partial/oracle/Oracle_admin_methods.ligo"
-#include "../partial/oracle/Oracle_methods.ligo"
+#include "../partial/common_types.ligo"
+#include "../partial/oracle/oracle_types.ligo"
+#include "../partial/oracle/oracle_errors.ligo"
+#include "../partial/oracle/oracle_utils.ligo"
+#include "../partial/common_utils.ligo"
+#include "../partial/oracle/oracle_admin_methods.ligo"
+#include "../partial/oracle/oracle_methods.ligo"
 
 type parameter_t        is
   | Change_owner          of address
