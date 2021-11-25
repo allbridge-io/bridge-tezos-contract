@@ -1,33 +1,73 @@
-(* Change service addresses entrypoint *)
-function change_address(
-  const changed_address : change_address_t;
+function change_owner(
+  const new_address     : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, err_not_owner);
-
-    case changed_address of
-    | Change_owner (address_) -> s.owner := address_
-    | Change_bridge_manager (address_) -> s.bridge_manager := address_
-    | Change_stop_manager (address_) -> s.stop_manager := address_
-    | Change_validator (address_) -> s.validator := address_
-    | Change_fee_oracle (address_) -> s.fee_oracle := address_
-    | Change_fee_collector (address_) -> s.fee_collector := address_
-    end;
+    s.owner := new_address;
   } with s
 
-(* Update validators set entrypoint *)
-function update_validators(
-  const param           : update_validators_t;
+function change_bridge_manager(
+  const new_address     : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, err_not_owner);
+    s.bridge_manager := new_address
+  } with s
 
-    case param of
-    | Add_validator(address_) -> s.validators := Set.add(address_, s.validators)
-    | Remove_validator(address_) -> s.validators := Set.remove(address_, s.validators)
-    end;
+function change_stop_manager(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.stop_manager := new_address;
+  } with s
+
+function change_validator(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.validator := new_address;
+  } with s
+
+function change_fee_oracle(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.fee_oracle := new_address;
+  } with s
+
+function change_fee_collector(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.fee_collector := new_address;
+  } with s
+
+function add_validator(
+  const address_        : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.validators := Set.add(address_, s.validators)
+  } with s
+
+function remove_validator(
+  const address_        : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.validators := Set.remove(address_, s.validators)
   } with s
 
 (* Stop bridge protocol entrypoint *)
@@ -36,11 +76,16 @@ function stop_bridge(
                         : storage_t is
   block {
     check_permission(s.stop_manager, err_not_manager);
+    s.enabled := False;
+  } with s
 
-    case s.enabled of
-    | True -> s.enabled := False
-    | False -> s.enabled := True
-    end;
+(* Start bridge protocol entrypoint *)
+function start_bridge(
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.stop_manager, err_not_manager);
+    s.enabled := True;
   } with s
 
 (* Stop bridge asset entrypoint *)
@@ -52,12 +97,20 @@ function stop_asset(
     check_permission(s.bridge_manager, err_not_manager);
 
     var asset := unwrap(s.bridge_assets[asset_id], err_asset_not_exist);
+    asset.enabled := False;
+    s.bridge_assets[asset_id] := asset;
+  } with s
 
-    case asset.enabled of
-    | True -> asset.enabled := False
-    | False -> asset.enabled := True
-    end;
+(* Start bridge asset entrypoint *)
+function start_asset(
+  const asset_id        : asset_id_t;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.bridge_manager, err_not_manager);
 
+    var asset := unwrap(s.bridge_assets[asset_id], err_asset_not_exist);
+    asset.enabled := True;
     s.bridge_assets[asset_id] := asset;
   } with s
 

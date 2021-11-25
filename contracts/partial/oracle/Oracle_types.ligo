@@ -14,11 +14,6 @@ type change_token_fee_t is [@layout:comb] record[
   new_fee                 : nat;
 ]
 
-type change_fee_t       is
-| Change_token_fee        of change_token_fee_t
-| Change_base_fee         of nat
-| Change_fee_multiper     of nat
-
 type calculate_fee_t    is [@layout:comb] record[
   amount                  : nat;
   token                   : asset_standard_t;

@@ -11,10 +11,6 @@ type storage_t          is [@layout:comb] record[
   validated_unlocks       : unlock_map_t;
 ]
 
-type change_address_t   is
-| Change_owner            of address
-| Change_bridge           of address
-
 type return_t           is list (operation) * storage_t
 
 const no_operations : list(operation) = nil;

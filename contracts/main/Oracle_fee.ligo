@@ -2,12 +2,15 @@
 #include "../partial/oracle/Oracle_types.ligo"
 #include "../partial/oracle/Oracle_errors.ligo"
 #include "../partial/oracle/Oracle_utils.ligo"
+#include "../partial/Common_utils.ligo"
 #include "../partial/oracle/Oracle_admin_methods.ligo"
 #include "../partial/oracle/Oracle_methods.ligo"
 
 type parameter_t        is
   | Change_owner          of address
-  | Change_fee            of change_fee_t
+  | Change_token_fee      of change_token_fee_t
+  | Change_base_fee       of nat
+  | Change_fee_multiper   of nat
 
 
 function main(
@@ -15,7 +18,8 @@ function main(
   const s               : storage_t)
                         : return_t is
   case action of
-  (* Admin methods *)
-  | Change_owner (params) -> (no_operations, change_owner(params, s))
-  | Change_fee (params) -> (no_operations, change_fee(params, s))
+  | Change_owner (params)        -> (no_operations, change_owner(params, s))
+  | Change_token_fee (params)    -> (no_operations, change_token_fee(params.token, params.new_fee, s))
+  | Change_base_fee (params)     -> (no_operations, change_base_fee(params, s))
+  | Change_fee_multiper (params) -> (no_operations, change_fee_multiper(params, s))
   end

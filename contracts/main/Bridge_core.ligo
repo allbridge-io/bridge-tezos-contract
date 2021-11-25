@@ -10,11 +10,20 @@
 #include "../partial/bridge-core/Bridge_views.ligo"
 
 type parameter_t        is
-  | Change_address        of change_address_t
-  | Update_validators     of update_validators_t
+  | Change_owner          of address
+  | Change_bridge_manager of address
+  | Change_stop_manager   of address
+  | Change_validator      of address
+  | Change_fee_oracle     of address
+  | Change_fee_collector  of address
+  | Add_validator         of address
+  | Remove_validator      of address
   | Stop_bridge           of unit
+  | Start_bridge          of unit
   | Stop_asset            of asset_id_t
+  | Start_asset           of asset_id_t
   | Add_asset             of new_asset_t
+
   | Lock_asset            of lock_asset_t
   | Unlock_asset          of unlock_asset_t
   | Transfer              of transfer_params_t
@@ -27,12 +36,21 @@ function main(
                         : return_t is
   case action of
   (* Admin methods *)
-  | Change_address (params)    -> (no_operations, change_address(params, s))
-  | Update_validators (params) -> (no_operations, update_validators(params, s))
+  | Change_owner (params)          -> (no_operations, change_owner(params, s))
+  | Change_bridge_manager (params) -> (no_operations, change_bridge_manager(params, s))
+  | Change_stop_manager (params)   -> (no_operations, change_stop_manager(params, s))
+  | Change_validator (params)      -> (no_operations, change_validator(params, s))
+  | Change_fee_oracle (params)     -> (no_operations, change_fee_oracle(params, s))
+  | Change_fee_collector (params)  -> (no_operations, change_fee_collector(params, s))
+  | Add_validator (params)    -> (no_operations, add_validator(params, s))
+  | Remove_validator (params) -> (no_operations, remove_validator(params, s))
   | Stop_bridge           -> (no_operations, stop_bridge(s))
+  | Start_bridge          -> (no_operations, start_bridge(s))
   | Stop_asset (params)   -> (no_operations, stop_asset(params, s))
+  | Start_asset (params)  -> (no_operations, start_asset(params, s))
   | Add_asset (params)    -> (no_operations, add_asset(params, s))
 
+  (* Common methods *)
   | Lock_asset (params)   -> lock_asset(params, s)
   | Unlock_asset (params) -> unlock_asset(params, s)
 

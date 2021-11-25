@@ -1,14 +1,19 @@
-(* Change addresses entrypoint *)
-function change_address(
-  const param           : change_address_t;
+function change_owner(
+  const new_address     : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, err_not_owner);
-    case param of
-    | Change_owner(address_) -> s.owner := address_
-    | Change_bridge(address_) -> s.bridge := address_
-    end;
+    s.owner := new_address;
+  } with s
+
+function change_bridge(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.bridge := new_address;
   } with s
 
 (* Change validator public key entrypoint *)

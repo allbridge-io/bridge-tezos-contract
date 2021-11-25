@@ -4,24 +4,34 @@ function change_owner(
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
-
+    check_permission(s.owner, err_not_owner);
     s.owner := new_owner;
   } with s
 
-(* Change fees entrypoint *)
-function change_fee(
-  const fee_param       : change_fee_t;
+function change_token_fee(
+  const token           : asset_standard_t;
+  const new_fee         : nat;
   var s                 : storage_t)
                         : storage_t is
   block {
-    (* Permission check *)
-    is_owner(s.owner);
+    check_permission(s.owner, err_not_owner);
+    s.fee_per_tokens[token] := new_fee
+  } with s
 
-    case fee_param of
-    | Change_token_fee (params) -> s.fee_per_tokens[params.token] := params.new_fee
-    | Change_base_fee (new_fee) -> s.base_fee := new_fee
-    | Change_fee_multiper (new_fee) -> s.base_fee := new_fee
-    end
+function change_base_fee(
+  const new_fee         : nat;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.base_fee := new_fee
+  } with s
+
+function change_fee_multiper(
+  const new_fee         : nat;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, err_not_owner);
+    s.fee_multiper := new_fee
   } with s

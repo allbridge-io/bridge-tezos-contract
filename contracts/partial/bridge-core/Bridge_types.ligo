@@ -59,18 +59,6 @@ type storage_t          is [@layout:comb] record[
 
 type return_t           is list (operation) * storage_t
 
-type change_address_t   is
-| Change_owner            of address
-| Change_bridge_manager   of address
-| Change_stop_manager     of address
-| Change_validator        of address
-| Change_fee_oracle       of address
-| Change_fee_collector    of address
-
-type update_validators_t is
-| Add_validator            of address
-| Remove_validator         of address
-
 type new_asset_t        is asset_standard_t;
 
 type lock_asset_t       is [@layout:comb] record[
