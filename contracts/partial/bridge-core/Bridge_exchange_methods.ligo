@@ -14,16 +14,15 @@ function lock_asset(
     case asset.asset_type of
     | Wrapped(info) -> {
       const token_id = unwrap(s.wrapped_token_ids[info], err_token_not_supported);
-      var account := unwrap(s.ledger[Tezos.sender], err_account_not_exist);
-      const account_balance = unwrap(account.balances[token_id], err_zero_balance);
+      const sender_key : ledger_key_t = (Tezos.sender, token_id);
+      const account_balance = unwrap(s.ledger[sender_key], err_zero_balance);
 
       assert_with_error(params.amount <= account_balance, err_insufficient_balance);
 
-      account.balances[token_id] := get_nat_or_fail(account_balance - params.amount);
-      s.ledger[Tezos.sender] := account;
+      s.ledger[sender_key] := get_nat_or_fail(account_balance - params.amount);
 
-      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector], new_account);
-      const collector_balance = unwrap_or(fee_collector_account.balances[token_id], 0n);
+      const collector_key = (s.fee_collector, token_id);
+      const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
 
       const fee = get_oracle_fee(
         record[
@@ -34,8 +33,7 @@ function lock_asset(
         ],
         s.fee_oracle);
       locked_amount := get_nat_or_fail(params.amount - fee);
-      fee_collector_account.balances[token_id] := collector_balance + fee;
-      s.ledger[s.fee_collector] := fee_collector_account;
+      s.ledger[collector_key ] := collector_balance + fee;
 
       asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount);
      }
@@ -114,6 +112,7 @@ function unlock_asset(
 
     assert_with_error(s.enabled, err_bridge_disabled);
     assert_with_error(asset.enabled, err_asset_disabled);
+    assert_with_error(params.amount > 0n, err_zero_transfer);
 
     const fee = if s.validators contains Tezos.sender
       then get_oracle_fee(
@@ -133,18 +132,15 @@ function unlock_asset(
     case asset.asset_type of
     | Wrapped(info) -> {
       const token_id = unwrap(s.wrapped_token_ids[info], err_token_not_supported);
-      var receiver_account := unwrap_or(s.ledger[Tezos.sender], new_account);
-      const receiver_balance = unwrap_or(receiver_account.balances[token_id], 0n);
-
-      receiver_account.balances[token_id] := receiver_balance + unlocked_amount;
-      s.ledger[params.receiver] := receiver_account;
+      const receiver_key = (params.receiver, token_id);
+      const receiver_balance = unwrap_or(s.ledger[receiver_key], 0n);
+      s.ledger[receiver_key] := receiver_balance + unlocked_amount;
 
       asset.locked_amount := asset.locked_amount + params.amount;
 
-      var fee_collector_account := unwrap_or(s.ledger[s.fee_collector], new_account);
-      const collector_balance = unwrap(fee_collector_account.balances[token_id], err_zero_balance);
-      fee_collector_account.balances[token_id] := collector_balance + fee;
-      s.ledger[s.fee_collector] := fee_collector_account;
+      const collector_key = (s.fee_collector, token_id);
+      const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
+      s.ledger[collector_key] := collector_balance + fee;
      }
     | _ -> {
       operations := wrap_transfer(

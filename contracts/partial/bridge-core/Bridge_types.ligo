@@ -36,7 +36,10 @@ type account_t          is [@layout:comb] record [
     permits               : set(address);
   ]
 
-type ledger_t           is big_map(address, account_t)
+type ledger_key_t       is (address * nat)
+
+type ledger_t           is big_map(ledger_key_t, nat)
+type permits_t          is big_map(ledger_key_t, set(address))
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -53,6 +56,7 @@ type storage_t          is [@layout:comb] record[
   wrapped_token_infos     : wrapped_token_map_t;
   wrapped_token_ids       : wrapped_token_ids_map_t;
   ledger                  : ledger_t;
+  permits                 : permits_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
 ]
@@ -88,7 +92,4 @@ type calculate_fee_t    is [@layout:comb] record[
 type response_fee_t     is nat;
 
 const no_operations : list(operation) = nil;
-const new_account = record [
-  balances = (map[]: balance_map_t);
-  permits = (set[]: set(address))
-];
+const empty_permits : set(address) = set[];

@@ -23,4 +23,5 @@ const err_fa2_not_operator       : string = "FA2_NOT_OPERATOR"
 const err_fa2_low_balance        : string = "FA2_INSUFFICIENT_BALANCE"
 const err_fa2_not_owner          : string = "FA2_NOT_OWNER"
 (* Other *)
-const err_not_nat                : string = "Bridge_core/not-nat"
+const err_not_nat                : string = "Bridge-core/not-nat"
+const err_zero_transfer          : string = "Bridge-core/zero-transfer"
