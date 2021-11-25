@@ -26,7 +26,7 @@ function iterate_transfer (
         assert_with_error(sender_balance >= transfer.amount, err_fa2_low_balance);
 
         (* Update sender account *)
-        sender_balance := abs(sender_balance - transfer.amount);
+        sender_balance := get_nat_or_fail(sender_balance - transfer.amount);
         sender_account.balances[transfer.token_id] := sender_balance;
         s.ledger[Tezos.sender] := sender_account;
 

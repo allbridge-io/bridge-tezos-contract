@@ -110,3 +110,11 @@ function get_unlock_contract(
   | Some(contr) -> contr
   | None -> failwith(err_not_validator_unlock)
   end;
+
+function get_nat_or_fail(
+  const value           : int)
+                        : nat is
+  case is_nat(value) of
+  | Some(natural) -> natural
+  | None -> (failwith(err_not_nat): nat)
+  end;

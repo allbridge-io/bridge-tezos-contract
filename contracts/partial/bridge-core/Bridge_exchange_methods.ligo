@@ -19,7 +19,7 @@ function lock_asset(
 
       assert_with_error(params.amount <= account_balance, err_insufficient_balance);
 
-      account.balances[token_id] := abs(account_balance - params.amount);
+      account.balances[token_id] := get_nat_or_fail(account_balance - params.amount);
       s.ledger[Tezos.sender] := account;
 
       var fee_collector_account := unwrap_or(s.ledger[s.fee_collector], new_account);
@@ -33,11 +33,11 @@ function lock_asset(
           abr_total_supply = 1n//abt_total_supply
         ],
         s.fee_oracle);
-      locked_amount := abs(params.amount - fee);
+      locked_amount := get_nat_or_fail(params.amount - fee);
       fee_collector_account.balances[token_id] := collector_balance + fee;
       s.ledger[s.fee_collector] := fee_collector_account;
 
-      asset.locked_amount := abs(asset.locked_amount - locked_amount);
+      asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount);
      }
     | Tez -> {
       const tez_amount = Tezos.amount / 1mutez;
@@ -49,7 +49,7 @@ function lock_asset(
           abr_total_supply = 1n//abt_total_supply
         ],
         s.fee_oracle);
-      locked_amount := abs(tez_amount - fee);
+      locked_amount := get_nat_or_fail(tez_amount - fee);
 
       operations := wrap_transfer(
         Tezos.self_address,
@@ -68,7 +68,8 @@ function lock_asset(
           abr_total_supply = 1n//abt_total_supply
         ],
         s.fee_oracle);
-      locked_amount := abs(params.amount - fee);
+      locked_amount := get_nat_or_fail(params.amount - fee);
+
       operations := wrap_transfer(
         Tezos.sender,
         Tezos.self_address,
@@ -126,7 +127,7 @@ function unlock_asset(
         )
       else 0n;
 
-    const unlocked_amount = abs(params.amount - fee);
+    const unlocked_amount = get_nat_or_fail(params.amount - fee);
 
     var operations := no_operations;
     case asset.asset_type of
@@ -161,7 +162,7 @@ function unlock_asset(
           asset.asset_type
         ) # operations}
       else skip;
-      asset.locked_amount := abs(asset.locked_amount - params.amount);
+      asset.locked_amount := get_nat_or_fail(asset.locked_amount - params.amount);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
