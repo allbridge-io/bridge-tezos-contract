@@ -37,10 +37,10 @@ function validate_unlock(
       ] : get_keccak_t)
     ));
 
-    case Crypto.check(s.validator_pk, params.signature, kessak_params) of
-    | False -> failwith(err_invalid_signature)
-    | True -> skip
-    end;
+    assert_with_error(
+      Crypto.check(s.validator_pk, params.signature, kessak_params),
+      err_invalid_signature
+    );
 
     s.validated_unlocks[params.lock_id] := params;
 
