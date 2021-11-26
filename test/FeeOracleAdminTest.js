@@ -32,13 +32,20 @@ describe("FeeOracle Admin tests", async function () {
       strictEqual(oracle.storage.owner, bob.pkh);
     });
   });
-  describe("Testing entrypoint: Change_fee", async function () {
-    it("Shouldn't changing fees if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_token_fee", async function () {
+    it("Shouldn't changing fee per token if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(oracle.сhangeFee("change_base_fee", 1000), err => {
-        strictEqual(err.message, "Oracle-fee/not-owner");
-        return true;
-      });
+      await rejects(
+        oracle.сhangeFee("change_token_fee", {
+          tokenType: "fa12",
+          tokenAddress: alice.pkh,
+          fee: 1000,
+        }),
+        err => {
+          strictEqual(err.message, "Oracle-fee/not-owner");
+          return true;
+        },
+      );
     });
     it("Should allow change token fee", async function () {
       Tezos.setSignerProvider(signerBob);
@@ -53,14 +60,34 @@ describe("FeeOracle Admin tests", async function () {
       });
       strictEqual(tokenFee.toNumber(), 1000);
     });
+  });
+  describe("Testing entrypoint: Change_base_fee", async function () {
+    it("Shouldn't changing base fee if the user is not an owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(oracle.сhangeFee("change_base_fee", 1000), err => {
+        strictEqual(err.message, "Oracle-fee/not-owner");
+        return true;
+      });
+    });
     it("Should allow change base fee", async function () {
+      Tezos.setSignerProvider(signerBob);
       await oracle.сhangeFee("change_base_fee", 1000);
       await oracle.updateStorage();
 
       strictEqual(oracle.storage.base_fee.toNumber(), 1000);
     });
+  });
+  describe("Testing entrypoint: Change_fee_multiper", async function () {
+    it("Shouldn't changing fee multiper if the user is not an owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(oracle.сhangeFee("change_fee_multiper", 1000), err => {
+        strictEqual(err.message, "Oracle-fee/not-owner");
+        return true;
+      });
+    });
 
     it("Should allow change fee multiper", async function () {
+      Tezos.setSignerProvider(signerBob);
       await oracle.сhangeFee("change_fee_multiper", 1000);
       await oracle.updateStorage();
 

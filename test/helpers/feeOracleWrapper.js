@@ -12,7 +12,7 @@ module.exports = class Validator {
 
   constructor() {}
   async init() {
-    const deployedContract = await migrate(Tezos, "Oracle_fee", oracleStorage);
+    const deployedContract = await migrate(Tezos, "oracle_fee", oracleStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
@@ -36,37 +36,37 @@ module.exports = class Validator {
       case "change_token_fee":
         switch (value.tokenType) {
           case "fa12":
-            operation = await this.contract.methods
-              .change_fee(feeType, "fa12", value.tokenAddress, value.fee)
-              .send();
+            operation = await this.contract.methods[feeType](
+              "fa12",
+              value.tokenAddress,
+              value.fee,
+            ).send();
             break;
           case "fa2":
-            operation = await this.contract.methods
-              .change_fee(
-                feeType,
-                "fa2",
-                value.tokenAddress,
-                value.tokenId,
-                value.fee,
-              )
-              .send();
+            operation = await this.contract.methods[feeType](
+              "fa2",
+              value.tokenAddress,
+              value.tokenId,
+              value.fee,
+            ).send();
             break;
           case "tez":
-            operation = await this.contract.methods
-              .change_fee(feeType, "tez", null, value.fee)
-              .send();
+            operation = await this.contract.methods[feeType](
+              "tez",
+              null,
+              value.fee,
+            ).send();
             break;
           case "wrapped":
-            operation = await this.contract.methods
-              .change_fee(feeType, value.tokenId, value.fee)
-              .send();
+            operation = await this.contract.methods[feeType](
+              value.tokenId,
+              value.fee,
+            ).send();
             break;
         }
         break;
       default:
-        operation = await this.contract.methods
-          .change_fee(feeType, value)
-          .send();
+        operation = await this.contract.methods[feeType](value).send();
         break;
     }
 

@@ -38,7 +38,7 @@ describe("BridgeValidator Validate tests", async function () {
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
           tezosChainId,
-          "fa12_",
+          "fa12",
           tokenAddress,
         ),
         err => {
@@ -56,7 +56,7 @@ describe("BridgeValidator Validate tests", async function () {
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
           tezosChainId,
-          "fa12_",
+          "fa12",
           tokenAddress,
         ),
         err => {
@@ -77,7 +77,7 @@ describe("BridgeValidator Validate tests", async function () {
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         bscChainId,
-        "fa12_",
+        "fa12",
         tokenAddress,
       );
       await validator.updateStorage();
@@ -93,7 +93,7 @@ describe("BridgeValidator Validate tests", async function () {
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         bscChainId,
-        "fa2_",
+        "fa2",
         tokenAddress,
         0,
       );
@@ -109,7 +109,7 @@ describe("BridgeValidator Validate tests", async function () {
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         bscChainId,
-        "tez_",
+        "tez",
       );
       await validator.updateStorage();
       const newLock = await validator.storage.validated_locks.get(2);
@@ -123,7 +123,7 @@ describe("BridgeValidator Validate tests", async function () {
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         bscChainId,
-        "wrapped_",
+        "wrapped",
         Buffer.from(tokenAddress, "ascii").toString("hex"),
         bscChainId,
       );
@@ -139,7 +139,7 @@ describe("BridgeValidator Validate tests", async function () {
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
           bscChainId,
-          "fa12_",
+          "fa12",
           tokenAddress,
         ),
         err => {
@@ -162,7 +162,7 @@ describe("BridgeValidator Validate tests", async function () {
           1111111,
           tezosChainId,
           signature.sig,
-          "fa12_",
+          "fa12",
           tokenAddress,
         ),
         err => {
@@ -183,7 +183,7 @@ describe("BridgeValidator Validate tests", async function () {
           1111111,
           tezosChainId,
           signature.sig,
-          "fa12_",
+          "fa12",
           tokenAddress,
         ),
         err => {
@@ -200,7 +200,7 @@ describe("BridgeValidator Validate tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa12_",
+        assetType: "fa12",
         chainId: bscChainId,
         tokenAddress: tokenAddress,
       });
@@ -212,7 +212,7 @@ describe("BridgeValidator Validate tests", async function () {
         unlockAmount,
         bscChainId,
         signature.sig,
-        "fa12_",
+        "fa12",
         tokenAddress,
       );
       await validator.updateStorage();
@@ -226,7 +226,7 @@ describe("BridgeValidator Validate tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa2_",
+        assetType: "fa2",
         chainId: bscChainId,
         tokenAddress: tokenAddress,
         tokenId: 0,
@@ -239,7 +239,7 @@ describe("BridgeValidator Validate tests", async function () {
         unlockAmount,
         bscChainId,
         signature.sig,
-        "fa2_",
+        "fa2",
         tokenAddress,
         0,
       );
@@ -254,7 +254,7 @@ describe("BridgeValidator Validate tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "tez_",
+        assetType: "tez",
       });
 
       const signature = await signerAlice.sign(keccakBytes);
@@ -264,7 +264,7 @@ describe("BridgeValidator Validate tests", async function () {
         unlockAmount,
         bscChainId,
         signature.sig,
-        "tez_",
+        "tez",
       );
       await validator.updateStorage();
       const newUnlock = await validator.storage.validated_unlocks.get(2);
@@ -277,7 +277,7 @@ describe("BridgeValidator Validate tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "wrapped_",
+        assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from(tokenAddress, "ascii").toString("hex"),
       });
@@ -289,7 +289,7 @@ describe("BridgeValidator Validate tests", async function () {
         unlockAmount,
         bscChainId,
         signature.sig,
-        "wrapped_",
+        "wrapped",
         Buffer.from(tokenAddress, "ascii").toString("hex"),
         bscChainId,
       );
@@ -308,7 +308,7 @@ describe("BridgeValidator Validate tests", async function () {
           10000,
           bscChainId,
           signature.sig,
-          "wrapped_",
+          "wrapped",
           Buffer.from(tokenAddress, "ascii").toString("hex"),
           bscChainId,
         ),

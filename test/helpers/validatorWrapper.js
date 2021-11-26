@@ -14,7 +14,7 @@ module.exports = class Validator {
   async init() {
     const deployedContract = await migrate(
       Tezos,
-      "Validator",
+      "validator",
       validatorStorage,
     );
     this.contract = await Tezos.contract.at(deployedContract);
@@ -29,11 +29,10 @@ module.exports = class Validator {
     this.storage = updatedStorage;
     return updatedStorage;
   }
-
   async сhangeAddress(addressType, newAddress) {
-    const operation = await this.contract.methods
-      .change_address(addressType, newAddress)
-      .send();
+    const operation = await this.contract.methods[addressType](
+      newAddress,
+    ).send();
     await confirmOperation(Tezos, operation.hash);
   }
   async сhangeValidatorPK(newKey) {
@@ -54,54 +53,54 @@ module.exports = class Validator {
   ) {
     let operation;
     switch (assetType) {
-      case "fa12_":
+      case "fa12":
         operation = await this.contract.methods
           .validate_lock(
             lockId,
             sender,
             receiver,
             amount,
-            "fa12_",
+            "fa12",
             tokenAddress,
             destinationChainId,
           )
           .send();
         break;
-      case "fa2_":
+      case "fa2":
         operation = await this.contract.methods
           .validate_lock(
             lockId,
             sender,
             receiver,
             amount,
-            "fa2_",
+            "fa2",
             tokenAddress,
             tokenId,
             destinationChainId,
           )
           .send();
         break;
-      case "tez_":
+      case "tez":
         operation = await this.contract.methods
           .validate_lock(
             lockId,
             sender,
             receiver,
             amount,
-            "tez_",
+            "tez",
             null,
             destinationChainId,
           )
           .send();
         break;
-      case "wrapped_":
+      case "wrapped":
         operation = await this.contract.methods
           .validate_lock(
             lockId,
             sender,
             receiver,
             amount,
-            "wrapped_",
+            "wrapped",
             tokenId,
             tokenAddress,
             destinationChainId,
@@ -124,54 +123,54 @@ module.exports = class Validator {
   ) {
     let operation;
     switch (assetType) {
-      case "fa12_":
+      case "fa12":
         operation = await this.contract.methods
           .validate_unlock(
             lockId,
             receiver,
             amount,
             chainFromId,
-            "fa12_",
+            "fa12",
             tokenAddress,
             signature,
           )
           .send();
         break;
-      case "fa2_":
+      case "fa2":
         operation = await this.contract.methods
           .validate_unlock(
             lockId,
             receiver,
             amount,
             chainFromId,
-            "fa2_",
+            "fa2",
             tokenAddress,
             tokenId,
             signature,
           )
           .send();
         break;
-      case "tez_":
+      case "tez":
         operation = await this.contract.methods
           .validate_unlock(
             lockId,
             receiver,
             amount,
             chainFromId,
-            "tez_",
+            "tez",
             null,
             signature,
           )
           .send();
         break;
-      case "wrapped_":
+      case "wrapped":
         operation = await this.contract.methods
           .validate_unlock(
             lockId,
             receiver,
             amount,
             chainFromId,
-            "wrapped_",
+            "wrapped",
             tokenId,
             tokenAddress,
             signature,

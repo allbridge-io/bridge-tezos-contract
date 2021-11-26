@@ -7,7 +7,7 @@ module.exports = {
   bridge_manager: alice.pkh,
   stop_manager: alice.pkh,
   validator: null,
-  validators: [bob.pkh],
+  signers: [bob.pkh],
   fee_oracle: null,
   fee_collector: bob.pkh,
   asset_count: 0,
@@ -17,6 +17,7 @@ module.exports = {
   wrapped_token_infos: MichelsonMap.fromLiteral({}),
   wrapped_token_ids: MichelsonMap.fromLiteral({}),
   ledger: MichelsonMap.fromLiteral({}),
+  permits: MichelsonMap.fromLiteral({}),
   enabled: true,
   metadata: MichelsonMap.fromLiteral({
     "": Buffer.from("tezos-storage:meta", "ascii").toString("hex"),

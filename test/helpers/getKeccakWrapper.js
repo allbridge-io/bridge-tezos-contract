@@ -12,7 +12,7 @@ module.exports = class GetBytes {
   async init() {
     const deployedContract = await migrate(
       Tezos,
-      "GetKeccak",
+      "get_keccak",
       Buffer.from("dsads", "ascii").toString("hex"),
     );
     this.contract = await Tezos.contract.at(deployedContract);
@@ -32,51 +32,51 @@ module.exports = class GetBytes {
     let operation;
 
     switch (params.assetType) {
-      case "fa12_":
+      case "fa12":
         operation = await this.contract.methods
           .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
             params.chainFromId,
-            "fa12_",
+            "fa12",
             params.tokenAddress,
           )
           .send();
         break;
-      case "fa2_":
+      case "fa2":
         operation = await this.contract.methods
           .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
             params.chainFromId,
-            "fa2_",
+            "fa2",
             params.tokenAddress,
             params.tokenId,
           )
           .send();
         break;
-      case "tez_":
+      case "tez":
         operation = await this.contract.methods
           .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
             params.chainFromId,
-            "tez_",
+            "tez",
             null,
           )
           .send();
         break;
-      case "wrapped_":
+      case "wrapped":
         operation = await this.contract.methods
           .get_keccak(
             params.lockId,
             params.recipient,
             params.amount,
             params.chainFromId,
-            "wrapped_",
+            "wrapped",
             params.chainId,
             params.tokenAddress,
           )

@@ -18,8 +18,8 @@ describe("Validator Admin tests", async function () {
     }
   });
 
-  describe("Testing entrypoint: Change_address", async function () {
-    it("Shouldn't changing addresses if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_owner", async function () {
+    it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(validator.сhangeAddress("change_owner", bob.pkh), err => {
         strictEqual(err.message, "Validator-bridge/not-owner");
@@ -32,6 +32,15 @@ describe("Validator Admin tests", async function () {
       await validator.сhangeAddress("change_owner", bob.pkh);
       await validator.updateStorage();
       strictEqual(validator.storage.owner, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint: Change_bridge", async function () {
+    it("Shouldn't changing bridge if the user is not an owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(validator.сhangeAddress("change_owner", bob.pkh), err => {
+        strictEqual(err.message, "Validator-bridge/not-owner");
+        return true;
+      });
     });
     it("Should allow change bridge address", async function () {
       Tezos.setSignerProvider(signerBob);

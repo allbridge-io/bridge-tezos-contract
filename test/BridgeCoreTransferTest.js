@@ -25,21 +25,20 @@ describe("BridgeCore Transfer tests", async function () {
 
       bridge = await new BridgeCore().init();
       keccak = await new GetKeccak().init();
-
       const fa12Asset = {
-        assetType: "fa12_",
+        assetType: "fa12",
         tokenAddress: fa12Token.address,
       };
       const fa2Asset = {
-        assetType: "fa2_",
+        assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
       };
       const tezAsset = {
-        assetType: "tez_",
+        assetType: "tez",
       };
       const wrappedAsset = {
-        assetType: "wrapped_",
+        assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
       };
@@ -161,15 +160,17 @@ describe("BridgeCore Transfer tests", async function () {
     it("Should lock wrapped asset", async function () {
       const lockAmount = 10000;
       const fee = 1000;
+
       const keccakBytes = await keccak.getKeccak({
         lockId: 3,
         recipient: alice.pkh,
         amount: 10000,
         chainFromId: bscChainId,
-        assetType: "wrapped_",
+        assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
       });
+
       const signature = await Tezos.signer.sign(keccakBytes);
       await bridge.unlockAsset(
         bscChainId,
@@ -179,16 +180,21 @@ describe("BridgeCore Transfer tests", async function () {
         alice.pkh,
         signature.sig,
       );
+
       await bridge.updateStorage();
       const prevAsset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const wrappedTokenId = prevAsset.asset_type.wrapped.toNumber();
+      const wrappedTokenId = await bridge.storage.wrapped_token_ids.get(
+        prevAsset.asset_type.wrapped,
+      );
+
       const prevAliseBalance = await bridge.getBalance(
         alice.pkh,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
+
       const prevFeeCollectorBalance = await bridge.getBalance(
         bridge.storage.fee_collector,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
       await bridge.lockAsset(
         bscChainId,
@@ -199,10 +205,14 @@ describe("BridgeCore Transfer tests", async function () {
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const aliseBalance = await bridge.getBalance(alice.pkh, wrappedTokenId);
+
+      const aliseBalance = await bridge.getBalance(
+        alice.pkh,
+        wrappedTokenId.toNumber(),
+      );
       const feeCollectorBalance = await bridge.getBalance(
         bridge.storage.fee_collector,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
       strictEqual(aliseBalance, prevAliseBalance - lockAmount);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
@@ -243,7 +253,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa12_",
+        assetType: "fa12",
         chainId: bscChainId,
         tokenAddress: fa12Token.address,
       });
@@ -286,7 +296,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa2_",
+        assetType: "fa2",
         chainId: bscChainId,
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
@@ -325,7 +335,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: eve.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "tez_",
+        assetType: "tez",
         chainId: bscChainId,
       });
       const signature = await signerAlice.sign(keccakBytes);
@@ -366,20 +376,22 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "wrapped_",
+        assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
       });
       const signature = await signerAlice.sign(keccakBytes);
       const prevAsset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const wrappedTokenId = prevAsset.asset_type.wrapped.toNumber();
+      const wrappedTokenId = await bridge.storage.wrapped_token_ids.get(
+        prevAsset.asset_type.wrapped,
+      );
       const prevAliseBalance = await bridge.getBalance(
         alice.pkh,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
       const prevFeeCollectorBalance = await bridge.getBalance(
         bridge.storage.fee_collector,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
       await bridge.unlockAsset(
         bscChainId,
@@ -391,10 +403,13 @@ describe("BridgeCore Transfer tests", async function () {
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const aliseBalance = await bridge.getBalance(alice.pkh, wrappedTokenId);
+      const aliseBalance = await bridge.getBalance(
+        alice.pkh,
+        wrappedTokenId.toNumber(),
+      );
       const feeCollectorBalance = await bridge.getBalance(
         bridge.storage.fee_collector,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
       strictEqual(aliseBalance, prevAliseBalance + unlockAmount - fee);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
@@ -415,7 +430,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa12_",
+        assetType: "fa12",
         chainId: bscChainId,
         tokenAddress: fa12Token.address,
       });
@@ -453,7 +468,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa2_",
+        assetType: "fa2",
         chainId: bscChainId,
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
@@ -488,7 +503,7 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: eve.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "tez_",
+        assetType: "tez",
         chainId: bscChainId,
       });
       const signature = await signerAlice.sign(keccakBytes);
@@ -527,16 +542,18 @@ describe("BridgeCore Transfer tests", async function () {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "wrapped_",
+        assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
       });
       const signature = await signerAlice.sign(keccakBytes);
       const prevAsset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const wrappedTokenId = prevAsset.asset_type.wrapped.toNumber();
+      const wrappedTokenId = await bridge.storage.wrapped_token_ids.get(
+        prevAsset.asset_type.wrapped,
+      );
       const prevAliseBalance = await bridge.getBalance(
         alice.pkh,
-        wrappedTokenId,
+        wrappedTokenId.toNumber(),
       );
 
       await bridge.unlockAsset(
@@ -549,7 +566,10 @@ describe("BridgeCore Transfer tests", async function () {
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(wrappedAssetId);
-      const aliseBalance = await bridge.getBalance(alice.pkh, wrappedTokenId);
+      const aliseBalance = await bridge.getBalance(
+        alice.pkh,
+        wrappedTokenId.toNumber(),
+      );
 
       strictEqual(aliseBalance, prevAliseBalance + unlockAmount);
 
