@@ -13,8 +13,8 @@ function iterate_transfer (
       block {
         var operations := result.0;
         var s := result.1;
+
         const sender_key : ledger_key_t = (Tezos.sender, transfer.token_id);
-        const sender_balance = unwrap(s.ledger[sender_key], err_fa2_low_balance);
         const sender_permits = unwrap_or(s.permits[sender_key], empty_permits);
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
@@ -22,6 +22,7 @@ function iterate_transfer (
 
         assert_with_error(transfer.amount > 0n, err_zero_transfer);
 
+        const sender_balance = unwrap(s.ledger[sender_key], err_fa2_low_balance);
         (* Balance check *)
         assert_with_error(sender_balance >= transfer.amount, err_fa2_low_balance);
 

@@ -15,10 +15,10 @@ type storage_t          is bytes;
 
 
 type asset_standard_t   is
-| Fa12_                     of address
-| Fa2_                      of token_t
-| Tez_
-| Wrapped_                  of wrapped_token_t
+| Fa12                    of address
+| Fa2                     of token_t
+| Tez
+| Wrapped                 of wrapped_token_t
 
 type get_keccak_t        is [@layout:comb] record[
   lock_id                 : nat;

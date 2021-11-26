@@ -1,7 +1,7 @@
 (* Helper contract for tests *)
 type storage_type       is record[
   response                : nat;
-  farm_address            : address;
+  bridge_address          : address;
 ]
 
 
@@ -65,7 +65,7 @@ function balance_of(
         callback    = get_callback(Tezos.self_address);
       ],
       0mutez,
-      get_balance_entrypoint(s.farm_address)
+      get_balance_entrypoint(s.bridge_address)
     );
   } with (list[op], s)
 
