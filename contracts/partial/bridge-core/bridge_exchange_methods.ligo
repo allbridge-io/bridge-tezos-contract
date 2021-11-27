@@ -4,20 +4,20 @@ function lock_asset(
   var s                : storage_t)
                        : return_t is
   block {
-    var asset := unwrap(s.bridge_assets[params.asset_id], err_asset_not_exist);
+    var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
 
-    assert_with_error(asset.enabled, err_asset_disabled);
-    assert_with_error(s.enabled, err_bridge_disabled);
+    assert_with_error(asset.enabled, Errors.asset_disabled);
+    assert_with_error(s.enabled, Errors.bridge_disabled);
 
     var locked_amount := 0n;
     var operations := no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[info], err_token_not_supported);
+      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
       const sender_key : ledger_key_t = (Tezos.sender, token_id);
-      const account_balance = unwrap(s.ledger[sender_key], err_zero_balance);
+      const account_balance = unwrap(s.ledger[sender_key], Errors.zero_balance);
 
-      assert_with_error(params.amount <= account_balance, err_insufficient_balance);
+      assert_with_error(params.amount <= account_balance, Errors.insufficient_balance);
 
       s.ledger[sender_key] := get_nat_or_fail(account_balance - params.amount);
 
@@ -108,11 +108,11 @@ function unlock_asset(
   var s                 : storage_t)
                         : return_t is
   block {
-    var asset := unwrap(s.bridge_assets[params.asset_id], err_asset_not_exist);
+    var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
 
-    assert_with_error(s.enabled, err_bridge_disabled);
-    assert_with_error(asset.enabled, err_asset_disabled);
-    assert_with_error(params.amount > 0n, err_zero_transfer);
+    assert_with_error(s.enabled, Errors.bridge_disabled);
+    assert_with_error(asset.enabled, Errors.asset_disabled);
+    assert_with_error(params.amount > 0n, Errors.zero_transfer);
 
     const fee = if s.signers contains Tezos.sender
       then get_oracle_fee(
@@ -131,7 +131,7 @@ function unlock_asset(
     var operations := no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[info], err_token_not_supported);
+      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
       const receiver_key = (params.receiver, token_id);
       const receiver_balance = unwrap_or(s.ledger[receiver_key], 0n);
       s.ledger[receiver_key] := receiver_balance + unlocked_amount;

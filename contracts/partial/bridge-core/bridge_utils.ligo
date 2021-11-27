@@ -51,7 +51,7 @@ function transfer_fa2(
     0mutez,
     unwrap(
       (Tezos.get_entrypoint_opt("%transfer", contract_address) : option(contract(fa2_transfer_t))),
-      err_transfer_not_found)
+      Errors.transfer_not_found)
   );
 
 function wrap_transfer(
@@ -67,7 +67,7 @@ function wrap_transfer(
         0mutez,
         unwrap(
           (Tezos.get_entrypoint_opt("%transfer", address_) : option(contract(fa12_transfer_t))),
-          err_transfer_not_found))
+          Errors.transfer_not_found))
     | Fa2(token_) -> transfer_fa2(
         sender_,
         receiver,
@@ -78,7 +78,7 @@ function wrap_transfer(
         unit,
         amount_ * 1mutez,
         (get_contract(receiver) : contract(unit)))
-    | _ -> failwith(err_non_transferable_asset)
+    | _ -> failwith(Errors.non_transferable_asset)
     end;
 
 (* Helper view function to get fee *)
@@ -88,7 +88,7 @@ function get_oracle_fee(
                        : response_fee_t is
   unwrap(
     (Tezos.call_view("calculate_fee", get_fee_param, oracle_address) : option(response_fee_t)),
-    err_oracle_not_found
+    Errors.oracle_not_found
   )
 
 function get_lock_contract(
@@ -98,7 +98,7 @@ function get_lock_contract(
     "%validate_lock",
     validator)        : option(contract(validate_lock_t))) of
   | Some(contr) -> contr
-  | None -> failwith(err_not_validator_lock)
+  | None -> failwith(Errors.not_validator_lock)
   end;
 
 function get_unlock_contract(
@@ -108,7 +108,7 @@ function get_unlock_contract(
     "%validate_unlock",
     validator)        : option(contract(validate_unlock_t))) of
   | Some(contr) -> contr
-  | None -> failwith(err_not_validator_unlock)
+  | None -> failwith(Errors.not_validator_unlock)
   end;
 
 function get_nat_or_fail(
@@ -116,5 +116,5 @@ function get_nat_or_fail(
                         : nat is
   case is_nat(value) of
   | Some(natural) -> natural
-  | None -> (failwith(err_not_nat): nat)
+  | None -> (failwith(Errors.not_nat): nat)
   end;

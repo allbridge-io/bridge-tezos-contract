@@ -5,5 +5,5 @@ function get_fee_per_token(
                         : nat is
   case token_fee_map[token] of
   | Some(fee) -> fee
-  | None -> failwith(err_token_not_exist)
+  | None -> failwith(Errors.token_not_exist)
   end

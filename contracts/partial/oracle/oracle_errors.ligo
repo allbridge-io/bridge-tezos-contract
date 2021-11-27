@@ -1,2 +1,4 @@
-const err_not_owner : string       = "Oracle-fee/not-owner"
-const err_token_not_exist : string = "Oracle-fee/token-doesn't-exist"
+module Errors is {
+  const not_owner : string       = "Oracle-fee/not-owner"
+  const token_not_exist : string = "Oracle-fee/token-doesn't-exist"
+}

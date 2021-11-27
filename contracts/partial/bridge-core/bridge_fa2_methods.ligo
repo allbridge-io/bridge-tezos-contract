@@ -18,13 +18,13 @@ function iterate_transfer (
         const sender_permits = unwrap_or(s.permits[sender_key], empty_permits);
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
-          or Set.mem(Tezos.sender, sender_permits), err_fa2_not_operator);
+          or Set.mem(Tezos.sender, sender_permits), Errors.fa2_not_operator);
 
-        assert_with_error(transfer.amount > 0n, err_zero_transfer);
+        assert_with_error(transfer.amount > 0n, Errors.zero_transfer);
 
-        const sender_balance = unwrap(s.ledger[sender_key], err_fa2_low_balance);
+        const sender_balance = unwrap(s.ledger[sender_key], Errors.fa2_low_balance);
         (* Balance check *)
-        assert_with_error(sender_balance >= transfer.amount, err_fa2_low_balance);
+        assert_with_error(sender_balance >= transfer.amount, Errors.fa2_low_balance);
 
         (* Update sender account *)
         s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount);
@@ -48,7 +48,7 @@ function iterate_update_operators(
     case params of
     | Add_operator(param) -> block {
       (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
+      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
       const account_key = (param.owner, param.token_id);
       const account_permits = unwrap_or(s.permits[account_key], empty_permits);
       (* Add operator *)
@@ -56,7 +56,7 @@ function iterate_update_operators(
     }
     | Remove_operator(param) -> block {
       (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, err_fa2_not_owner);
+      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
       const account_key = (param.owner, param.token_id);
       const account_permits = unwrap_or(s.permits[account_key], empty_permits);
       (* Remove operator *)

@@ -3,7 +3,7 @@ function change_owner(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.owner := new_address;
   } with s
 
@@ -12,7 +12,7 @@ function change_bridge_manager(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.bridge_manager := new_address
   } with s
 
@@ -21,7 +21,7 @@ function change_stop_manager(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.stop_manager := new_address;
   } with s
 
@@ -30,7 +30,7 @@ function change_validator(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.validator := new_address;
   } with s
 
@@ -39,7 +39,7 @@ function change_fee_oracle(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.fee_oracle := new_address;
   } with s
 
@@ -48,7 +48,7 @@ function change_fee_collector(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.fee_collector := new_address;
   } with s
 
@@ -57,7 +57,7 @@ function add_signer(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.signers := Set.add(address_, s.signers)
   } with s
 
@@ -66,7 +66,7 @@ function remove_signer(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.signers := Set.remove(address_, s.signers)
   } with s
 
@@ -75,7 +75,7 @@ function stop_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.stop_manager, err_not_manager);
+    check_permission(s.stop_manager, Errors.not_manager);
     s.enabled := False;
   } with s
 
@@ -84,7 +84,7 @@ function start_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.stop_manager, err_not_manager);
+    check_permission(s.stop_manager, Errors.not_manager);
     s.enabled := True;
   } with s
 
@@ -94,9 +94,9 @@ function stop_asset(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.bridge_manager, err_not_manager);
+    check_permission(s.bridge_manager, Errors.not_manager);
 
-    var asset := unwrap(s.bridge_assets[asset_id], err_asset_not_exist);
+    var asset := unwrap(s.bridge_assets[asset_id], Errors.asset_not_exist);
     asset.enabled := False;
     s.bridge_assets[asset_id] := asset;
   } with s
@@ -107,9 +107,9 @@ function start_asset(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.bridge_manager, err_not_manager);
+    check_permission(s.bridge_manager, Errors.not_manager);
 
-    var asset := unwrap(s.bridge_assets[asset_id], err_asset_not_exist);
+    var asset := unwrap(s.bridge_assets[asset_id], Errors.asset_not_exist);
     asset.enabled := True;
     s.bridge_assets[asset_id] := asset;
   } with s
@@ -120,9 +120,9 @@ function add_asset(
   var s                  : storage_t)
                          : storage_t is
   block {
-    check_permission(s.bridge_manager, err_not_manager);
+    check_permission(s.bridge_manager, Errors.not_manager);
     (* Check bridge status *)
-    assert_with_error(s.enabled, err_bridge_disabled);
+    assert_with_error(s.enabled, Errors.bridge_disabled);
 
     var new_asset := record[
       asset_type = asset_type;
@@ -132,7 +132,7 @@ function add_asset(
     case asset_type of
     | Wrapped (info) -> {
       (* Check if the asset exists *)
-      assert_none(s.wrapped_token_ids[info], err_wrapped_exist);
+      assert_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
 
       s.wrapped_token_infos[s.wrapped_token_count] := info;
       s.wrapped_token_ids[info] := s.wrapped_token_count;
@@ -142,7 +142,7 @@ function add_asset(
     end;
 
     (* Сheck that such an asset has not been added already *)
-    assert_none(s.bridge_asset_ids[asset_type], err_bridge_exist);
+    assert_none(s.bridge_asset_ids[asset_type], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[asset_type] := s.asset_count;

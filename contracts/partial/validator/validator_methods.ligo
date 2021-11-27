@@ -5,12 +5,12 @@ function validate_lock(
                         : storage_t is
   block {
     (* Check sender is bridge-core conract *)
-    check_permission(s.bridge, err_not_bridge);
+    check_permission(s.bridge, Errors.not_bridge);
 
-    assert_with_error(params.destination_chain_id =/= tezos_chain_id, err_wrong_chain_id);
+    assert_with_error(params.destination_chain_id =/= tezos_chain_id, Errors.wrong_chain_id);
 
     (* Check if the lock has been not validated earlier *)
-    assert_none(s.validated_locks[params.lock_id], err_lock_exist);
+    assert_none(s.validated_locks[params.lock_id], Errors.lock_exist);
 
     s.validated_locks[params.lock_id] := params;
   } with s
@@ -22,10 +22,10 @@ function validate_unlock(
                         : storage_t is
   block {
     (* Check sender is bridge-core conract *)
-    check_permission(s.bridge, err_not_bridge);
+    check_permission(s.bridge, Errors.not_bridge);
 
     (* Check if the unlock has been not validated earlier *)
-    assert_none(s.validated_unlocks[params.lock_id], err_unlock_exist);
+    assert_none(s.validated_unlocks[params.lock_id], Errors.unlock_exist);
 
     const kessak_params : bytes = Crypto.keccak(Bytes.pack(
       (record[
@@ -39,7 +39,7 @@ function validate_unlock(
 
     assert_with_error(
       Crypto.check(s.validator_pk, params.signature, kessak_params),
-      err_invalid_signature
+      Errors.invalid_signature
     );
 
     s.validated_unlocks[params.lock_id] := params;

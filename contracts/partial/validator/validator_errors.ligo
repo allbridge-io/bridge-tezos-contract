@@ -1,6 +1,8 @@
-const err_not_owner : string         = "Validator-bridge/not-owner"
-const err_lock_exist : string        = "Validator-bridge/lock-already-exists"
-const err_unlock_exist : string      = "Validator-bridge/unlock-already-exists"
-const err_not_bridge : string        = "Validator-bridge/not-bridge"
-const err_invalid_signature : string = "Validator-bridge/signature-not-validated"
-const err_wrong_chain_id : string    = "Validator-bridge/wrong-destination-chain-id"
+module Errors is {
+  const not_owner : string         = "Validator-bridge/not-owner"
+  const lock_exist : string        = "Validator-bridge/lock-already-exists"
+  const unlock_exist : string      = "Validator-bridge/unlock-already-exists"
+  const not_bridge : string        = "Validator-bridge/not-bridge"
+  const invalid_signature : string = "Validator-bridge/signature-not-validated"
+  const wrong_chain_id : string    = "Validator-bridge/wrong-destination-chain-id"
+}

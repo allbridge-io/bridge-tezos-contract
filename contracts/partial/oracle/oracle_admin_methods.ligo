@@ -4,7 +4,7 @@ function change_owner(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.owner := new_owner;
   } with s
 
@@ -14,7 +14,7 @@ function change_token_fee(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.fee_per_tokens[token] := new_fee
   } with s
 
@@ -23,7 +23,7 @@ function change_base_fee(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.base_fee := new_fee
   } with s
 
@@ -32,6 +32,6 @@ function change_fee_multiper(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.fee_multiper := new_fee
   } with s

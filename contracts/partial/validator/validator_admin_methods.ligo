@@ -3,7 +3,7 @@ function change_owner(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.owner := new_address;
   } with s
 
@@ -12,7 +12,7 @@ function change_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.bridge := new_address;
   } with s
 
@@ -22,6 +22,6 @@ function change_validator_pk(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, err_not_owner);
+    check_permission(s.owner, Errors.not_owner);
     s.validator_pk := new_key;
   } with s
