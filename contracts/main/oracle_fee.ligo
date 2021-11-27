@@ -1,8 +1,9 @@
 #include "../partial/common_types.ligo"
+#include "../partial/common_constants.ligo"
 #include "../partial/oracle/oracle_types.ligo"
 #include "../partial/oracle/oracle_errors.ligo"
-#include "../partial/oracle/oracle_utils.ligo"
-#include "../partial/common_utils.ligo"
+#include "../partial/oracle/oracle_helpers.ligo"
+#include "../partial/common_helpers.ligo"
 #include "../partial/oracle/oracle_admin_methods.ligo"
 #include "../partial/oracle/oracle_methods.ligo"
 
@@ -18,8 +19,8 @@ function main(
   const s               : storage_t)
                         : return_t is
   case action of
-  | Change_owner (params)        -> (no_operations, change_owner(params, s))
-  | Change_token_fee (params)    -> (no_operations, change_token_fee(params.token, params.new_fee, s))
-  | Change_base_fee (params)     -> (no_operations, change_base_fee(params, s))
-  | Change_fee_multiper (params) -> (no_operations, change_fee_multiper(params, s))
+  | Change_owner(params)        -> (Constants.no_operations, change_owner(params, s))
+  | Change_token_fee(params)    -> (Constants.no_operations, change_token_fee(params.token, params.new_fee, s))
+  | Change_base_fee(params)     -> (Constants.no_operations, change_base_fee(params, s))
+  | Change_fee_multiper(params) -> (Constants.no_operations, change_fee_multiper(params, s))
   end

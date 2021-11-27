@@ -3,10 +3,7 @@ function check_permission(
   const address_        : address;
   const error           : string)
                         : unit is
-  case Tezos.sender = address_ of
-  | True -> unit
-  | False -> failwith(error)
-  end
+  assert_with_error(Tezos.sender = address_, error)
 
 function assert_none(
   const param           : option(_a);

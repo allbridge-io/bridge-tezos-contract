@@ -15,7 +15,7 @@ function iterate_transfer (
         var s := result.1;
 
         const sender_key : ledger_key_t = (Tezos.sender, transfer.token_id);
-        const sender_permits = unwrap_or(s.permits[sender_key], empty_permits);
+        const sender_permits = unwrap_or(s.permits[sender_key], Constants.empty_permits);
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
           or Set.mem(Tezos.sender, sender_permits), Errors.fa2_not_operator);
@@ -50,7 +50,7 @@ function iterate_update_operators(
       (* Check an owner *)
       assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
       const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], empty_permits);
+      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
       (* Add operator *)
       s.permits[account_key] := Set.add(param.operator, account_permits);
     }
@@ -58,7 +58,7 @@ function iterate_update_operators(
       (* Check an owner *)
       assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
       const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], empty_permits);
+      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
       (* Remove operator *)
       s.permits[account_key] := Set.remove(param.operator, account_permits);
     }
@@ -114,5 +114,5 @@ function transfer(
                         : return_t is
   block {
     skip
-  } with List.fold(iterate_transfer, params, (no_operations, s));
+  } with List.fold(iterate_transfer, params, (Constants.no_operations, s));
 

@@ -1,6 +1,4 @@
-type token_id_t is nat
-
-const default_token_id : token_id_t = 0n;
+type token_id_t         is nat
 
 type transfer_destination_t is[@layout:comb] record[
     to_       : address;

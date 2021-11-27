@@ -7,7 +7,10 @@ function validate_lock(
     (* Check sender is bridge-core conract *)
     check_permission(s.bridge, Errors.not_bridge);
 
-    assert_with_error(params.destination_chain_id =/= tezos_chain_id, Errors.wrong_chain_id);
+    assert_with_error(
+      params.destination_chain_id =/= Constants.tezos_chain_id,
+      Errors.wrong_chain_id
+    );
 
     (* Check if the lock has been not validated earlier *)
     assert_none(s.validated_locks[params.lock_id], Errors.lock_exist);

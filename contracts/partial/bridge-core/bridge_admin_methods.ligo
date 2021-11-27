@@ -130,7 +130,7 @@ function add_asset(
       enabled = True;
     ];
     case asset_type of
-    | Wrapped (info) -> {
+    | Wrapped(info) -> {
       (* Check if the asset exists *)
       assert_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
 

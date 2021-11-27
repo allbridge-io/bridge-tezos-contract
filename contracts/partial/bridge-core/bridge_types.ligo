@@ -90,6 +90,3 @@ type calculate_fee_t    is [@layout:comb] record[
 ]
 
 type response_fee_t     is nat;
-
-const no_operations : list(operation) = nil;
-const empty_permits : set(address) = set[];

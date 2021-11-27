@@ -45,5 +45,3 @@ type get_keccak_t       is [@layout:comb] record[
   chain_from_id           : bytes;
   asset                   : asset_standard_t;
 ]
-
-const tezos_chain_id : chain_id_t = 0x4e6574586451707263566b70615755;

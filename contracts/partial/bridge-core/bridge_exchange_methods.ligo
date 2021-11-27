@@ -10,7 +10,7 @@ function lock_asset(
     assert_with_error(s.enabled, Errors.bridge_disabled);
 
     var locked_amount := 0n;
-    var operations := no_operations;
+    var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
       const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
@@ -128,7 +128,7 @@ function unlock_asset(
 
     const unlocked_amount = get_nat_or_fail(params.amount - fee);
 
-    var operations := no_operations;
+    var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
       const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);

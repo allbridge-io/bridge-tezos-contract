@@ -1,9 +1,10 @@
 #include "../partial/common_types.ligo"
+#include "../partial/common_constants.ligo"
 #include "../partial/bridge-core/bridge_types.ligo"
 #include "../partial/bridge-core/bridge_fa2_types.ligo"
 #include "../partial/bridge-core/bridge_errors.ligo"
-#include "../partial/common_utils.ligo"
-#include "../partial/bridge-core/bridge_utils.ligo"
+#include "../partial/common_helpers.ligo"
+#include "../partial/bridge-core/bridge_helpers.ligo"
 #include "../partial/bridge-core/bridge_admin_methods.ligo"
 #include "../partial/bridge-core/bridge_exchange_methods.ligo"
 #include "../partial/bridge-core/bridge_fa2_methods.ligo"
@@ -36,26 +37,26 @@ function main(
                         : return_t is
   case action of
   (* Admin methods *)
-  | Change_owner (params)          -> (no_operations, change_owner(params, s))
-  | Change_bridge_manager (params) -> (no_operations, change_bridge_manager(params, s))
-  | Change_stop_manager (params)   -> (no_operations, change_stop_manager(params, s))
-  | Change_validator (params)      -> (no_operations, change_validator(params, s))
-  | Change_fee_oracle (params)     -> (no_operations, change_fee_oracle(params, s))
-  | Change_fee_collector (params)  -> (no_operations, change_fee_collector(params, s))
-  | Add_signer (params)    -> (no_operations, add_signer(params, s))
-  | Remove_signer (params) -> (no_operations, remove_signer(params, s))
-  | Stop_bridge            -> (no_operations, stop_bridge(s))
-  | Start_bridge           -> (no_operations, start_bridge(s))
-  | Stop_asset (params)    -> (no_operations, stop_asset(params, s))
-  | Start_asset (params)   -> (no_operations, start_asset(params, s))
-  | Add_asset (params)     -> (no_operations, add_asset(params, s))
+  | Change_owner(params)          -> (Constants.no_operations, change_owner(params, s))
+  | Change_bridge_manager(params) -> (Constants.no_operations, change_bridge_manager(params, s))
+  | Change_stop_manager(params)   -> (Constants.no_operations, change_stop_manager(params, s))
+  | Change_validator(params)      -> (Constants.no_operations, change_validator(params, s))
+  | Change_fee_oracle(params)     -> (Constants.no_operations, change_fee_oracle(params, s))
+  | Change_fee_collector(params)  -> (Constants.no_operations, change_fee_collector(params, s))
+  | Add_signer(params)    -> (Constants.no_operations, add_signer(params, s))
+  | Remove_signer(params) -> (Constants.no_operations, remove_signer(params, s))
+  | Stop_bridge           -> (Constants.no_operations, stop_bridge(s))
+  | Start_bridge          -> (Constants.no_operations, start_bridge(s))
+  | Stop_asset(params)    -> (Constants.no_operations, stop_asset(params, s))
+  | Start_asset(params)   -> (Constants.no_operations, start_asset(params, s))
+  | Add_asset(params)     -> (Constants.no_operations, add_asset(params, s))
 
   (* Common methods *)
-  | Lock_asset (params)    -> lock_asset(params, s)
-  | Unlock_asset (params)  -> unlock_asset(params, s)
+  | Lock_asset(params)    -> lock_asset(params, s)
+  | Unlock_asset(params)  -> unlock_asset(params, s)
 
   (* Fa2 methods *)
-  | Transfer (params)          -> transfer(s, params)
-  | Update_operators (params)  -> (no_operations, update_operators(s, params))
-  | Balance_of (params)        -> (get_balance_of(s, params), s)
+  | Transfer(params)          -> transfer(s, params)
+  | Update_operators(params)  -> (Constants.no_operations, update_operators(s, params))
+  | Balance_of(params)        -> (get_balance_of(s, params), s)
   end

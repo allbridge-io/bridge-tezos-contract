@@ -12,5 +12,3 @@ type storage_t          is [@layout:comb] record[
 ]
 
 type return_t           is list (operation) * storage_t
-
-const no_operations : list(operation) = nil;
