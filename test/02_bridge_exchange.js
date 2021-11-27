@@ -7,7 +7,7 @@ const Token = require("./helpers/tokenWrapper");
 const { alice, eve, secpSigner } = require("../scripts/sandbox/accounts");
 const toBytes = require("../scripts/toBytesForSign");
 
-describe("BridgeCore Transfer tests", async function () {
+describe("BridgeCore Exchange tests", async function () {
   let bridge;
   let fa12Token;
   let fa2Token;
