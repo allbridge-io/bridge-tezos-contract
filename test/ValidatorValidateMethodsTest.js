@@ -1,4 +1,4 @@
-const { Tezos, signerAlice, signerBob } = require("./utils/cli");
+const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
 const {
   rejects,
   strictEqual,
@@ -7,13 +7,11 @@ const {
 } = require("assert");
 const Validator = require("./helpers/validatorWrapper");
 
-const GetKeccak = require("./helpers/getKeccakWrapper");
-
 const { alice, bob } = require("../scripts/sandbox/accounts");
+const toBytes = require("../scripts/toBytesForSign");
 
 describe("BridgeValidator Validate tests", async function () {
   let validator;
-  let keccak;
 
   const bscChainId = Buffer.from("56", "ascii").toString("hex");
   const tezosChainId = Buffer.from("NetXdQprcVkpaWU", "ascii").toString("hex");
@@ -22,7 +20,6 @@ describe("BridgeValidator Validate tests", async function () {
     Tezos.setSignerProvider(signerAlice);
     try {
       validator = await new Validator().init();
-      keccak = await new GetKeccak().init();
     } catch (e) {
       console.log(e);
     }
@@ -195,7 +192,7 @@ describe("BridgeValidator Validate tests", async function () {
     it("Should validate unlock fa12 asset", async function () {
       Tezos.setSignerProvider(signerAlice);
       const unlockAmount = 10000;
-      const keccakBytes = await keccak.getKeccak({
+      const keccakBytes = toBytes({
         lockId: 0,
         recipient: alice.pkh,
         amount: unlockAmount,
@@ -205,7 +202,7 @@ describe("BridgeValidator Validate tests", async function () {
         tokenAddress: tokenAddress,
       });
 
-      const signature = await signerAlice.sign(keccakBytes);
+      const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
         0,
         alice.pkh,
@@ -221,7 +218,7 @@ describe("BridgeValidator Validate tests", async function () {
     });
     it("Should validate unlock fa2 asset", async function () {
       const unlockAmount = 10000;
-      const keccakBytes = await keccak.getKeccak({
+      const keccakBytes = await toBytes({
         lockId: 1,
         recipient: alice.pkh,
         amount: unlockAmount,
@@ -232,7 +229,7 @@ describe("BridgeValidator Validate tests", async function () {
         tokenId: 0,
       });
 
-      const signature = await signerAlice.sign(keccakBytes);
+      const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
         1,
         alice.pkh,
@@ -249,7 +246,7 @@ describe("BridgeValidator Validate tests", async function () {
     });
     it("Should validate unlock tez asset", async function () {
       const unlockAmount = 10000;
-      const keccakBytes = await keccak.getKeccak({
+      const keccakBytes = await toBytes({
         lockId: 2,
         recipient: alice.pkh,
         amount: unlockAmount,
@@ -257,7 +254,7 @@ describe("BridgeValidator Validate tests", async function () {
         assetType: "tez",
       });
 
-      const signature = await signerAlice.sign(keccakBytes);
+      const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
         2,
         alice.pkh,
@@ -272,7 +269,7 @@ describe("BridgeValidator Validate tests", async function () {
     });
     it("Should validate unlock wrapped asset", async function () {
       const unlockAmount = 10000;
-      const keccakBytes = await keccak.getKeccak({
+      const keccakBytes = await toBytes({
         lockId: 3,
         recipient: alice.pkh,
         amount: unlockAmount,
@@ -282,7 +279,7 @@ describe("BridgeValidator Validate tests", async function () {
         tokenAddress: Buffer.from(tokenAddress, "ascii").toString("hex"),
       });
 
-      const signature = await signerAlice.sign(keccakBytes);
+      const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
         3,
         alice.pkh,
@@ -298,7 +295,7 @@ describe("BridgeValidator Validate tests", async function () {
       notStrictEqual(newUnlock, undefined);
     });
     it("Shouldn't validate if unlock is validated", async function () {
-      const signature = await signerAlice.sign(
+      const signature = await signerSecp.sign(
         Buffer.from("dasdsa", "ascii").toString("hex"),
       );
       await rejects(

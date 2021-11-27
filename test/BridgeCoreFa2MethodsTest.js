@@ -1,10 +1,10 @@
-const { Tezos, signerAlice, alice, bob } = require("./utils/cli");
+const { Tezos, signerAlice, alice, bob, signerSecp } = require("./utils/cli");
 
 const { rejects, strictEqual } = require("assert");
 
 const Bridge = require("./helpers/bridgeWrapper");
-const GetKeccak = require("./helpers/getKeccakWrapper");
 const { migrate } = require("../scripts/helpers");
+const toBytes = require("../scripts/toBytesForSign");
 
 const transferAmount = 1000;
 describe("Bridge FA2 methods test", async function () {
@@ -22,8 +22,7 @@ describe("Bridge FA2 methods test", async function () {
       };
 
       await bridge.addAsset(wrappedAsset);
-      const keccak = await new GetKeccak().init();
-      const keccakBytes = await keccak.getKeccak({
+      const keccakBytes = await toBytes({
         lockId: 0,
         recipient: alice.pkh,
         amount: transferAmount,
@@ -32,7 +31,7 @@ describe("Bridge FA2 methods test", async function () {
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
       });
-      const signature = await signerAlice.sign(keccakBytes);
+      const signature = await signerSecp.sign(keccakBytes);
 
       await bridge.unlockAsset(
         bscChainId,

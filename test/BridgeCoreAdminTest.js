@@ -1,4 +1,4 @@
-const { Tezos, signerAlice, signerBob } = require("./utils/cli");
+const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
 const {
   rejects,
   strictEqual,
@@ -8,7 +8,7 @@ const {
 const BridgeCore = require("./helpers/bridgeWrapper");
 const Token = require("./helpers/tokenWrapper");
 
-const { alice, bob } = require("../scripts/sandbox/accounts");
+const { alice, bob, secpSigner } = require("../scripts/sandbox/accounts");
 
 describe("BridgeCore Admin tests", async function () {
   let bridge;
@@ -135,7 +135,7 @@ describe("BridgeCore Admin tests", async function () {
 
       await bridge.updateSigners("add_signer", bob.pkh);
       await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.signers, [bob.pkh]);
+      deepStrictEqual(bridge.storage.signers, [bob.pkh, secpSigner.pkh]);
     });
   });
   describe("Testing entrypoint: Remove_signer", async function () {
@@ -150,7 +150,7 @@ describe("BridgeCore Admin tests", async function () {
       Tezos.setSignerProvider(signerBob);
       await bridge.updateSigners("remove_signer", bob.pkh);
       await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.signers, []);
+      deepStrictEqual(bridge.storage.signers, [secpSigner.pkh]);
     });
   });
   describe("Testing entrypoint: Add_asset", async function () {

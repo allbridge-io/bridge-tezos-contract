@@ -1,13 +1,11 @@
 const { Tezos, signerAlice, signerBob } = require("./utils/cli");
 const { rejects, strictEqual } = require("assert");
 const Validator = require("./helpers/validatorWrapper");
-const Token = require("./helpers/tokenWrapper");
 
-const { alice, bob } = require("../scripts/sandbox/accounts");
+const { bob } = require("../scripts/sandbox/accounts");
 
 describe("Validator Admin tests", async function () {
   let validator;
-  const bscChainId = Buffer.from("56", "ascii").toString("hex");
 
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
