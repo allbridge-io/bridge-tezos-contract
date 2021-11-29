@@ -27,7 +27,7 @@ type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
 type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
 
-type signer_set_t       is set(address);
+type claimer_set_t      is set(address);
 
 type balance_map_t      is map(token_id_t, nat);
 
@@ -46,7 +46,7 @@ type storage_t          is [@layout:comb] record[
   bridge_manager          : address;
   stop_manager            : address;
   validator               : address;
-  signers                 : signer_set_t;
+  approved_claimers       : claimer_set_t;
   fee_oracle              : address;
   fee_collector           : address;
   asset_count             : nat;

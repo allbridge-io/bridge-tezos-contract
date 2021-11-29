@@ -5,7 +5,7 @@ module.exports = {
   bridge_manager: null,
   stop_manager: null,
   validator: null,
-  signers: [],
+  approved_claimers: [],
   fee_oracle: null,
   fee_collector: null,
   asset_count: 0,

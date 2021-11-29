@@ -122,35 +122,38 @@ describe("BridgeCore Admin tests", async function () {
       strictEqual(bridge.storage.fee_collector, bob.pkh);
     });
   });
-  describe("Testing entrypoint: Add_signer", async function () {
-    it("Shouldn't add signer if the user is not an owner", async function () {
+  describe("Testing entrypoint: Add_claimer", async function () {
+    it("Shouldn't add approved claimer if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.updateSigners("add_signer", bob.pkh), err => {
+      await rejects(bridge.updateClaimers("add_claimer", bob.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
     });
-    it("Should allow add signers to signers", async function () {
+    it("Should allow add claimer to approved claimers", async function () {
       Tezos.setSignerProvider(signerBob);
 
-      await bridge.updateSigners("add_signer", bob.pkh);
+      await bridge.updateClaimers("add_claimer", bob.pkh);
       await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.signers, [bob.pkh, secpSigner.pkh]);
+      deepStrictEqual(bridge.storage.approved_claimers, [
+        bob.pkh,
+        secpSigner.pkh,
+      ]);
     });
   });
-  describe("Testing entrypoint: Remove_signer", async function () {
-    it("Shouldn't remove signer if the user is not an owner", async function () {
+  describe("Testing entrypoint: Remove_claimer", async function () {
+    it("Shouldn't remove claimer if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.updateSigners("add_signer", bob.pkh), err => {
+      await rejects(bridge.updateClaimers("add_claimer", bob.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
     });
-    it("Should allow remove signer from signers", async function () {
+    it("Should allow remove claimer  from approved claimers", async function () {
       Tezos.setSignerProvider(signerBob);
-      await bridge.updateSigners("remove_signer", bob.pkh);
+      await bridge.updateClaimers("remove_claimer", bob.pkh);
       await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.signers, [secpSigner.pkh]);
+      deepStrictEqual(bridge.storage.approved_claimers, [secpSigner.pkh]);
     });
   });
   describe("Testing entrypoint: Add_asset", async function () {

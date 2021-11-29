@@ -7,7 +7,7 @@ module.exports = {
   bridge_manager: alice.pkh,
   stop_manager: alice.pkh,
   validator: null,
-  signers: [secpSigner.pkh],
+  approved_claimers: [secpSigner.pkh],
   fee_oracle: null,
   fee_collector: bob.pkh,
   asset_count: 0,

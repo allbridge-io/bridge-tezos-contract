@@ -19,7 +19,7 @@ module.exports = async tezos => {
   bridgeStorage.validator = validatorAddress;
   bridgeStorage.fee_oracle = oracleAddress;
   bridgeStorage.fee_collector = env.FEE_COLLECTOR;
-  bridgeStorage.signers = [env.SIGNER];
+  bridgeStorage.approved_claimers = [];
 
   const bridgeAddress = await migrate(tezos, "bridge_core", bridgeStorage);
 

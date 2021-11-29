@@ -52,22 +52,22 @@ function change_fee_collector(
     s.fee_collector := new_address;
   } with s
 
-function add_signer(
+function add_claimer(
   const address_        : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.signers := Set.add(address_, s.signers)
+    s.approved_claimers := Set.add(address_, s.approved_claimers)
   } with s
 
-function remove_signer(
+function remove_claimer(
   const address_        : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.signers := Set.remove(address_, s.signers)
+    s.approved_claimers := Set.remove(address_, s.approved_claimers)
   } with s
 
 (* Stop bridge protocol entrypoint *)

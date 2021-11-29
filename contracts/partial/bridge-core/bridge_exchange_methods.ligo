@@ -114,7 +114,7 @@ function unlock_asset(
     assert_with_error(asset.enabled, Errors.asset_disabled);
     assert_with_error(params.amount > 0n, Errors.zero_transfer);
 
-    const fee = if s.signers contains Tezos.sender
+    const fee = if s.approved_claimers contains Tezos.sender
       then get_oracle_fee(
           record[
             amount = params.amount;
