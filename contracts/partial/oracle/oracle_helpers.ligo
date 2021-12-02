@@ -1,9 +1,18 @@
-(* Helper function to get fee per token *)
-function get_fee_per_token(
-  const token           : asset_standard_t;
-  const token_fee_map   : token_fee_map_t)
-                        : nat is
-  case token_fee_map[token] of
-  | Some(fee) -> fee
-  | None -> failwith(Errors.token_not_exist)
-  end
+(* Helper view function to get abrTotalSupply *)
+function get_abr_supply(
+  const stake_address  : address)
+                       : r_abr_supply_t is
+  unwrap(
+    (Tezos.call_view("get_abr_supply", unit, stake_address) : option(r_abr_supply_t)),
+    Errors.get_supply_not_found
+  )
+
+(* Helper view function to get abr account balance *)
+function get_abr_balance(
+  const requested_addr : address;
+  const stake_address  : address)
+                       : r_abr_balance_t is
+  unwrap(
+    (Tezos.call_view("get_abr_supply", requested_addr, stake_address) : option(r_abr_balance_t)),
+    Errors.get_balance_not_found
+  )
