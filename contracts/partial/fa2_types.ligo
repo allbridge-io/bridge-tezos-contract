@@ -43,3 +43,12 @@ type update_operator_param_t is
   | Remove_operator     of operator_param_t
 
 type update_operator_params_t is list(update_operator_param_t)
+
+type fa2_transfer_param_t is [@layout:comb] record [
+    from_                   : address;
+    txs                     : list(transfer_destination_t);
+  ]
+
+type fa2_transfer_t     is list(fa2_transfer_param_t)
+
+type fa12_transfer_t    is michelson_pair(address, "from", michelson_pair(address, "to", nat, "value"), "")

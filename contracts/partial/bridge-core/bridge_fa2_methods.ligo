@@ -27,7 +27,7 @@ function iterate_transfer (
         assert_with_error(sender_balance >= transfer.amount, Errors.fa2_low_balance);
 
         (* Update sender account *)
-        s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount);
+        s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount, Errors.not_nat);
 
         (* Create or get destination account *)
         const destination_key = (transfer.to_, transfer.token_id);
