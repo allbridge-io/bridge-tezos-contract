@@ -7,12 +7,13 @@ function update_reward(
       if Tezos.now > element.start_period
       then {
         const time = if element.start_period > s.last_update_time
-        then Tezos.now - element.start_period
+        then if Tezos.now >= element.end_period
+          then element.end_period - element.start_period
+          else Tezos.now - element.start_period
         else Tezos.now - s.last_update_time;
 
         const reward_f = abs(element.abr_per_sec_f * time);
         s.total_underlying_f := s.total_underlying_f + reward_f;
-        s.exchange_rate_f := s.total_underlying_f / s.total_supply;
 
         if Tezos.now >= element.end_period
         then {

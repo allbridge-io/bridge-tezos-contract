@@ -14,27 +14,34 @@ function add_reward(
   block {
     check_permission(s.owner, Errors.not_owner);
 
+    assert_with_error(params.end_period <= params.start_period, Errors.wrong_period_time);
+    assert_with_error(params.amount < 0n, Errors.zero_period_reward);
+
     for element in set s.periods
     block {
-      if params.start_period < element.end_period
-      then failwith(Errors.intersected_period)
-      else skip;
-
-      if params.end_period <= params.start_period
-      then failwith(Errors.wrong_period_time)
-      else skip;
-
-      if params.amount < 0n
-      then failwith(Errors.zero_period_reward)
-      else skip;
+      assert_with_error(
+        (params.start_period <= element.end_period and params.start_period > element.start_period)
+        or (params.start_period <= element.end_period and params.end_period >= element.start_period),
+        Errors.intersected_period
+      );
     };
     const period_time = params.end_period - params.start_period;
     const reward_per_sec_f = abs(params.amount * Constants.precision / period_time);
 
     const new_period = record[
-      abr_per_sec_f = reward_per_sec_f;
       start_period = params.start_period;
-      end_period = params.end_period
+      end_period = params.end_period;
+      abr_per_sec_f = reward_per_sec_f
     ];
     s.periods := Set.add(new_period, s.periods);
-  } with ((nil: list(operation)), s)
+
+    const operations = list[
+      transfer_fa2(
+        Tezos.sender,
+        Tezos.self_address,
+        params.amount,
+        Constants.default_token_id,
+        s.deposit_token
+      )
+    ];
+  } with (operations, s)

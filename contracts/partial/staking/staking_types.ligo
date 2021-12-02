@@ -1,7 +1,7 @@
 type reward_period_t    is [@layout:comb] record[
-  abr_per_sec_f           : nat;
   start_period            : timestamp;
   end_period              : timestamp;
+  abr_per_sec_f           : nat;
 ]
 
 type ledger_t           is big_map(address, nat)
