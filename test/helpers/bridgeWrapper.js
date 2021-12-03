@@ -2,11 +2,12 @@ const { Tezos, signerAlice, alice } = require("../utils/cli");
 
 const { migrate } = require("../../scripts/helpers");
 const { confirmOperation } = require("../../scripts/confirmation");
-const { Tzip16Module, tzip16 } = require("@taquito/tzip16");
+const { tzip16 } = require("@taquito/tzip16");
 const bridgeStorage = require("../storage/bridgeCore");
 
-const feeOracle = require("./feeOracleWrapper");
-const validator = require("./validatorWrapper");
+const FeeOracle = require("./feeOracleWrapper");
+const Validator = require("./validatorWrapper");
+const Staking = require("./stakingWrapper");
 
 module.exports = class BridgeCore {
   address;
@@ -14,11 +15,13 @@ module.exports = class BridgeCore {
   storage;
   feeOracle;
   validator;
+  staking;
 
   constructor() {}
   async init() {
-    this.feeOracle = await new feeOracle().init();
-    this.validator = await new validator().init();
+    this.staking = await new Staking().init();
+    this.feeOracle = await new FeeOracle().init(this.staking.address);
+    this.validator = await new Validator().init();
     bridgeStorage.fee_oracle = this.feeOracle.address;
     bridgeStorage.validator = this.validator.address;
     const deployedContract = await migrate(Tezos, "bridge_core", bridgeStorage);

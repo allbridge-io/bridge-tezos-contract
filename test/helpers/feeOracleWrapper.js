@@ -11,7 +11,8 @@ module.exports = class Validator {
   storage;
 
   constructor() {}
-  async init() {
+  async init(stakingAddress) {
+    oracleStorage.staking_address = stakingAddress;
     const deployedContract = await migrate(Tezos, "oracle_fee", oracleStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
@@ -28,6 +29,12 @@ module.exports = class Validator {
 
   async сhangeOwner(newOwner) {
     const operation = await this.contract.methods.change_owner(newOwner).send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async сhangeStaking(newAddress) {
+    const operation = await this.contract.methods
+      .change_staking(newAddress)
+      .send();
     await confirmOperation(Tezos, operation.hash);
   }
   async сhangeFee(feeType, value) {
