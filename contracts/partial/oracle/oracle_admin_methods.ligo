@@ -8,6 +8,15 @@ function change_owner(
     s.owner := new_owner;
   } with s
 
+function change_staking(
+  const new_address     : address;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, Errors.not_owner);
+    s.staking_address := new_address;
+  } with s
+
 function change_token_fee(
   const token           : asset_standard_t;
   const new_fee         : nat;

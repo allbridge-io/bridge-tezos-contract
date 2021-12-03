@@ -7,6 +7,15 @@ function change_owner(
     s.owner := new_address;
   } with s
 
+function change_deposit_token(
+  const new_token       : token_t;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.owner, Errors.not_owner);
+    s.deposit_token := new_token;
+  } with s
+
 function add_reward(
   const params          : new_period_t;
   var s                 : storage_t)
@@ -40,8 +49,8 @@ function add_reward(
         Tezos.sender,
         Tezos.self_address,
         params.amount,
-        Constants.default_token_id,
-        s.deposit_token
+        s.deposit_token.id,
+        s.deposit_token.address
       )
     ];
   } with (operations, s)

@@ -11,7 +11,7 @@ type period_set_t       is set(reward_period_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
-  deposit_token           : address;
+  deposit_token           : token_t;
   ledger                  : ledger_t;
   permits                 : permits_t;
   periods                 : period_set_t;

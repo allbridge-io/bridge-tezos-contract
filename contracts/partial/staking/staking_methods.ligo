@@ -26,8 +26,8 @@ function deposit(
         Tezos.sender,
         Tezos.self_address,
         amount_,
-        Constants.default_token_id,
-        s.deposit_token
+        s.deposit_token.id,
+        s.deposit_token.address
       )
     ];
 
@@ -57,8 +57,8 @@ function withdraw(
         Tezos.self_address,
         Tezos.sender,
         out,
-        Constants.default_token_id,
-        s.deposit_token
+        s.deposit_token.id,
+        s.deposit_token.address
       )
     ];
   } with (operations, s)

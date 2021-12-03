@@ -12,6 +12,7 @@
 
 type parameter_t        is
   | Change_owner          of address
+  | Change_deposit_token  of token_t
   | Add_reward            of new_period_t
   | Deposit               of nat
   | Withdraw              of nat
@@ -25,10 +26,11 @@ function main(
   const s               : storage_t)
                         : return_t is
   case action of
-  | Change_owner(params) -> (Constants.no_operations, change_owner(params, s))
-  | Add_reward(params)   -> add_reward(params, s)
-  | Deposit(params)      -> deposit(params, s)
-  | Withdraw(params)     -> withdraw(params, s)
+  | Change_owner(params)         -> (Constants.no_operations, change_owner(params, s))
+  | Change_deposit_token(params) -> (Constants.no_operations, change_deposit_token(params, s))
+  | Add_reward(params)           -> add_reward(params, s)
+  | Deposit(params)              -> deposit(params, s)
+  | Withdraw(params)             -> withdraw(params, s)
 
   (* Fa2 methods *)
   | Transfer(params)          -> transfer(s, params)
