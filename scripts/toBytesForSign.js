@@ -1,10 +1,4 @@
-const {
-  Parser,
-  packDataBytes,
-  MichelsonData,
-  MichelsonType,
-} = require("@taquito/michel-codec");
-const createKeccakHash = require("keccak");
+const { Parser, packDataBytes } = require("@taquito/michel-codec");
 const keccak256 = require("keccak256");
 function paramToBytes(params) {
   const parser = new Parser();
@@ -17,14 +11,28 @@ function paramToBytes(params) {
                                (or (unit %tez_) (pair %wrapped_ (bytes %chain_id) (bytes %native_token_address))))))))`;
   let data;
   switch (params.assetType) {
-    case "fa12_":
+    case "fa12":
       data = `(Pair ${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
-      (Right (Right (Pair "${params.tokenAddress}""))))`;
+      (Left (Left "${params.tokenAddress}")))`;
       break;
-    case "wrapped_":
+    case "fa2":
+      data = `(Pair ${params.lockId}
+      "${params.recipient}"
+      ${params.amount}
+      0x${params.chainFromId}
+      (Left (Right (Pair "${params.tokenAddress}" ${params.tokenId}))))`;
+      break;
+    case "tez":
+      data = `(Pair ${params.lockId}
+      "${params.recipient}"
+      ${params.amount}
+      0x${params.chainFromId}
+      (Right (Left Unit)))`;
+      break;
+    case "wrapped":
       data = `(Pair ${params.lockId}
       "${params.recipient}"
       ${params.amount}
@@ -36,8 +44,8 @@ function paramToBytes(params) {
   const typeJSON = parser.parseMichelineExpression(type);
 
   const packed = packDataBytes(dataJSON, typeJSON);
-  // console.log(createKeccakHash("keccak256").update(packed.bytes).digest("hex"));
-  return packed;
+  const hashBytes = keccak256(Buffer.from(packed.bytes, "hex")).toString("hex");
+  return hashBytes;
 }
 
 module.exports = paramToBytes;

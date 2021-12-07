@@ -1,10 +1,7 @@
 const { MichelsonMap } = require("@taquito/michelson-encoder");
 
-const { alice } = require("../utils/cli");
-
 module.exports = {
-  owner: alice.pkh,
-  staking_address: alice.pkh,
+  owner: null,
   fee_per_tokens: MichelsonMap.fromLiteral({}),
   base_fee: 1000,
   fee_multiper: 1000,
