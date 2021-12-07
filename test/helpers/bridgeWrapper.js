@@ -18,8 +18,8 @@ module.exports = class BridgeCore {
   staking;
 
   constructor() {}
-  async init() {
-    this.staking = await new Staking().init();
+  async init(params = false) {
+    this.staking = await new Staking().init(params);
     this.feeOracle = await new FeeOracle().init(this.staking.address);
     this.validator = await new Validator().init();
     bridgeStorage.fee_oracle = this.feeOracle.address;
@@ -30,6 +30,7 @@ module.exports = class BridgeCore {
     this.storage = await this.updateStorage();
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
+    await this.staking.сhangeDepositToken(this.address, 0);
 
     return this;
   }
@@ -47,7 +48,7 @@ module.exports = class BridgeCore {
 
   async updateClaimers(typeOperation, address) {
     const operation = await this.contract.methods[typeOperation](
-      address,
+      address
     ).send();
     await confirmOperation(Tezos, operation.hash);
   }
@@ -147,64 +148,5 @@ module.exports = class BridgeCore {
       ])
       .send();
     await confirmOperation(Tezos, operation.hash);
-  }
-  async getKeccak(params) {
-    let operation;
-
-    switch (params.assetType) {
-      case "fa12":
-        operation = await this.contract.views
-          .get_keccak(
-            params.lockId,
-            params.recipient,
-            params.amount,
-            params.chainFromId,
-            "fa12",
-            params.tokenAddress,
-          )
-          .read();
-        break;
-      case "fa2":
-        operation = await this.contract.views
-          .get_keccak(
-            params.lockId,
-            params.recipient,
-            params.amount,
-            params.chainFromId,
-            "fa2",
-            params.tokenAddress,
-            params.tokenId,
-          )
-          .read();
-        break;
-      case "tez":
-        operation = await this.contract.views
-          .get_keccak(
-            params.lockId,
-            params.recipient,
-            params.amount,
-            params.chainFromId,
-            "tez",
-            null,
-          )
-          .read();
-        break;
-      case "wrapped":
-        operation = await this.contract.views
-          .get_keccak(
-            params.lockId,
-            params.recipient,
-            params.amount,
-            params.chainFromId,
-            "wrapped",
-            params.chainId,
-            params.tokenAddress,
-          )
-          .read();
-        break;
-    }
-    await confirmOperation(Tezos, operation.hash);
-    await this.updateStorage();
-    return this.storage.kessak_bytes;
   }
 };

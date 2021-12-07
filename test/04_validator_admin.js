@@ -19,7 +19,7 @@ describe("Validator Admin tests", async function () {
   describe("Testing entrypoint: Change_owner", async function () {
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(validator.сhangeAddress("change_owner", bob.pkh), err => {
+      await rejects(validator.сhangeAddress("change_owner", bob.pkh), (err) => {
         strictEqual(err.message, "Validator-bridge/not-owner");
         return true;
       });
@@ -35,7 +35,7 @@ describe("Validator Admin tests", async function () {
   describe("Testing entrypoint: Change_bridge", async function () {
     it("Shouldn't changing bridge if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(validator.сhangeAddress("change_owner", bob.pkh), err => {
+      await rejects(validator.сhangeAddress("change_owner", bob.pkh), (err) => {
         strictEqual(err.message, "Validator-bridge/not-owner");
         return true;
       });
@@ -51,7 +51,7 @@ describe("Validator Admin tests", async function () {
   describe("Testing entrypoint: Change_validator_pk", async function () {
     it("Shouldn't changing validator pk if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(validator.сhangeValidatorPK(bob.pk), err => {
+      await rejects(validator.сhangeValidatorPK(bob.pk), (err) => {
         strictEqual(err.message, "Validator-bridge/not-owner");
         return true;
       });

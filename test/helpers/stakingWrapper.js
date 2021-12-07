@@ -11,10 +11,20 @@ module.exports = class Staking {
   storage;
 
   constructor() {}
-  async init() {
+  async init(params = false) {
+    if (params) {
+      stakingStorage.periods = [
+        {
+          start_period: params.startPeriod,
+          end_period: params.endPeriod,
+          abr_per_sec_f: params.abrPerSec,
+        },
+      ];
+    }
     const deployedContract = await migrate(Tezos, "staking", stakingStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
+
     this.storage = await this.updateStorage();
 
     return this;
@@ -77,5 +87,15 @@ module.exports = class Staking {
       ])
       .send();
     await confirmOperation(Tezos, operation.hash);
+  }
+  async getBalance(address) {
+    await this.updateStorage();
+    const balance = await this.storage.ledger.get(address);
+
+    try {
+      return balance.toNumber();
+    } catch (e) {
+      return 0;
+    }
   }
 };

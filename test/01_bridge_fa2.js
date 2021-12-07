@@ -39,7 +39,7 @@ describe("Bridge FA2 methods test", async function () {
         0,
         transferAmount,
         alice.pkh,
-        signature.sig,
+        signature.sig
       );
     } catch (e) {
       console.log(e);
@@ -53,21 +53,21 @@ describe("Bridge FA2 methods test", async function () {
         await rejects(
           bridge.transfer(bob.pkh, alice.pkh, 1000),
 
-          err => {
+          (err) => {
             strictEqual(err.message, "FA2_NOT_OPERATOR");
             return true;
-          },
+          }
         );
       });
       it("Shouldn't Transfer with insufficient balance", async function () {
-        await rejects(bridge.transfer(alice.pkh, bob.pkh, 10000), err => {
+        await rejects(bridge.transfer(alice.pkh, bob.pkh, 10000), (err) => {
           strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
           return true;
         });
       });
       it("Shouldn't Transfer with 0", async function () {
         Tezos.setSignerProvider(signerAlice);
-        await rejects(bridge.transfer(alice.pkh, bob.pkh, 0), err => {
+        await rejects(bridge.transfer(alice.pkh, bob.pkh, 0), (err) => {
           strictEqual(err.message, "Bridge-core/zero-transfer");
           return true;
         });
@@ -94,19 +94,19 @@ describe("Bridge FA2 methods test", async function () {
       it("Shouldn't Add_operator if the user is not an owner", async function () {
         await rejects(
           bridge.updateOperator("add_operator", bob.pkh, alice.pkh, 0),
-          err => {
+          (err) => {
             strictEqual(err.message, "FA2_NOT_OWNER");
             return true;
-          },
+          }
         );
       });
       it("Shouldn't Remove_operator if the user is not an owner", async function () {
         await rejects(
           bridge.updateOperator("remove_operator", bob.pkh, alice.pkh, 0),
-          err => {
+          (err) => {
             strictEqual(err.message, "FA2_NOT_OWNER");
             return true;
-          },
+          }
         );
       });
     });

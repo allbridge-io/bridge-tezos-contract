@@ -46,7 +46,7 @@ module.exports = class Validator {
             operation = await this.contract.methods[feeType](
               "fa12",
               value.tokenAddress,
-              value.fee,
+              value.fee
             ).send();
             break;
           case "fa2":
@@ -54,20 +54,22 @@ module.exports = class Validator {
               "fa2",
               value.tokenAddress,
               value.tokenId,
-              value.fee,
+              value.fee
             ).send();
             break;
           case "tez":
             operation = await this.contract.methods[feeType](
               "tez",
               null,
-              value.fee,
+              value.fee
             ).send();
             break;
           case "wrapped":
             operation = await this.contract.methods[feeType](
-              value.tokenId,
-              value.fee,
+              "wrapped",
+              value.chainId,
+              value.tokenAddress,
+              value.fee
             ).send();
             break;
         }

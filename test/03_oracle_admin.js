@@ -10,7 +10,7 @@ describe("FeeOracle Admin tests", async function () {
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     try {
-      oracle = await new FeeOracle().init();
+      oracle = await new FeeOracle().init(alice.pkh);
     } catch (e) {
       console.log(e);
     }
@@ -19,7 +19,7 @@ describe("FeeOracle Admin tests", async function () {
   describe("Testing entrypoint: Change_owner", async function () {
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(oracle.сhangeOwner(bob.pkh), err => {
+      await rejects(oracle.сhangeOwner(bob.pkh), (err) => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });
@@ -41,10 +41,10 @@ describe("FeeOracle Admin tests", async function () {
           tokenAddress: alice.pkh,
           fee: 1000,
         }),
-        err => {
+        (err) => {
           strictEqual(err.message, "Oracle-fee/not-owner");
           return true;
-        },
+        }
       );
     });
     it("Should allow change token fee", async function () {
@@ -64,7 +64,7 @@ describe("FeeOracle Admin tests", async function () {
   describe("Testing entrypoint: Change_base_fee", async function () {
     it("Shouldn't changing base fee if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(oracle.сhangeFee("change_base_fee", 1000), err => {
+      await rejects(oracle.сhangeFee("change_base_fee", 1000), (err) => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });
@@ -80,7 +80,7 @@ describe("FeeOracle Admin tests", async function () {
   describe("Testing entrypoint: Change_fee_multiper", async function () {
     it("Shouldn't changing fee multiper if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(oracle.сhangeFee("change_fee_multiper", 1000), err => {
+      await rejects(oracle.сhangeFee("change_fee_multiper", 1000), (err) => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });

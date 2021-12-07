@@ -10,7 +10,6 @@ module.exports = {
   periods: [],
   total_supply: 0,
   total_underlying_f: 0,
-  exchange_rate_f: 0,
   last_update_time: "2021-01-01T00:00:00Z",
 
   // metadata: MichelsonMap.fromLiteral({
