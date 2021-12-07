@@ -28,19 +28,19 @@ function change_token_fee(
   } with s
 
 function change_base_fee(
-  const new_fee         : nat;
+  const new_fee_f       : nat;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.base_fee := new_fee
+    s.base_fee_f := new_fee_f
   } with s
 
 function change_fee_multiper(
-  const new_fee         : nat;
+  const new_fee_f       : nat;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.fee_multiper := new_fee
+    s.fee_multiper_f := new_fee_f
   } with s
