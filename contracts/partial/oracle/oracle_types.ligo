@@ -15,12 +15,6 @@ type change_token_fee_t is [@layout:comb] record[
   new_fee                 : nat;
 ]
 
-type calculate_fee_t    is [@layout:comb] record[
-  amount                  : nat;
-  token                   : asset_standard_t;
-  account                 : address;
-]
-
 type response_fee_t     is nat;
 
 (* R means response *)

@@ -13,6 +13,6 @@ function get_abr_balance(
   const staking_addr   : address)
                        : r_abr_balance_t is
   unwrap(
-    (Tezos.call_view("get_abr_supply", requested_addr, staking_addr) : option(r_abr_balance_t)),
+    (Tezos.call_view("get_abr_balance", requested_addr, staking_addr) : option(r_abr_balance_t)),
     Errors.get_balance_not_found
   )

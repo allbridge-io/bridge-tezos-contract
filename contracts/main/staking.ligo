@@ -9,6 +9,7 @@
 #include "../partial/staking/staking_admin_methods.ligo"
 #include "../partial/staking/staking_methods.ligo"
 #include "../partial/staking/staking_fa2_methods.ligo"
+#include "../partial/staking/staking_views.ligo"
 
 type parameter_t        is
   | Change_owner          of address

@@ -1,6 +1,6 @@
 type token_id_t         is nat
 
-type transfer_destination_t is[@layout:comb] record[
+type transfer_destination_t is [@layout:comb] record[
     to_       : address;
     token_id  : nat;
     amount    : nat;
@@ -13,26 +13,22 @@ type transfer_param_t   is [@layout:comb] record [
 
 type transfer_params_t  is list(transfer_param_t)
 
-type balance_of_request_t is [@layout:comb]
-  record [
+type balance_of_request_t is [@layout:comb] record [
     owner       : address;
     token_id    : token_id_t;
   ]
 
-type balance_of_response_t is [@layout:comb]
-  record [
+type balance_of_response_t is [@layout:comb] record [
     request     : balance_of_request_t;
     balance     : nat;
   ]
 
-type balance_params_t   is [@layout:comb]
-  record [
+type balance_params_t   is [@layout:comb] record [
     requests    : list (balance_of_request_t);
     callback    : contract (list (balance_of_response_t));
   ]
 
-type operator_param_t   is [@layout:comb]
-  record [
+type operator_param_t   is [@layout:comb] record[
     owner     : address;
     operator  : address;
     token_id  : token_id_t;

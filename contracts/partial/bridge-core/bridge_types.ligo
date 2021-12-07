@@ -82,11 +82,4 @@ type unlock_asset_t     is [@layout:comb] record[
   signature               : signature;
 ]
 
-type calculate_fee_t    is [@layout:comb] record[
-  amount                  : nat;
-  token                   : asset_standard_t;
-  abr_balance             : nat;
-  abr_total_supply        : nat;
-]
-
 type response_fee_t     is nat;

@@ -14,7 +14,7 @@ function iterate_transfer (
         var operations := result.0;
         var s := result.1;
 
-        const sender_key : ledger_key_t = (Tezos.sender, transfer.token_id);
+        const sender_key : ledger_key_t = (trx_params.from_, transfer.token_id);
         const sender_permits = unwrap_or(s.permits[sender_key], Constants.empty_permits);
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender

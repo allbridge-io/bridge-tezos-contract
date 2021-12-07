@@ -45,3 +45,9 @@ type get_keccak_t       is [@layout:comb] record[
   chain_from_id           : bytes;
   asset                   : asset_standard_t;
 ]
+
+type calculate_fee_t    is [@layout:comb] record[
+  amount                  : nat;
+  token                   : asset_standard_t;
+  account                 : address;
+]

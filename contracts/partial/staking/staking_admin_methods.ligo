@@ -29,8 +29,8 @@ function add_reward(
     for element in set s.periods
     block {
       assert_with_error(
-        (params.start_period <= element.end_period and params.start_period > element.start_period)
-        or (params.start_period <= element.end_period and params.end_period >= element.start_period),
+        (params.start_period > element.end_period and params.start_period > element.start_period)
+        or (params.start_period < element.end_period and params.end_period < element.start_period),
         Errors.intersected_period
       );
     };

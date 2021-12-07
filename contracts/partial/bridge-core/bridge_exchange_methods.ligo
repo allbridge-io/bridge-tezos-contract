@@ -28,8 +28,7 @@ function lock_asset(
         record[
           amount = params.amount;
           token = asset.asset_type;
-          abr_balance = 1n;//abr_balance;
-          abr_total_supply = 1n//abt_total_supply
+          account = Tezos.sender
         ],
         s.fee_oracle);
       locked_amount := get_nat_or_fail(params.amount - fee, Errors.not_nat);
@@ -43,8 +42,7 @@ function lock_asset(
         record[
           amount = tez_amount;
           token = asset.asset_type;
-          abr_balance = 1n;//abr_balance;
-          abr_total_supply = 1n//abt_total_supply
+          account = Tezos.sender
         ],
         s.fee_oracle);
       locked_amount := get_nat_or_fail(tez_amount - fee, Errors.not_nat);
@@ -62,8 +60,7 @@ function lock_asset(
         record[
           amount = params.amount;
           token = asset.asset_type;
-          abr_balance = 1n;//abr_balance;
-          abr_total_supply = 1n//abt_total_supply
+          account = Tezos.sender;
         ],
         s.fee_oracle);
       locked_amount := get_nat_or_fail(params.amount - fee, Errors.not_nat);
@@ -119,8 +116,7 @@ function unlock_asset(
           record[
             amount = params.amount;
             token = asset.asset_type;
-            abr_balance = 1n;//abr_balance;
-            abr_total_supply = 1n//abt_total_supply
+            account = Tezos.sender;
           ],
           s.fee_oracle
         )

@@ -5,6 +5,7 @@
 #include "../partial/oracle/oracle_types.ligo"
 #include "../partial/oracle/oracle_helpers.ligo"
 #include "../partial/oracle/oracle_admin_methods.ligo"
+#include "../partial/oracle/oracle_views.ligo"
 
 type parameter_t        is
   | Change_owner          of address
