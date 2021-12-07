@@ -9,7 +9,6 @@
 #include "../partial/bridge-core/bridge_admin_methods.ligo"
 #include "../partial/bridge-core/bridge_exchange_methods.ligo"
 #include "../partial/bridge-core/bridge_fa2_methods.ligo"
-#include "../partial/bridge-core/bridge_views.ligo"
 
 type parameter_t        is
   | Change_owner          of address

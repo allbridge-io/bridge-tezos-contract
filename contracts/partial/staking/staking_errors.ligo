@@ -14,5 +14,4 @@ module Errors is {
   const fa2_low_balance        : string = "FA2_INSUFFICIENT_BALANCE";
   const fa2_not_owner          : string = "FA2_NOT_OWNER";
   const transfer_not_found     : string = "Bridge-core/not-transfer-contract"
-
 }

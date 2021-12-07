@@ -9,7 +9,7 @@
     const user_shares_bp = abr_balance * s.fee_multiper * Constants.bp / abr_supply;
     const basic_fee = params.amount * Constants.bp / (user_shares_bp + Constants.bp * Constants.bp / s.base_fee);
     const fee = if fee_per_token > basic_fee
-    then fee_per_token
-    else basic_fee;
+      then fee_per_token
+      else basic_fee;
 
   } with fee

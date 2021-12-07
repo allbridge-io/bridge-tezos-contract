@@ -57,10 +57,10 @@ function withdraw(
     s.ledger[Tezos.sender] := get_nat_or_fail(account_balance - shares, Errors.not_nat);
 
     operations := transfer_fa2(
-        Tezos.self_address,
-        Tezos.sender,
-        out,
-        s.deposit_token.id,
-        s.deposit_token.address
-      ) # operations;
+      Tezos.self_address,
+      Tezos.sender,
+      out,
+      s.deposit_token.id,
+      s.deposit_token.address
+    ) # operations;
   } with (operations, s)
