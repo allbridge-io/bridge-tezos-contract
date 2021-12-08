@@ -1,11 +1,10 @@
 const { migrate } = require("../scripts/helpers");
-const { confirmOperation } = require("../scripts/confirmation");
 const envJs = require("../env");
 const network = envJs.network;
 const env = process.env;
 const bridgeStorage = require("../storage/bridgeCore");
 
-module.exports = async tezos => {
+module.exports = async (tezos) => {
   const sender = await tezos.signer.publicKeyHash();
   const validatorAddress = require("../builds/validator.json").networks[
     network
@@ -22,12 +21,6 @@ module.exports = async tezos => {
   bridgeStorage.approved_claimers = [];
 
   const bridgeAddress = await migrate(tezos, "bridge_core", bridgeStorage);
-
-  const validatorContract = await tezos.contract.at(validatorAddress);
-  const operation = await validatorContract.methods
-    .change_bridge(bridgeAddress)
-    .send();
-  await confirmOperation(tezos, operation.hash);
 
   console.log(`Bridge-core address: ${bridgeAddress}`);
 };
