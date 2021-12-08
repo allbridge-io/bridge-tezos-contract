@@ -62,6 +62,10 @@ describe("BridgeCore Exchange tests", async function () {
         assetType: "wrapped",
         chainId: bscChainId,
         tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
+        symbol: Buffer.from("wABR").toString("hex"),
+        name: Buffer.from("Wrapped ABR").toString("hex"),
+        decimals: Buffer.from("6").toString("hex"),
+        icon: Buffer.from("").toString("hex"),
       };
 
       await bridge.addAsset(fa12Asset);

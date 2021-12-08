@@ -233,7 +233,18 @@ describe("BridgeCore Admin tests", async function () {
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       const prevWrappedCount = bridge.storage.wrapped_token_count.toNumber();
-      await bridge.addAsset(newAsset);
+
+      const newAssetParam = {
+        assetType: "wrapped",
+        chainId: bscChainId,
+        tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
+
+        symbol: Buffer.from("wABR").toString("hex"),
+        name: Buffer.from("Wrapped ABR").toString("hex"),
+        decimals: Buffer.from("6").toString("hex"),
+        icon: Buffer.from("").toString("hex"),
+      };
+      await bridge.addAsset(newAssetParam);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
       const addedWrapped = await bridge.storage.wrapped_token_infos.get(

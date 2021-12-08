@@ -79,20 +79,30 @@ module.exports = class BridgeCore {
     switch (assetType) {
       case "fa12":
         operation = await this.contract.methods
-          .add_asset("fa12", params.tokenAddress)
+          .add_asset("fa12", params.tokenAddress, null)
           .send();
         break;
       case "fa2":
         operation = await this.contract.methods
-          .add_asset("fa2", params.tokenAddress, params.tokenId)
+          .add_asset("fa2", params.tokenAddress, params.tokenId, null)
           .send();
         break;
       case "tez":
-        operation = await this.contract.methods.add_asset("tez", null).send();
+        operation = await this.contract.methods
+          .add_asset("tez", null, null)
+          .send();
         break;
       case "wrapped":
         operation = await this.contract.methods
-          .add_asset("wrapped", params.chainId, params.tokenAddress)
+          .add_asset(
+            "wrapped",
+            params.chainId,
+            params.tokenAddress,
+            params.symbol,
+            params.name,
+            params.decimals,
+            params.icon
+          )
           .send();
         break;
     }
