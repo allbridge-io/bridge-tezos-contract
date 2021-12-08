@@ -10,10 +10,7 @@ function deposit(
 
     const new_shares = if s.total_supply = 0n
     then amount_
-    else block {
-      const exchange_rate_f = s.total_underlying_f / s.total_supply;
-      const shares = amount_ * Constants.precision / exchange_rate_f;
-    } with shares;
+    else amount_ * Constants.precision * s.total_supply / s.total_underlying_f;
 
     s := s with record[
       total_supply = s.total_supply + new_shares;
@@ -43,12 +40,11 @@ function withdraw(
     const updated_reward = update_reward(s);
     var operations := updated_reward.0;
     s := updated_reward.1;
-    const exchange_rate_f = s.total_underlying_f / s.total_supply;
 
     const account_balance = unwrap_or(s.ledger[Tezos.sender], 0n);
     assert_with_error(account_balance >= shares, Errors.insufficient_balance);
 
-    const out = shares * exchange_rate_f / Constants.precision;
+    const out = shares * s.total_underlying_f / (s.total_supply * Constants.precision);
     s := s with record[
       total_underlying_f = get_nat_or_fail(s.total_underlying_f - (out * Constants.precision), Errors.not_nat);
       total_supply = get_nat_or_fail(s.total_supply - shares, Errors.not_nat);
