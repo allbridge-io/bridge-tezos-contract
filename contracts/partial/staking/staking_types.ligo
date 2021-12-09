@@ -18,6 +18,8 @@ type storage_t          is [@layout:comb] record[
   total_supply            : nat;
   total_underlying_f      : nat;
   last_update_time        : timestamp;
+  metadata                : big_map(string, bytes);
+  token_metadata          : big_map(token_id_t, token_metadata_t)
 ]
 
 type return_t           is list (operation) * storage_t

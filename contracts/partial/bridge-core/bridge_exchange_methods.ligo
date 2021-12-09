@@ -113,12 +113,12 @@ function unlock_asset(
 
     const fee = if s.approved_claimers contains Tezos.sender
       then get_oracle_fee(
-          record[
-            amount = params.amount;
-            token = asset.asset_type;
-            account = Tezos.sender;
+        record[
+          amount = params.amount;
+          token = asset.asset_type;
+          account = Tezos.sender;
           ],
-          s.fee_oracle
+        s.fee_oracle
         )
       else 0n;
 

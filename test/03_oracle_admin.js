@@ -74,7 +74,7 @@ describe("FeeOracle Admin tests", async function () {
       await oracle.сhangeFee("change_base_fee", 1000);
       await oracle.updateStorage();
 
-      strictEqual(oracle.storage.base_fee.toNumber(), 1000);
+      strictEqual(oracle.storage.base_fee_f.toNumber(), 1000);
     });
   });
   describe("Testing entrypoint: Change_fee_multiper", async function () {
@@ -91,7 +91,7 @@ describe("FeeOracle Admin tests", async function () {
       await oracle.сhangeFee("change_fee_multiper", 1000);
       await oracle.updateStorage();
 
-      strictEqual(oracle.storage.fee_multiper.toNumber(), 1000);
+      strictEqual(oracle.storage.fee_multiper_f.toNumber(), 1000);
     });
   });
 });

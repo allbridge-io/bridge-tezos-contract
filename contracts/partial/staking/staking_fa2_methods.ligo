@@ -78,9 +78,9 @@ function get_balance_of(
 
         (* Form the response *)
         var response : balance_of_response_t := record [
-            request = request;
-            balance = balance_;
-          ];
+          request = request;
+          balance = balance_;
+        ];
       } with response # l;
 
     (* Collect balances info *)
@@ -89,11 +89,12 @@ function get_balance_of(
         look_up_balance,
         balance_params.requests,
         (nil: list(balance_of_response_t)));
-  } with list [Tezos.transaction(
-    accumulated_response,
-    0tz,
-    balance_params.callback
-  )]
+  } with list [
+    Tezos.transaction(
+      accumulated_response,
+      0tz,
+      balance_params.callback
+    )]
 
 function update_operators(
   const s               : storage_t;

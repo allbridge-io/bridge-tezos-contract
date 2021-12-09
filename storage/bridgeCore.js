@@ -139,7 +139,8 @@ module.exports = {
         ],
         errors: [],
       }),
-      "ascii",
+      "ascii"
     ).toString("hex"),
   }),
+  token_metadata: MichelsonMap.fromLiteral({}),
 };

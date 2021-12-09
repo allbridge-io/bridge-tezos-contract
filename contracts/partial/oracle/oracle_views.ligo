@@ -6,10 +6,16 @@
     const fee_per_token = unwrap(s.fee_per_tokens[params.token], Errors.token_not_exist);
     const abr_balance = get_abr_balance(params.account, s.staking_address);
     const abr_supply = get_abr_supply(s.staking_address);
-    const user_shares_bp = abr_balance * s.fee_multiper * Constants.bp / abr_supply;
-    const basic_fee = params.amount * Constants.bp / (user_shares_bp + Constants.bp * Constants.bp / s.base_fee);
-    const fee = if fee_per_token > basic_fee
-    then fee_per_token
-    else basic_fee;
+    const fee = if abr_supply = 0n
+        or abr_balance = 0n
+        or params.amount = 0n
+        or s.base_fee_f = 0n
+      then fee_per_token
+      else block {
+        const user_shares_fee_accuracy = abr_balance * s.fee_multiper_f * Constants.fee_accuracy / abr_supply;
+        const basic_fee = params.amount * Constants.fee_accuracy / (user_shares_fee_accuracy + Constants.fee_accuracy * Constants.fee_accuracy / s.base_fee_f);
+      } with if fee_per_token > basic_fee
+        then fee_per_token
+        else basic_fee;
 
   } with fee

@@ -5,6 +5,7 @@
 #include "../partial/common_helpers.ligo"
 #include "../partial/validator/validator_admin_methods.ligo"
 #include "../partial/validator/validator_methods.ligo"
+#include "../partial/validator/validator_views.ligo"
 
 type parameter_t        is
   | Change_owner          of address

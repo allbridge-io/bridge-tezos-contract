@@ -51,3 +51,8 @@ type calculate_fee_t    is [@layout:comb] record[
   token                   : asset_standard_t;
   account                 : address;
 ]
+
+type token_metadata_t   is [@layout:comb] record [
+  token_id      : token_id_t;
+  token_info    : map (string, bytes);
+]

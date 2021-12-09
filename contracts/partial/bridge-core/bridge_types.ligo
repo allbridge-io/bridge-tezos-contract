@@ -59,11 +59,22 @@ type storage_t          is [@layout:comb] record[
   permits                 : permits_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
+  token_metadata          : big_map(token_id_t, token_metadata_t)
 ]
 
 type return_t           is list (operation) * storage_t
 
-type new_asset_t        is asset_standard_t;
+type token_metadata_params_t is [@layout:comb] record[
+  symbol                       : bytes;
+  name                         : bytes;
+  decimals                     : bytes;
+  icon                         : bytes;
+]
+
+type new_asset_t        is [@layout:comb] record[
+  asset_type              : asset_standard_t;
+  metadata                : option(token_metadata_params_t)
+]
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;

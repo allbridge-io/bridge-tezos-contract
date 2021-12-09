@@ -13,7 +13,7 @@ function get_lock_contract(
                         : contract(validate_lock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_lock",
-    validator)        : option(contract(validate_lock_t))) of
+    validator)          : option(contract(validate_lock_t))) of
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_lock)
   end;
@@ -23,7 +23,7 @@ function get_unlock_contract(
                         : contract(validate_unlock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_unlock",
-    validator)        : option(contract(validate_unlock_t))) of
+    validator)          : option(contract(validate_unlock_t))) of
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_unlock)
   end;

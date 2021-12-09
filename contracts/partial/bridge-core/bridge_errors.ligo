@@ -14,6 +14,7 @@ module Errors is {
   const account_not_exist      : string = "Bridge-core/account-doesn't-exist"
   const insufficient_balance   : string = "Bridge-core/insufficient-balance"
   const zero_balance           : string = "Bridge-core/zero-balance"
+  const not_metadata           : string = "Bridge-core/not-metadata"
   (* Get contract entrypoint errors *)
   const transfer_not_found     : string = "Bridge-core/not-transfer-contract"
   const oracle_not_found       : string = "Bridge-core/oracle-fee-404"

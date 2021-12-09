@@ -30,13 +30,13 @@
     };
 
     const operations = if burnt_reward > 0n
-    then list[
-      transfer_fa2(
-        Tezos.self_address,
-        Constants.zero_address,
-        burnt_reward,
-        s.deposit_token.id,
-        s.deposit_token.address
-    )]
-    else (nil: list(operation));
+      then list[
+        transfer_fa2(
+          Tezos.self_address,
+          Constants.zero_address,
+          burnt_reward,
+          s.deposit_token.id,
+          s.deposit_token.address
+      )]
+      else (nil: list(operation));
   } with (operations, s)
