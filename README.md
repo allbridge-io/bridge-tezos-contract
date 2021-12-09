@@ -22,36 +22,30 @@ So, the bridge is the main gateway for user to interact with the protocol.
 
 ```
 yarn install
-
 ```
 
 # Compile contract
 
 ```
 yarn compile
-
 ```
 
 # Quick Start tests
 
 ```
 yarn start-sandbox
-
 ```
 
 ```
 yarn test
-
 ```
 
 ```
 yarn stop-sandbox
-
 ```
 
 # Deploy contract
 
 ```
 yarn migrate
-
 ```
