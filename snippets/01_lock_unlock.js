@@ -10,7 +10,7 @@ Tezos.setSignerProvider(signer);
 
 const contractAddress = "KT";
 
-module.exports.locAsset = async function (
+module.exports.lockAsset = async function (
   chainId,
   lockId,
   assetId,

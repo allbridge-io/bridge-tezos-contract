@@ -14,7 +14,7 @@ module.exports.getStakedAmount = async function (accountAddress) {
   try {
     const stakingContract = await Tezos.contract.at(contractAddress);
     const storage = await stakingContract.storage();
-    const balance = await storage.get(accountAddress);
+    const balance = await storage.ledger.get(accountAddress);
     return balance.toNumber();
   } catch (err) {
     console.log(err);
