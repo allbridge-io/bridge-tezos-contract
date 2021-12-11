@@ -9,9 +9,8 @@ const signer = new InMemorySigner(secretKey);
 Tezos.setSignerProvider(signer);
 
 const contractAddress = "KT";
-const contract = await Tezos.contract.at(contractAddress);
 
-async function lockAsset(
+module.exports.locAsset = async function (
   chainId,
   lockId,
   assetId,
@@ -19,14 +18,19 @@ async function lockAsset(
   receiver,
   tezAmount = 0,
 ) {
-  const operation = await contract.methods
-    .lock_asset(chainId, lockId, assetId, amount, receiver)
-    .send({ amount: tezAmount });
+  try {
+    const contract = await Tezos.contract.at(contractAddress);
+    const operation = await contract.methods
+      .lock_asset(chainId, lockId, assetId, amount, receiver)
+      .send({ amount: tezAmount });
 
-  await confirmOperation(Tezos, operation.hash);
-}
+    await confirmOperation(Tezos, operation.hash);
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-async function unlockAsset(
+module.exports.unlockAsset = async function (
   chainId,
   lockId,
   assetId,
@@ -34,8 +38,13 @@ async function unlockAsset(
   receiver,
   signature,
 ) {
-  const operation = await contract.methods
-    .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
-    .send();
-  await confirmOperation(Tezos, operation.hash);
-}
+  try {
+    const contract = await Tezos.contract.at(contractAddress);
+    const operation = await contract.methods
+      .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .send();
+    await confirmOperation(Tezos, operation.hash);
+  } catch (err) {
+    console.log(err);
+  }
+};

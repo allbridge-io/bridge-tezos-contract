@@ -9,21 +9,35 @@ const signer = new InMemorySigner(secretKey);
 Tezos.setSignerProvider(signer);
 
 const contractAddress = "KT";
-const stakingContract = await Tezos.contract.at(contractAddress);
 
-async function getStakedAmount(accountAddress) {
-  const storage = await stakingContract.storage();
-  const balance = await storage.get(accountAddress);
-  return balance.toNumber();
-}
+module.exports.getStakedAmount = async function (accountAddress) {
+  try {
+    const stakingContract = await Tezos.contract.at(contractAddress);
+    const storage = await stakingContract.storage();
+    const balance = await storage.get(accountAddress);
+    return balance.toNumber();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-async function getTotalSupply() {
-  const storage = await stakingContract.storage();
-  const totalSupply = storage.total_supply;
-  return totalSupply.toNumber();
-}
+module.exports.getTotalSupply = async function () {
+  try {
+    const stakingContract = await Tezos.contract.at(contractAddress);
+    const storage = await stakingContract.storage();
+    const totalSupply = storage.total_supply;
+    return totalSupply.toNumber();
+  } catch (err) {
+    console.log(err);
+  }
+};
 
-async function getPeriods() {
-  const storage = await stakingContract.storage();
-  return storage.periods;
-}
+module.exports.getPeriods = async function () {
+  try {
+    const stakingContract = await Tezos.contract.at(contractAddress);
+    const storage = await stakingContract.storage();
+    return storage.periods;
+  } catch (err) {
+    console.log(err);
+  }
+};
