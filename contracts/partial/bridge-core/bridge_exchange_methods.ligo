@@ -6,15 +6,15 @@ function lock_asset(
   block {
     var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
 
-    assert_with_error(asset.enabled, Errors.asset_disabled);
-    assert_with_error(s.enabled, Errors.bridge_disabled);
+    require(asset.enabled, Errors.asset_disabled);
+    require(s.enabled, Errors.bridge_disabled);
 
     const lock_amount = case asset.asset_type of
     | Tez -> Tezos.amount / 1mutez
     | _ -> params.amount
     end;
 
-    assert_with_error(lock_amount > 0n, Errors.zero_transfer);
+    require(lock_amount > 0n, Errors.zero_transfer);
 
     const fee = get_oracle_fee(
       record[
@@ -94,8 +94,8 @@ function unlock_asset(
   block {
     var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
 
-    assert_with_error(s.enabled, Errors.bridge_disabled);
-    assert_with_error(asset.enabled, Errors.asset_disabled);
+    require(s.enabled, Errors.bridge_disabled);
+    require(asset.enabled, Errors.asset_disabled);
 
     const fee = if s.approved_claimers contains Tezos.sender
       then get_oracle_fee(

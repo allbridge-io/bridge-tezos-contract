@@ -1,11 +1,16 @@
-(* Helper to check permissions *)
+function require(
+  const param           : bool;
+  const error           : string)
+                        : unit is
+  assert_with_error(param, error)
+
 function check_permission(
   const address_        : address;
   const error           : string)
                         : unit is
-  assert_with_error(Tezos.sender = address_, error)
+  require(Tezos.sender = address_, error)
 
-function assert_none(
+function require_none(
   const param           : option(_a);
   const error           : string)
                         : unit is

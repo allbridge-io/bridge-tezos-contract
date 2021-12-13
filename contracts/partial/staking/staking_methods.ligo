@@ -3,7 +3,7 @@ function deposit(
   var s                 : storage_t)
                         : return_t is
   block {
-    assert_with_error(amount_ > 0n, Errors.zero_deposit);
+    require(amount_ > 0n, Errors.zero_deposit);
     const updated_reward = update_reward(s);
     var operations := updated_reward.0;
     s := updated_reward.1;
@@ -42,7 +42,7 @@ function withdraw(
     s := updated_reward.1;
 
     const account_balance = unwrap_or(s.ledger[Tezos.sender], 0n);
-    assert_with_error(account_balance >= shares, Errors.insufficient_balance);
+    require(account_balance >= shares, Errors.insufficient_balance);
 
     const out = shares * s.total_underlying_f / (s.total_supply * Constants.precision);
     s := s with record[

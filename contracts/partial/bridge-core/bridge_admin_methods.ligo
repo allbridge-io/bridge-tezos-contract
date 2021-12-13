@@ -122,7 +122,7 @@ function add_asset(
   block {
     check_permission(s.bridge_manager, Errors.not_manager);
     (* Check bridge status *)
-    assert_with_error(s.enabled, Errors.bridge_disabled);
+    require(s.enabled, Errors.bridge_disabled);
 
     var new_asset := record[
       asset_type = params.asset_type;
@@ -132,7 +132,7 @@ function add_asset(
     case params.asset_type of
     | Wrapped(info) -> {
       (* Check if the asset exists *)
-      assert_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
+      require_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
 
       s.wrapped_token_infos[s.wrapped_token_count] := info;
       s.wrapped_token_ids[info] := s.wrapped_token_count;
@@ -152,7 +152,7 @@ function add_asset(
     end;
 
     (* Сheck that such an asset has not been added already *)
-    assert_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
+    require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[params.asset_type] := s.asset_count;

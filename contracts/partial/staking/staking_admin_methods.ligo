@@ -23,12 +23,12 @@ function add_reward(
   block {
     check_permission(s.owner, Errors.not_owner);
 
-    assert_with_error(params.end_period > params.start_period, Errors.wrong_period_time);
-    assert_with_error(params.amount > 0n, Errors.zero_period_reward);
+    require(params.end_period > params.start_period, Errors.wrong_period_time);
+    require(params.amount > 0n, Errors.zero_period_reward);
 
     for element in set s.periods
     block {
-      assert_with_error(
+      require(
         (params.start_period > element.end_period and params.start_period > element.start_period)
           or (params.start_period < element.end_period and params.end_period < element.start_period),
         Errors.intersected_period
