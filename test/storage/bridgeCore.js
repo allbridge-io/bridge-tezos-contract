@@ -17,7 +17,7 @@ module.exports = {
   wrapped_token_infos: MichelsonMap.fromLiteral({}),
   wrapped_token_ids: MichelsonMap.fromLiteral({}),
   ledger: MichelsonMap.fromLiteral({}),
-  permits: MichelsonMap.fromLiteral({}),
+  allowances: MichelsonMap.fromLiteral({}),
   enabled: true,
   metadata: MichelsonMap.fromLiteral({
     "": Buffer.from("tezos-storage:meta", "ascii").toString("hex"),

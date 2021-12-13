@@ -15,7 +15,7 @@ function dtFormat(days, minus = false) {
   return dt.toISOString();
 }
 function sleep(sec) {
-  return new Promise((resolve) => setTimeout(resolve, sec * 1000));
+  return new Promise(resolve => setTimeout(resolve, sec * 1000));
 }
 
 describe("Staking tests", async function () {
@@ -93,7 +93,7 @@ describe("Staking tests", async function () {
       0,
       10000,
       staking.address,
-      signature.sig
+      signature.sig,
     );
     await bridge.updateOperator("add_operator", bob.pkh, staking.address, 0);
   });
@@ -101,7 +101,7 @@ describe("Staking tests", async function () {
   describe("Testing entrypoint: Deposit", async function () {
     it("Shouldn't deposit with 0 tokens", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(staking.deposit(0), (err) => {
+      await rejects(staking.deposit(0), err => {
         strictEqual(err.message, "Bridge-staking/zero-deposit");
         return true;
       });
@@ -112,17 +112,15 @@ describe("Staking tests", async function () {
       const aliceBalance = await staking.getBalance(alice.pkh);
       const burnBalance = await bridge.getBalance(
         "tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg",
-        0
+        0,
       );
       strictEqual(aliceBalance, 10000);
       strictEqual(
         staking.storage.total_underlying_f.toNumber(),
-        10000 * accuracy
+        10000 * accuracy,
       );
       strictEqual(staking.storage.total_supply.toNumber(), 10000);
       strictEqual(burnBalance, Math.floor((abrPerSec / accuracy) * 10 * 86400));
-
-      //await sleep(10);
     });
     it("Should allow deposit 10000 bob", async function () {
       await staking.addReward(dtFormat(0.1, true), dtFormat(1), 50000);
@@ -134,27 +132,27 @@ describe("Staking tests", async function () {
       await staking.updateStorage();
       const exchangeRate = Math.floor(
         staking.storage.total_underlying_f.toNumber() /
-          staking.storage.total_supply.toNumber()
+          staking.storage.total_supply.toNumber(),
       );
       const shares = Math.floor((10000 * 10 ** 6) / exchangeRate);
 
       strictEqual(
         staking.storage.total_underlying_f.toNumber() >
           prevTotalUnderlying + 10000 * accuracy,
-        true
+        true,
       );
       strictEqual(
         staking.storage.total_supply.toNumber(),
-        prevTotalSupply + shares
+        prevTotalSupply + shares,
       );
     });
   });
-  describe("Testing entrypoinL: Withdraw", async function () {
+  describe("Testing entrypoint: Withdraw", async function () {
     it("Shouldn't withdraw 0 tokens", async function () {
       Tezos.setSignerProvider(signerAlice);
 
-      await rejects(staking.withdraw(0), (err) => {
-        strictEqual(err.message, "Bridge-core/zero-transfer");
+      await rejects(staking.withdraw(0), err => {
+        strictEqual(err.message, "Bridge-staking/zero-withdraw");
         return true;
       });
     });
@@ -173,7 +171,7 @@ describe("Staking tests", async function () {
       strictEqual(aliceBalance, 0);
       strictEqual(
         staking.storage.total_supply.toNumber(),
-        prevTotalSupply - withdrawAmount
+        prevTotalSupply - withdrawAmount,
       );
     });
     it("Should withdraw 9993 shares Bob", async function () {
@@ -192,7 +190,7 @@ describe("Staking tests", async function () {
       strictEqual(bobBalance, 0);
       strictEqual(
         staking.storage.total_supply.toNumber(),
-        prevTotalSupply - withdrawAmount
+        prevTotalSupply - withdrawAmount,
       );
     });
   });
