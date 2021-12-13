@@ -69,13 +69,6 @@ describe("Bridge FA2 methods test", async function () {
           return true;
         });
       });
-      it("Shouldn't Transfer with 0", async function () {
-        Tezos.setSignerProvider(signerAlice);
-        await rejects(bridge.transfer(alice.pkh, bob.pkh, 0), (err) => {
-          strictEqual(err.message, "Bridge-core/zero-transfer");
-          return true;
-        });
-      });
     });
     // Scenario 2
     describe("Scenario 2: Should cases Transfer", async function () {

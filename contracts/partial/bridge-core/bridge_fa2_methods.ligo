@@ -17,8 +17,6 @@ function iterate_transfer (
         assert_with_error(trx_params.from_ = Tezos.sender
           or Set.mem(Tezos.sender, sender_permits), Errors.fa2_not_operator);
 
-        assert_with_error(transfer.amount > 0n, Errors.zero_transfer);
-
         const sender_balance = unwrap(s.ledger[sender_key], Errors.fa2_low_balance);
 
         (* Update sender account *)
