@@ -14,13 +14,15 @@ function lock_asset(
     | _ -> params.amount
     end;
 
+    assert_with_error(lock_amount > 0n, Errors.zero_transfer);
+
     const fee = get_oracle_fee(
-        record[
-          amount = lock_amount;
-          token = asset.asset_type;
-          account = Tezos.sender
-        ],
-        s.fee_oracle);
+      record[
+        amount = lock_amount;
+        token = asset.asset_type;
+        account = Tezos.sender
+      ],
+      s.fee_oracle);
 
     const locked_amount = get_nat_or_fail(params.amount - fee, Errors.not_nat);
 
@@ -94,7 +96,6 @@ function unlock_asset(
 
     assert_with_error(s.enabled, Errors.bridge_disabled);
     assert_with_error(asset.enabled, Errors.asset_disabled);
-    assert_with_error(params.amount > 0n, Errors.zero_transfer);
 
     const fee = if s.approved_claimers contains Tezos.sender
       then get_oracle_fee(
