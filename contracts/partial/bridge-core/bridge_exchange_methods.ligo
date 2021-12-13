@@ -17,9 +17,7 @@ function lock_asset(
       const sender_key : ledger_key_t = (Tezos.sender, token_id);
       const account_balance = unwrap(s.ledger[sender_key], Errors.zero_balance);
 
-      assert_with_error(params.amount <= account_balance, Errors.insufficient_balance);
-
-      s.ledger[sender_key] := get_nat_or_fail(account_balance - params.amount, Errors.not_nat);
+      s.ledger[sender_key] := get_nat_or_fail(account_balance - params.amount, Errors.insufficient_balance);
 
       const collector_key = (s.fee_collector, token_id);
       const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
