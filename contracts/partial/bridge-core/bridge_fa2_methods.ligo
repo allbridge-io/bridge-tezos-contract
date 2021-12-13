@@ -91,15 +91,10 @@ function update_operators(
   const s               : storage_t;
   const params          : update_operator_params_t)
                         : storage_t is
-  block {
-    skip
-  } with List.fold(iterate_update_operators, params, s)
+  List.fold(iterate_update_operators, params, s)
 
 function transfer(
   const s               : storage_t;
   const params          : transfer_params_t)
                         : storage_t is
-  block {
-    skip
-  } with List.fold(iterate_transfer, params, s);
-
+  List.fold(iterate_transfer, params, s)
