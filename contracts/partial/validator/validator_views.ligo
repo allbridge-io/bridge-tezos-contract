@@ -3,7 +3,7 @@
   const s               : storage_t)
                         : bool is
   block {
-     const kessak_params : bytes = Crypto.keccak(Bytes.pack(
+     const keccak_params : bytes = Crypto.keccak(Bytes.pack(
       (record[
         lock_id       = params.lock_id;
         recipient     = params.recipient;
@@ -13,4 +13,4 @@
       ] : get_keccak_t)
     ));
 
-  } with Crypto.check(s.validator_pk, params.signature, kessak_params)
+  } with Crypto.check(s.validator_pk, params.signature, keccak_params)
