@@ -9,7 +9,21 @@ function lock_asset(
     assert_with_error(asset.enabled, Errors.asset_disabled);
     assert_with_error(s.enabled, Errors.bridge_disabled);
 
-    var locked_amount := 0n;
+    const lock_amount = case asset.asset_type of
+    | Tez -> Tezos.amount / 1mutez
+    | _ -> params.amount
+    end;
+
+    const fee = get_oracle_fee(
+        record[
+          amount = lock_amount;
+          token = asset.asset_type;
+          account = Tezos.sender
+        ],
+        s.fee_oracle);
+
+    const locked_amount = get_nat_or_fail(params.amount - fee, Errors.not_nat);
+
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
@@ -17,34 +31,16 @@ function lock_asset(
       const sender_key : ledger_key_t = (Tezos.sender, token_id);
       const account_balance = unwrap(s.ledger[sender_key], Errors.zero_balance);
 
-      s.ledger[sender_key] := get_nat_or_fail(account_balance - params.amount, Errors.insufficient_balance);
+      s.ledger[sender_key] := get_nat_or_fail(account_balance - lock_amount, Errors.insufficient_balance);
 
       const collector_key = (s.fee_collector, token_id);
       const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
 
-      const fee = get_oracle_fee(
-        record[
-          amount = params.amount;
-          token = asset.asset_type;
-          account = Tezos.sender
-        ],
-        s.fee_oracle);
-      locked_amount := get_nat_or_fail(params.amount - fee, Errors.not_nat);
       s.ledger[collector_key ] := collector_balance + fee;
 
       asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount, Errors.not_nat);
      }
     | Tez -> {
-      const tez_amount = Tezos.amount / 1mutez;
-      const fee = get_oracle_fee(
-        record[
-          amount = tez_amount;
-          token = asset.asset_type;
-          account = Tezos.sender
-        ],
-        s.fee_oracle);
-      locked_amount := get_nat_or_fail(tez_amount - fee, Errors.not_nat);
-
       operations := wrap_transfer(
         Tezos.self_address,
         s.fee_collector,
@@ -54,15 +50,6 @@ function lock_asset(
       asset.locked_amount := asset.locked_amount + locked_amount;
     }
     | _ -> {
-      const fee = get_oracle_fee(
-        record[
-          amount = params.amount;
-          token = asset.asset_type;
-          account = Tezos.sender;
-        ],
-        s.fee_oracle);
-      locked_amount := get_nat_or_fail(params.amount - fee, Errors.not_nat);
-
       operations := wrap_transfer(
         Tezos.sender,
         Tezos.self_address,
