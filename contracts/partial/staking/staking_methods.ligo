@@ -37,6 +37,8 @@ function withdraw(
   var s                 : storage_t)
                         : return_t is
   block {
+    require(shares > 0n, Errors.zero_withdraw);
+
     const updated_reward = update_reward(s);
     var operations := updated_reward.0;
     s := updated_reward.1;

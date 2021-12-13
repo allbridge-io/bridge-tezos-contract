@@ -24,7 +24,7 @@ function lock_asset(
       ],
       s.fee_oracle);
 
-    const locked_amount = get_nat_or_fail(params.amount - fee, Errors.not_nat);
+    const locked_amount = get_nat_or_fail(lock_amount - fee, Errors.not_nat);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
