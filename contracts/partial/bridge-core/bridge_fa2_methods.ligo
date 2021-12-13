@@ -1,19 +1,16 @@
 (* Perform transfers from one owner *)
 function iterate_transfer (
-  var result            : return_t;
+  var s                 : storage_t;
   const trx_params      : transfer_param_t)
-                        : return_t is
+                        : storage_t is
   block {
 
     (* Perform single transfer *)
     function make_transfer(
-      var result        : return_t;
+      var s             : storage_t;
       var transfer      : transfer_destination_t)
-                        : return_t is
+                        : storage_t is
       block {
-        var operations := result.0;
-        var s := result.1;
-
         const sender_key : ledger_key_t = (trx_params.from_, transfer.token_id);
         const sender_permits = unwrap_or(s.permits[sender_key], Constants.empty_permits);
         (* Check permissions *)
@@ -34,8 +31,8 @@ function iterate_transfer (
         (* Update destination account *)
         s.ledger[destination_key] := destination_balance + transfer.amount;
 
-    } with (operations, s);
-} with List.fold (make_transfer, trx_params.txs, result)
+    } with s;
+} with List.fold (make_transfer, trx_params.txs, s)
 
 (* Perform single operator update *)
 function iterate_update_operators(
@@ -109,8 +106,8 @@ function update_operators(
 function transfer(
   const s               : storage_t;
   const params          : transfer_params_t)
-                        : return_t is
+                        : storage_t is
   block {
     skip
-  } with List.fold(iterate_transfer, params, (Constants.no_operations, s));
+  } with List.fold(iterate_transfer, params, s);
 

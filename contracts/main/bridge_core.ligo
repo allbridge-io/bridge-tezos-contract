@@ -56,7 +56,7 @@ function main(
   | Unlock_asset(params)   -> unlock_asset(params, s)
 
   (* Fa2 methods *)
-  | Transfer(params)          -> transfer(s, params)
+  | Transfer(params)          -> (Constants.no_operations, transfer(s, params))
   | Update_operators(params)  -> (Constants.no_operations, update_operators(s, params))
   | Balance_of(params)        -> (get_balance_of(s, params), s)
   end
