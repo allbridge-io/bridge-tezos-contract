@@ -32,14 +32,14 @@ type claimer_set_t      is set(address);
 type balance_map_t      is map(token_id_t, nat);
 
 type account_t          is [@layout:comb] record [
-    balances              : balance_map_t;
-    permits               : set(address);
-  ]
+  balances                : balance_map_t;
+  allowances              : set(address);
+]
 
 type ledger_key_t       is (address * nat)
 
 type ledger_t           is big_map(ledger_key_t, nat)
-type permits_t          is big_map(ledger_key_t, set(address))
+type allowances_t       is big_map(ledger_key_t, set(address))
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -56,7 +56,7 @@ type storage_t          is [@layout:comb] record[
   wrapped_token_infos     : wrapped_token_map_t;
   wrapped_token_ids       : wrapped_token_ids_map_t;
   ledger                  : ledger_t;
-  permits                 : permits_t;
+  allowances              : allowances_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
   token_metadata          : big_map(token_id_t, token_metadata_t)

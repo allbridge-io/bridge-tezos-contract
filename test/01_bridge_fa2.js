@@ -111,15 +111,21 @@ describe("Bridge FA2 methods test", async function () {
       it("Should allow add operator", async function () {
         await bridge.updateOperator("add_operator", alice.pkh, bob.pkh, 0);
         await bridge.updateStorage();
-        const alicePermits = await bridge.storage.permits.get([alice.pkh, 0]);
-        strictEqual(alicePermits[0], bob.pkh);
+        const aliceAllowances = await bridge.storage.allowances.get([
+          alice.pkh,
+          0,
+        ]);
+        strictEqual(aliceAllowances[0], bob.pkh);
       });
 
       it("Should allow remove_operator", async function () {
         await bridge.updateOperator("remove_operator", alice.pkh, bob.pkh, 0);
         await bridge.updateStorage();
-        const alicePermits = await bridge.storage.permits.get([alice.pkh, 0]);
-        strictEqual(alicePermits[0], undefined);
+        const aliceAllowances = await bridge.storage.allowances.get([
+          alice.pkh,
+          0,
+        ]);
+        strictEqual(aliceAllowances[0], undefined);
       });
     });
   });

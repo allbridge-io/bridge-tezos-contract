@@ -12,10 +12,10 @@ function iterate_transfer (
                         : storage_t is
       block {
         const sender_key : ledger_key_t = (trx_params.from_, transfer.token_id);
-        const sender_permits = unwrap_or(s.permits[sender_key], Constants.empty_permits);
+        const sender_allowances = unwrap_or(s.allowances[sender_key], Constants.empty_allowances);
         (* Check permissions *)
         assert_with_error(trx_params.from_ = Tezos.sender
-          or Set.mem(Tezos.sender, sender_permits), Errors.fa2_not_operator);
+          or Set.mem(Tezos.sender, sender_allowances), Errors.fa2_not_operator);
 
         const sender_balance = unwrap(s.ledger[sender_key], Errors.fa2_low_balance);
 
@@ -38,24 +38,18 @@ function iterate_update_operators(
   const params          : update_operator_param_t)
                         : storage_t is
   block {
-    case params of
-    | Add_operator(param) -> block {
-      (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
-      const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
-      (* Add operator *)
-      s.permits[account_key] := Set.add(param.operator, account_permits);
-    }
-    | Remove_operator(param) -> block {
-      (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
-      const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
-      (* Remove operator *)
-      s.permits[account_key] := Set.remove(param.operator, account_permits);
-    }
-    end
+    const (param, should_add) = case params of
+    | Add_operator(param)    -> (param, True)
+    | Remove_operator(param) -> (param, False)
+    end;
+
+    assert_with_error(param.token_id <= s.wrapped_token_count, Errors.fa2_token_undefined);
+    assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
+
+    const account_key = (param.owner, param.token_id);
+    const account_allowances = unwrap_or(s.allowances[account_key], Constants.empty_allowances);
+    s.allowances[account_key] := Set.update(param.operator, should_add, account_allowances);
+
   } with s
 
 (* Perform balance lookup *)
