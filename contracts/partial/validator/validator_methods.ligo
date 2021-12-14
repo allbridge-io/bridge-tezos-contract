@@ -13,7 +13,7 @@ function validate_lock(
     );
 
     (* Check if the lock has been not validated earlier *)
-    assert_none(s.validated_locks[params.lock_id], Errors.lock_exist);
+    require_none(s.validated_locks[params.lock_id], Errors.lock_exist);
 
     s.validated_locks[params.lock_id] := params;
   } with s
@@ -28,9 +28,9 @@ function validate_unlock(
     check_permission(s.bridge, Errors.not_bridge);
 
     (* Check if the unlock has been not validated earlier *)
-    assert_none(s.validated_unlocks[params.lock_id], Errors.unlock_exist);
+    require_none(s.validated_unlocks[params.lock_id], Errors.unlock_exist);
 
-    const kessak_params : bytes = Crypto.keccak(Bytes.pack(
+    const keccak_params : bytes = Crypto.keccak(Bytes.pack(
       (record[
         lock_id       = params.lock_id;
         recipient     = params.recipient;
@@ -41,7 +41,7 @@ function validate_unlock(
     ));
 
     assert_with_error(
-      Crypto.check(s.validator_pk, params.signature, kessak_params),
+      Crypto.check(s.validator_pk, params.signature, keccak_params),
       Errors.invalid_signature
     );
 

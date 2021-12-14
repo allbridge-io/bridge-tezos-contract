@@ -6,6 +6,7 @@ module Errors is {
 
   const zero_transfer         : string = "Bridge-staking/zero-transfer";
   const zero_deposit          : string = "Bridge-staking/zero-deposit";
+  const zero_withdraw         : string = "Bridge-staking/zero-withdraw";
   const insufficient_balance  : string = "Bridge-staking/insufficient-balance";
   const not_nat               : string = "Bridge-staking/not-nat";
 

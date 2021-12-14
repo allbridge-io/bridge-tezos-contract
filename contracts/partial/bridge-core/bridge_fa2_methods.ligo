@@ -1,33 +1,26 @@
 (* Perform transfers from one owner *)
 function iterate_transfer (
-  var result            : return_t;
+  var s                 : storage_t;
   const trx_params      : transfer_param_t)
-                        : return_t is
+                        : storage_t is
   block {
 
     (* Perform single transfer *)
     function make_transfer(
-      var result        : return_t;
+      var s             : storage_t;
       var transfer      : transfer_destination_t)
-                        : return_t is
+                        : storage_t is
       block {
-        var operations := result.0;
-        var s := result.1;
-
         const sender_key : ledger_key_t = (trx_params.from_, transfer.token_id);
-        const sender_permits = unwrap_or(s.permits[sender_key], Constants.empty_permits);
+        const sender_allowances = unwrap_or(s.allowances[sender_key], Constants.empty_allowances);
         (* Check permissions *)
-        assert_with_error(trx_params.from_ = Tezos.sender
-          or Set.mem(Tezos.sender, sender_permits), Errors.fa2_not_operator);
-
-        assert_with_error(transfer.amount > 0n, Errors.zero_transfer);
+        require(trx_params.from_ = Tezos.sender
+          or Set.mem(Tezos.sender, sender_allowances), Errors.fa2_not_operator);
 
         const sender_balance = unwrap(s.ledger[sender_key], Errors.fa2_low_balance);
-        (* Balance check *)
-        assert_with_error(sender_balance >= transfer.amount, Errors.fa2_low_balance);
 
         (* Update sender account *)
-        s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount, Errors.not_nat);
+        s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount, Errors.fa2_low_balance);
 
         (* Create or get destination account *)
         const destination_key = (transfer.to_, transfer.token_id);
@@ -36,8 +29,8 @@ function iterate_transfer (
         (* Update destination account *)
         s.ledger[destination_key] := destination_balance + transfer.amount;
 
-    } with (operations, s);
-} with List.fold (make_transfer, trx_params.txs, result)
+    } with s;
+} with List.fold (make_transfer, trx_params.txs, s)
 
 (* Perform single operator update *)
 function iterate_update_operators(
@@ -45,24 +38,18 @@ function iterate_update_operators(
   const params          : update_operator_param_t)
                         : storage_t is
   block {
-    case params of
-    | Add_operator(param) -> block {
-      (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
-      const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
-      (* Add operator *)
-      s.permits[account_key] := Set.add(param.operator, account_permits);
-    }
-    | Remove_operator(param) -> block {
-      (* Check an owner *)
-      assert_with_error(Tezos.sender = param.owner, Errors.fa2_not_owner);
-      const account_key = (param.owner, param.token_id);
-      const account_permits = unwrap_or(s.permits[account_key], Constants.empty_permits);
-      (* Remove operator *)
-      s.permits[account_key] := Set.remove(param.operator, account_permits);
-    }
-    end
+    const (param, should_add) = case params of
+    | Add_operator(param)    -> (param, True)
+    | Remove_operator(param) -> (param, False)
+    end;
+
+    require(param.token_id <= s.wrapped_token_count, Errors.fa2_token_undefined);
+    require(Tezos.sender = param.owner, Errors.fa2_not_owner);
+
+    const account_key = (param.owner, param.token_id);
+    const account_allowances = unwrap_or(s.allowances[account_key], Constants.empty_allowances);
+    s.allowances[account_key] := Set.update(param.operator, should_add, account_allowances);
+
   } with s
 
 (* Perform balance lookup *)
@@ -104,15 +91,10 @@ function update_operators(
   const s               : storage_t;
   const params          : update_operator_params_t)
                         : storage_t is
-  block {
-    skip
-  } with List.fold(iterate_update_operators, params, s)
+  List.fold(iterate_update_operators, params, s)
 
 function transfer(
   const s               : storage_t;
   const params          : transfer_params_t)
-                        : return_t is
-  block {
-    skip
-  } with List.fold(iterate_transfer, params, (Constants.no_operations, s));
-
+                        : storage_t is
+  List.fold(iterate_transfer, params, s)

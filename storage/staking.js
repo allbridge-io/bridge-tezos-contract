@@ -4,7 +4,7 @@ module.exports = {
   owner: null,
   deposit_token: { address: null, id: 0 },
   ledger: MichelsonMap.fromLiteral({}),
-  permits: MichelsonMap.fromLiteral({}),
+  allowances: MichelsonMap.fromLiteral({}),
   periods: [],
   total_supply: 0,
   total_underlying_f: 0,
