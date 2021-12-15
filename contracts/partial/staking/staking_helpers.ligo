@@ -7,11 +7,9 @@
     block {
       if Tezos.now > element.start_period
       then {
-        const time = if element.start_period > s.last_update_time
-        then if Tezos.now >= element.end_period
+        const time = if Tezos.now >= element.end_period
           then element.end_period - element.start_period
-          else Tezos.now - element.start_period
-        else Tezos.now - s.last_update_time;
+          else Tezos.now - element.start_period;
 
         const reward_f = abs(element.abr_per_sec_f * time);
 
