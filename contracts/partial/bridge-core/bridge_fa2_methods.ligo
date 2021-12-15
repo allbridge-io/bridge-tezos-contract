@@ -43,7 +43,7 @@ function iterate_update_operators(
     | Remove_operator(param) -> (param, False)
     end;
 
-    require(param.token_id <= s.wrapped_token_count, Errors.fa2_token_undefined);
+    require(param.token_id < s.wrapped_token_count, Errors.fa2_token_undefined);
     require(Tezos.sender = param.owner, Errors.fa2_not_owner);
 
     const account_key = (param.owner, param.token_id);
