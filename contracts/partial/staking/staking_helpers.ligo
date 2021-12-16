@@ -7,11 +7,19 @@
     block {
       if Tezos.now > element.start_period
       then {
-        const time = if Tezos.now >= element.end_period
-          then element.end_period - element.start_period
-          else Tezos.now - element.start_period;
+        const interval_start = if s.last_update_time > element.start_period
+          then s.last_update_time
+          else element.start_period;
 
-        const reward_f = abs(element.abr_per_sec_f * time);
+        const interval_end = if Tezos.now > element.end_period
+          then element.end_period
+          else Tezos.now;
+
+        s.last_update_time := interval_end;
+
+        const time = interval_end - interval_start;
+
+        const reward_f = get_nat_or_fail(element.abr_per_sec_f * time, Errors.wrong_time);
 
         if s.total_supply = 0n
         then {

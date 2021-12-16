@@ -4,6 +4,7 @@ module Errors is {
   const wrong_period_time     : string = "Bridge-staking/wrong-period-time"
   const zero_period_reward    : string = "Bridge-staking/zero-period-reward"
   const overdue_period        : string = "Bridge-staking/overdue-period"
+  const wrong_time            : string = "Bridge-staking/wrong-reward-time"
 
   const zero_transfer         : string = "Bridge-staking/zero-transfer"
   const zero_deposit          : string = "Bridge-staking/zero-deposit"
