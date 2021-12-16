@@ -19,8 +19,7 @@ module.exports = class BridgeCore {
 
   constructor() {}
   async init(params = false) {
-    this.staking = await new Staking().init(params);
-    this.feeOracle = await new FeeOracle().init(this.staking.address);
+    this.feeOracle = await new FeeOracle().init();
     this.validator = await new Validator().init();
     bridgeStorage.fee_oracle = this.feeOracle.address;
     bridgeStorage.validator = this.validator.address;
@@ -28,9 +27,10 @@ module.exports = class BridgeCore {
     this.contract = await Tezos.contract.at(deployedContract, tzip16);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
+    this.staking = await new Staking().init(params, this.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
-    await this.staking.сhangeDepositToken(this.address, 0);
+    await this.feeOracle.сhangeStaking(this.staking.address);
 
     return this;
   }
@@ -48,7 +48,7 @@ module.exports = class BridgeCore {
 
   async updateClaimers(typeOperation, address) {
     const operation = await this.contract.methods[typeOperation](
-      address
+      address,
     ).send();
     await confirmOperation(Tezos, operation.hash);
   }
@@ -101,7 +101,7 @@ module.exports = class BridgeCore {
             params.symbol,
             params.name,
             params.decimals,
-            params.icon
+            params.icon,
           )
           .send();
         break;

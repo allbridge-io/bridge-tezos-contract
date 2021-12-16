@@ -11,7 +11,7 @@ module.exports = class Staking {
   storage;
 
   constructor() {}
-  async init(params = false) {
+  async init(params = false, bridgeAddress = alice.pkh) {
     if (params) {
       stakingStorage.periods = [
         {
@@ -21,6 +21,7 @@ module.exports = class Staking {
         },
       ];
     }
+    stakingStorage.deposit_token.address = bridgeAddress;
     const deployedContract = await migrate(Tezos, "staking", stakingStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
@@ -40,12 +41,7 @@ module.exports = class Staking {
     const operation = await this.contract.methods.change_owner(newOwner).send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async сhangeDepositToken(address, tokenId) {
-    const operation = await this.contract.methods
-      .change_deposit_token(address, tokenId)
-      .send();
-    await confirmOperation(Tezos, operation.hash);
-  }
+
   async addReward(startPeriod, endPeriod, amount) {
     const operation = await this.contract.methods
       .add_reward(startPeriod, endPeriod, amount)

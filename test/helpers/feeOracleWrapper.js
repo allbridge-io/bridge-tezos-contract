@@ -11,8 +11,7 @@ module.exports = class Validator {
   storage;
 
   constructor() {}
-  async init(stakingAddress) {
-    oracleStorage.staking_address = stakingAddress;
+  async init() {
     const deployedContract = await migrate(Tezos, "oracle_fee", oracleStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;
@@ -46,7 +45,7 @@ module.exports = class Validator {
             operation = await this.contract.methods[feeType](
               "fa12",
               value.tokenAddress,
-              value.fee
+              value.fee,
             ).send();
             break;
           case "fa2":
@@ -54,14 +53,14 @@ module.exports = class Validator {
               "fa2",
               value.tokenAddress,
               value.tokenId,
-              value.fee
+              value.fee,
             ).send();
             break;
           case "tez":
             operation = await this.contract.methods[feeType](
               "tez",
               null,
-              value.fee
+              value.fee,
             ).send();
             break;
           case "wrapped":
@@ -69,7 +68,7 @@ module.exports = class Validator {
               "wrapped",
               value.chainId,
               value.tokenAddress,
-              value.fee
+              value.fee,
             ).send();
             break;
         }
