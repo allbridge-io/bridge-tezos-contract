@@ -16,6 +16,7 @@ function add_reward(
 
     require(params.end_period > params.start_period, Errors.wrong_period_time);
     require(params.start_period >= Tezos.now, Errors.overdue_period);
+
     require(params.amount > 0n, Errors.zero_period_reward);
 
     for element in set s.periods

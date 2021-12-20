@@ -1,6 +1,8 @@
 const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
 const { rejects, strictEqual } = require("assert");
-const { bob } = require("../scripts/sandbox/accounts");
+
+const { alice, bob } = require("../scripts/sandbox/accounts");
+
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 
@@ -51,6 +53,7 @@ describe("Staking Admin tests", async function () {
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(staking.сhangeOwner(bob.pkh), err => {
+
         strictEqual(err.message, "Bridge-staking/not-owner");
         return true;
       });
@@ -89,6 +92,7 @@ describe("Staking Admin tests", async function () {
       const endPeriod = dtFormat(0);
 
       await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
+
         strictEqual(err.message, "Bridge-staking/wrong-period-time");
         return true;
       });
@@ -105,7 +109,7 @@ describe("Staking Admin tests", async function () {
       const newPeriod = staking.storage.periods[0];
       strictEqual(
         newPeriod.start_period.slice(0, -5),
-        startPeriod.slice(0, -5),
+        startPeriod.slice(0, -5)
       );
       strictEqual(newPeriod.end_period.slice(0, -5), endPeriod.slice(0, -5));
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);
@@ -121,7 +125,7 @@ describe("Staking Admin tests", async function () {
       const newPeriod = staking.storage.periods[1];
       strictEqual(
         newPeriod.start_period.slice(0, -5),
-        startPeriod.slice(0, -5),
+        startPeriod.slice(0, -5)
       );
       strictEqual(newPeriod.end_period.slice(0, -5), endPeriod.slice(0, -5));
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);
@@ -137,7 +141,7 @@ describe("Staking Admin tests", async function () {
       const newPeriod = staking.storage.periods[2];
       strictEqual(
         newPeriod.start_period.slice(0, -5),
-        startPeriod.slice(0, -5),
+        startPeriod.slice(0, -5)
       );
       strictEqual(newPeriod.end_period.slice(0, -5), endPeriod.slice(0, -5));
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);
@@ -180,6 +184,7 @@ describe("Staking Admin tests", async function () {
       strictEqual(
         newPeriod.start_period.slice(0, -5),
         startPeriod.slice(0, -5),
+
       );
       strictEqual(newPeriod.end_period.slice(0, -5), endPeriod.slice(0, -5));
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);

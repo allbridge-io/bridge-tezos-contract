@@ -22,6 +22,7 @@ module.exports = class Staking {
       ];
     }
     stakingStorage.deposit_token.address = bridgeAddress;
+
     const deployedContract = await migrate(Tezos, "staking", stakingStorage);
     this.contract = await Tezos.contract.at(deployedContract);
     this.address = deployedContract;

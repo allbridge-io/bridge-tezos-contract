@@ -175,11 +175,9 @@ const runMigrations = async options => {
   try {
     const migrations = getMigrationsList();
 
-    options.network = options.network || "development";
-    options.optionFrom = options.from || 0;
-    options.optionTo = options.to || migrations.length;
+    const network = env.network;
 
-    const networkConfig = env.networks[options.network];
+    const networkConfig = env.networks[network];
 
     const tezos = new TezosToolkit(networkConfig.rpc);
 
@@ -187,7 +185,7 @@ const runMigrations = async options => {
       config: {
         confirmationPollingTimeoutSecond: env.confirmationPollingTimeoutSecond,
       },
-      signer: await InMemorySigner.fromSecretKey(alice.sk),
+      signer: await InMemorySigner.fromSecretKey(networkConfig.secretKey),
     });
 
     for (const migration of migrations) {
