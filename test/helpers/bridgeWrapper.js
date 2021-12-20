@@ -33,7 +33,6 @@ module.exports = class BridgeCore {
     await this.validator.updateStorage();
     await this.feeOracle.сhangeStaking(this.staking.address);
 
-
     return this;
   }
 
@@ -50,7 +49,7 @@ module.exports = class BridgeCore {
 
   async updateClaimers(typeOperation, address) {
     const operation = await this.contract.methods[typeOperation](
-      address
+      address,
     ).send();
     await confirmOperation(Tezos, operation.hash);
   }
@@ -103,7 +102,7 @@ module.exports = class BridgeCore {
             params.symbol,
             params.name,
             params.decimals,
-            params.icon
+            params.icon,
           )
           .send();
         break;
