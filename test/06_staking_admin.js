@@ -1,6 +1,8 @@
 const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
 const { rejects, strictEqual } = require("assert");
+
 const { alice, bob } = require("../scripts/sandbox/accounts");
+
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 
@@ -50,7 +52,8 @@ describe("Staking Admin tests", async function () {
   describe("Testing entrypoint: Change_owner", async function () {
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
-      await rejects(staking.сhangeOwner(bob.pkh), (err) => {
+      await rejects(staking.сhangeOwner(bob.pkh), err => {
+
         strictEqual(err.message, "Bridge-staking/not-owner");
         return true;
       });
@@ -63,30 +66,13 @@ describe("Staking Admin tests", async function () {
       strictEqual(staking.storage.owner, bob.pkh);
     });
   });
-  describe("Testing entrypoint: Change_deposit_token", async function () {
-    it("Shouldn't changing deposit token if the user is not an owner", async function () {
-      Tezos.setSignerProvider(signerAlice);
-      await rejects(staking.сhangeDepositToken(bob.pkh, 9), (err) => {
-        strictEqual(err.message, "Bridge-staking/not-owner");
-        return true;
-      });
-    });
-    it("Should allow change deposit token", async function () {
-      Tezos.setSignerProvider(signerBob);
-
-      await staking.сhangeDepositToken(bridge.address, 0);
-      await staking.updateStorage();
-      strictEqual(staking.storage.deposit_token.address, bridge.address);
-      strictEqual(staking.storage.deposit_token.id.toNumber(), 0);
-    });
-  });
   describe("Testing entrypoint: Add_reward", async function () {
     it("Shouldn't add reward if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
       const startPeriod = dtFormat(0);
       const endPeriod = dtFormat(10);
 
-      await rejects(staking.addReward(startPeriod, endPeriod, 10000), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
         strictEqual(err.message, "Bridge-staking/not-owner");
         return true;
       });
@@ -96,7 +82,7 @@ describe("Staking Admin tests", async function () {
       const startPeriod = dtFormat(0);
       const endPeriod = dtFormat(10);
 
-      await rejects(staking.addReward(startPeriod, endPeriod, 0), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 0), err => {
         strictEqual(err.message, "Bridge-staking/zero-period-reward");
         return true;
       });
@@ -105,7 +91,8 @@ describe("Staking Admin tests", async function () {
       const startPeriod = dtFormat(10);
       const endPeriod = dtFormat(0);
 
-      await rejects(staking.addReward(startPeriod, endPeriod, 10000), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
+
         strictEqual(err.message, "Bridge-staking/wrong-period-time");
         return true;
       });
@@ -162,7 +149,7 @@ describe("Staking Admin tests", async function () {
     it("Shouldn't add reward 0 20", async function () {
       const startPeriod = dtFormat(0);
       const endPeriod = dtFormat(20);
-      await rejects(staking.addReward(startPeriod, endPeriod, 10000), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
         strictEqual(err.message, "Bridge-staking/intersected-period");
         return true;
       });
@@ -170,7 +157,7 @@ describe("Staking Admin tests", async function () {
     it("Shouldn't add reward 10 15", async function () {
       const startPeriod = dtFormat(10);
       const endPeriod = dtFormat(15);
-      await rejects(staking.addReward(startPeriod, endPeriod, 10000), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
         strictEqual(err.message, "Bridge-staking/intersected-period");
         return true;
       });
@@ -179,7 +166,7 @@ describe("Staking Admin tests", async function () {
     it("Shouldn't add reward 22 40", async function () {
       const startPeriod = dtFormat(22);
       const endPeriod = dtFormat(40);
-      await rejects(staking.addReward(startPeriod, endPeriod, 10000), (err) => {
+      await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
         strictEqual(err.message, "Bridge-staking/intersected-period");
         return true;
       });
@@ -196,7 +183,8 @@ describe("Staking Admin tests", async function () {
 
       strictEqual(
         newPeriod.start_period.slice(0, -5),
-        startPeriod.slice(0, -5)
+        startPeriod.slice(0, -5),
+
       );
       strictEqual(newPeriod.end_period.slice(0, -5), endPeriod.slice(0, -5));
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);

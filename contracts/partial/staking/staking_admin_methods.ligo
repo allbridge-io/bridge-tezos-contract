@@ -7,15 +7,6 @@ function change_owner(
     s.owner := new_address;
   } with s
 
-function change_deposit_token(
-  const new_token       : token_t;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.deposit_token := new_token;
-  } with s
-
 function add_reward(
   const params          : new_period_t;
   var s                 : storage_t)
@@ -24,6 +15,8 @@ function add_reward(
     check_permission(s.owner, Errors.not_owner);
 
     require(params.end_period > params.start_period, Errors.wrong_period_time);
+    require(params.start_period >= Tezos.now, Errors.overdue_period);
+
     require(params.amount > 0n, Errors.zero_period_reward);
 
     for element in set s.periods
