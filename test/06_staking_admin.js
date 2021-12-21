@@ -118,7 +118,7 @@ describe("Staking Admin tests", async function () {
       const endPeriod = await dtFormat(Tezos, 10 * 86400);
       await staking.addReward(startPeriod, endPeriod, 1000);
       await staking.updateStorage();
-      const abrPerSec = 1157;
+      const abrPerSec = 1286;
 
       const newPeriod = staking.storage.periods[0];
       strictEqual(
@@ -161,7 +161,7 @@ describe("Staking Admin tests", async function () {
       strictEqual(newPeriod.abr_per_sec_f.toNumber(), abrPerSec);
     });
     it("Shouldn't add reward 0 20", async function () {
-      const startPeriod = await dtFormat(Tezos, 0 * 86400);
+      const startPeriod = await dtFormat(Tezos, 3 * 86400);
       const endPeriod = await dtFormat(Tezos, 20 * 86400);
       await rejects(staking.addReward(startPeriod, endPeriod, 10000), err => {
         strictEqual(err.message, "Bridge-staking/intersected-period");
