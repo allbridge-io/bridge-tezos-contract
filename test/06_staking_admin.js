@@ -6,16 +6,6 @@ const { alice, bob } = require("../scripts/sandbox/accounts");
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 
-// async function dtFormat(Tezos, sec, minus = false) {
-//   const ts = await Tezos.rpc.getBlockHeader();
-//   let currentTime = Date.parse(ts.timestamp);
-//   if (minus) {
-//     currentTime -= sec;
-//   } else {
-//     currentTime += sec;
-//   }
-//   return currentTime.toString();
-// }
 async function dtFormat(Tezos, sec, minus = false) {
   const ts = await Tezos.rpc.getBlockHeader();
   let currentTime = Date.parse(ts.timestamp) / 1000;
