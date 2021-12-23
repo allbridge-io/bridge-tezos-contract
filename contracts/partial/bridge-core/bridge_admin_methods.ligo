@@ -132,10 +132,10 @@ function add_asset(
     case params.asset_type of
     | Wrapped(info) -> {
       (* Check if the asset exists *)
-      require_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
+      require_none(s.wrapped_token_ids[Bytes.pack(info)], Errors.wrapped_exist);
 
       s.wrapped_token_infos[s.wrapped_token_count] := info;
-      s.wrapped_token_ids[info] := s.wrapped_token_count;
+      s.wrapped_token_ids[Bytes.pack(info)] := s.wrapped_token_count;
       const metadata_params = unwrap(params.metadata, Errors.not_metadata);
       const token_info = map[
         "symbol" -> metadata_params.symbol;
@@ -152,10 +152,10 @@ function add_asset(
     end;
 
     (* Сheck that such an asset has not been added already *)
-    require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
+    require_none(s.bridge_asset_ids[Bytes.pack(params.asset_type)], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
-    s.bridge_asset_ids[params.asset_type] := s.asset_count;
+    s.bridge_asset_ids[Bytes.pack(params.asset_type)] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s
