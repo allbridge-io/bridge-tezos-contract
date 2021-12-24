@@ -5,28 +5,10 @@ from re import template
 from unittest import TestCase
 
 from helpers import *
+from constants import *
 from pprint import pprint
 
 from pytezos import ContractInterface, pytezos, MichelsonRuntimeError
-
-SOLANA_CHAIN_ID = "7263566b706157554e657458645170"
-
-token_a_address = "KT18amZmM5W7qDWVt2pH6uj7sCEd3kbzLrHT"
-token_b_address = "KT1AxaBxkFLCUi3f8rdDAAxBKHfzY8LfKDRA"
-token_c_address = "KT1XXAavg3tTj12W1ADvd3EEnm1pu6XTmiEF"
-token_a = {"fA12": token_a_address}
-token_b = {"fA12" : token_b_address}
-token_c = {"fA12" : token_c_address}
-
-oracle = "KT1LzyPS8rN375tC31WPAVHaQ4HyBvTSLwBu"
-price_feed = "KT1Qf46j2x37sAN4t2MKRQRVt9gc4FZ5duMs"
-
-fee_collector = "tz1MDhGTfMQjtMYFXeasKzRWzkQKPtXEkSEw"
-dummy_sig = "sigY3oZknG7z2N9bj5aWVtdZBakTviKnwbSYTecbbT2gwQDrnLRNhP5KDcLroggq71AjXWkx27nSLfS8rodS4DYn14FyueS5"
-
-vr = {
-    f"{oracle}%calculate_fee": int(0.01 * FEE_PRECISION)
-}
 
 class StakingTest(TestCase):
 

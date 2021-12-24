@@ -5,10 +5,8 @@ from pytezos.michelson.micheline import micheline_value_to_python_object
 
 from pprint import pprint
 
-FEE_PRECISION = pow(10, 5)
 SECONDS_PER_BLOCK = 30
 
-TOKEN_ADDRESS = "KT1VHd7ysjnvxEzwtjBAmYAmasvVCfPpSkiG"
 
 alice = "tz1iA1iceA1iceA1iceA1iceA1ice9ydjsaW"
 bob = "tz1iBobBobBobBobBobBobBobBobBodTWLCX"
