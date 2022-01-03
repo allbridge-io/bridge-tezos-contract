@@ -1,5 +1,6 @@
 [@inline] function update_reward(
-  var s                 : storage_t)
+  var s                 : storage_t;
+  var operations        : list(operation))
                         : return_t is
   block {
     var burnt_reward := 0n;
@@ -35,14 +36,13 @@
       } else skip;
     };
 
-    const operations = if burnt_reward > 0n
-      then list[
-        transfer_fa2(
+    if burnt_reward > 0n
+    then operations := transfer_fa2(
           Tezos.self_address,
           Constants.zero_address,
           burnt_reward,
           s.deposit_token.id,
           s.deposit_token.address
-      )]
-      else (nil: list(operation));
+      ) # operations
+    else skip;
   } with (operations, s)

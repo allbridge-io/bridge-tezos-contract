@@ -36,11 +36,11 @@ function change_base_fee(
     s.base_fee_f := new_fee_f
   } with s
 
-function change_fee_multiper(
+function change_fee_multiplier(
   const new_fee_f       : nat;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.fee_multiper_f := new_fee_f
+    s.fee_multiplier_f := new_fee_f
   } with s

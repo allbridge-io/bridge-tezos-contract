@@ -5,14 +5,19 @@ const { alice, bob } = require("../scripts/sandbox/accounts");
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 const accuracy = 10 ** 6;
-function dtFormat(days, minus = false) {
-  const dt = new Date();
+
+async function dtFormat(tezos, sec, minus = false) {
+  let timestamp = Date.parse((await tezos.rpc.getBlockHeader()).timestamp);
   if (minus) {
-    dt.setDate(dt.getDate() - days);
+    timestamp -= sec * 1000;
   } else {
-    dt.setDate(dt.getDate() + days);
+    timestamp += sec * 1000;
   }
+  dt = new Date(timestamp);
   return dt.toISOString();
+}
+function dayToSec(days) {
+  return days * 86400;
 }
 function sleep(sec) {
   return new Promise(resolve => setTimeout(resolve, sec * 1000));
@@ -27,8 +32,8 @@ describe("Staking tests", async function () {
     Tezos.setSignerProvider(signerAlice);
     try {
       bridge = await new BridgeCore().init({
-        startPeriod: dtFormat(11, true),
-        endPeriod: dtFormat(1, true),
+        startPeriod: await dtFormat(Tezos, dayToSec(20), true),
+        endPeriod: await dtFormat(Tezos, dayToSec(10), true),
         abrPerSec: abrPerSec,
       });
       staking = bridge.staking;
@@ -123,7 +128,11 @@ describe("Staking tests", async function () {
       strictEqual(burnBalance, Math.floor((abrPerSec / accuracy) * 10 * 86400));
     });
     it("Should allow deposit 10000 bob", async function () {
-      await staking.addReward(dtFormat(0.1, true), dtFormat(1), 50000);
+      await staking.addReward(
+        await dtFormat(Tezos, 3),
+        await dtFormat(Tezos, 86400),
+        50000,
+      );
       Tezos.setSignerProvider(signerBob);
 
       const prevTotalSupply = staking.storage.total_supply.toNumber();

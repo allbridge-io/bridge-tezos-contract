@@ -13,13 +13,14 @@ function iterate_transfer (
       block {
         var operations := result.0;
         var s := result.1;
+        const updated_reward = update_reward(s, operations);
+        operations := updated_reward.0;
+        var s := updated_reward.1;
 
         const sender_allowances = unwrap_or(s.allowances[trx_params.from_], Constants.empty_allowances);
         (* Check permissions *)
         require(trx_params.from_ = Tezos.sender
           or Set.mem(Tezos.sender, sender_allowances), Errors.fa2_not_operator);
-
-        require(transfer.amount > 0n, Errors.zero_transfer);
 
         const sender_balance = unwrap(s.ledger[trx_params.from_], Errors.fa2_low_balance);
         (* Balance check *)
