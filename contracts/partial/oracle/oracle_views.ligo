@@ -12,8 +12,8 @@
         or s.base_fee_f = 0n
       then fee_per_token
       else block {
-        const user_shares_fee_accuracy = abr_balance * s.fee_multiper_f * Constants.fee_accuracy / abr_supply;
-        const basic_fee = params.amount * Constants.fee_accuracy / (user_shares_fee_accuracy + Constants.fee_accuracy * Constants.fee_accuracy / s.base_fee_f);
+        const user_shares_fee_f = abr_balance * s.fee_multiplier_f * Constants.fee_accuracy / abr_supply;
+        const basic_fee = params.amount * Constants.fee_accuracy / (user_shares_fee_f + Constants.fee_accuracy * Constants.fee_accuracy / s.base_fee_f);
       } with if fee_per_token > basic_fee
         then fee_per_token
         else basic_fee;

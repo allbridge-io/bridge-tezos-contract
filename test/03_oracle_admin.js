@@ -77,21 +77,21 @@ describe("FeeOracle Admin tests", async function () {
       strictEqual(oracle.storage.base_fee_f.toNumber(), 1000);
     });
   });
-  describe("Testing entrypoint: Change_fee_multiper", async function () {
-    it("Shouldn't changing fee multiper if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_fee_multiplier", async function () {
+    it("Shouldn't changing fee multiplier if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(oracle.сhangeFee("change_fee_multiper", 1000), err => {
+      await rejects(oracle.сhangeFee("change_fee_multiplier", 1000), err => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });
     });
 
-    it("Should allow change fee multiper", async function () {
+    it("Should allow change fee multiplier", async function () {
       Tezos.setSignerProvider(signerBob);
-      await oracle.сhangeFee("change_fee_multiper", 1000);
+      await oracle.сhangeFee("change_fee_multiplier", 1000);
       await oracle.updateStorage();
 
-      strictEqual(oracle.storage.fee_multiper_f.toNumber(), 1000);
+      strictEqual(oracle.storage.fee_multiplier_f.toNumber(), 1000);
     });
   });
 });

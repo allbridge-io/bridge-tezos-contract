@@ -4,7 +4,7 @@ function deposit(
                         : return_t is
   block {
     require(amount_ > 0n, Errors.zero_deposit);
-    const updated_reward = update_reward(s);
+    const updated_reward = update_reward(s, Constants.no_operations);
     var operations := updated_reward.0;
     s := updated_reward.1;
 
@@ -39,7 +39,7 @@ function withdraw(
   block {
     require(shares > 0n, Errors.zero_withdraw);
 
-    const updated_reward = update_reward(s);
+    const updated_reward = update_reward(s, Constants.no_operations);
     var operations := updated_reward.0;
     s := updated_reward.1;
 

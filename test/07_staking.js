@@ -5,14 +5,20 @@ const { alice, bob } = require("../scripts/sandbox/accounts");
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 const accuracy = 10 ** 6;
-function dtFormat(days, minus = false) {
-  const dt = new Date();
+
+async function dtFormat(Tezos, sec, minus = false) {
+  const ts = await Tezos.rpc.getBlockHeader();
+  let currentTime = Date.parse(ts.timestamp) / 1000;
   if (minus) {
-    dt.setDate(dt.getDate() - days);
+    currentTime -= sec;
   } else {
-    dt.setDate(dt.getDate() + days);
+    currentTime += sec;
   }
-  return dt.toISOString();
+  return currentTime.toString();
+
+}
+function dayToSec(days) {
+  return days * 86400;
 }
 function sleep(sec) {
   return new Promise(resolve => setTimeout(resolve, sec * 1000));
@@ -21,15 +27,15 @@ function sleep(sec) {
 describe("Staking tests", async function () {
   let staking;
   let bridge;
-  const abrPerSec = 1200;
+  const abrPerSec = 120;
   const abrChainId = Buffer.from("42", "ascii").toString("hex");
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     try {
       bridge = await new BridgeCore().init({
-        startPeriod: dtFormat(11, true),
-        endPeriod: dtFormat(1, true),
-        abrPerSec: abrPerSec,
+        startPeriod: await dtFormat(Tezos, 60000, true),
+        endPeriod: await dtFormat(Tezos, 59960, true),
+        abrPerSec: abrPerSec * 10 ** 6,
       });
       staking = bridge.staking;
     } catch (e) {
@@ -120,10 +126,14 @@ describe("Staking tests", async function () {
         10000 * accuracy,
       );
       strictEqual(staking.storage.total_supply.toNumber(), 10000);
-      strictEqual(burnBalance, Math.floor((abrPerSec / accuracy) * 10 * 86400));
+      strictEqual(burnBalance, 4800);
     });
     it("Should allow deposit 10000 bob", async function () {
-      await staking.addReward(dtFormat(0.1, true), dtFormat(1), 50000);
+      await staking.addReward(
+        await dtFormat(Tezos, 5),
+        await dtFormat(Tezos, 60),
+        50000,
+      );
       Tezos.setSignerProvider(signerBob);
 
       const prevTotalSupply = staking.storage.total_supply.toNumber();
@@ -174,9 +184,9 @@ describe("Staking tests", async function () {
         prevTotalSupply - withdrawAmount,
       );
     });
-    it("Should withdraw 9993 shares Bob", async function () {
+    it("Should withdraw all shares Bob", async function () {
       Tezos.setSignerProvider(signerBob);
-      const withdrawAmount = 9993;
+      const withdrawAmount = await staking.getBalance(bob.pkh);
 
       const prevTotalSupply = staking.storage.total_supply.toNumber();
       const prevTotalUnderlying = staking.storage.total_underlying_f.toNumber();
