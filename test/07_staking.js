@@ -15,6 +15,10 @@ async function dtFormat(Tezos, sec, minus = false) {
     currentTime += sec;
   }
   return currentTime.toString();
+
+}
+function dayToSec(days) {
+  return days * 86400;
 }
 function sleep(sec) {
   return new Promise(resolve => setTimeout(resolve, sec * 1000));

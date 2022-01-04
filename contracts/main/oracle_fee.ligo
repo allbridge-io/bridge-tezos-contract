@@ -12,7 +12,7 @@ type parameter_t        is
   | Change_staking        of address
   | Change_token_fee      of change_token_fee_t
   | Change_base_fee       of nat
-  | Change_fee_multiper   of nat
+  | Change_fee_multiplier   of nat
 
 
 function main(
@@ -24,5 +24,5 @@ function main(
   | Change_staking(params)      -> (Constants.no_operations, change_staking(params, s))
   | Change_token_fee(params)    -> (Constants.no_operations, change_token_fee(params.token, params.new_fee, s))
   | Change_base_fee(params)     -> (Constants.no_operations, change_base_fee(params, s))
-  | Change_fee_multiper(params) -> (Constants.no_operations, change_fee_multiper(params, s))
+  | Change_fee_multiplier(params) -> (Constants.no_operations, change_fee_multiplier(params, s))
   end

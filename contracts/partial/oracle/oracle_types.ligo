@@ -5,7 +5,7 @@ type storage_t          is [@layout:comb] record[
   staking_address         : address;
   fee_per_tokens          : token_fee_map_t;
   base_fee_f              : nat;
-  fee_multiper_f          : nat;
+  fee_multiplier_f          : nat;
 ]
 
 type return_t           is list (operation) * storage_t

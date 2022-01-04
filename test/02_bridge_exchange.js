@@ -9,10 +9,10 @@ const toBytes = require("../scripts/toBytesForSign");
 
 function calculateFee(amount, abrSupply, abrBalance) {
   const bp = 10000;
-  const feeMultiper = 1000;
+  const feemultiplier = 1000;
   const baseFee = 1000;
   const feePerToken = 1;
-  const userSharesBp = (abrBalance * feeMultiper * bp) / abrSupply;
+  const userSharesBp = (abrBalance * feemultiplier * bp) / abrSupply;
   const basicFee = (amount * bp) / (userSharesBp + (bp * bp) / baseFee);
   let fee;
   if (feePerToken > basicFee) {

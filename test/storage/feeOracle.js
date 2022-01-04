@@ -7,5 +7,5 @@ module.exports = {
   staking_address: alice.pkh,
   fee_per_tokens: MichelsonMap.fromLiteral({}),
   base_fee_f: 1000,
-  fee_multiper_f: 1000,
+  fee_multiplier_f: 1000,
 };
