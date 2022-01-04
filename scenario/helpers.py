@@ -388,6 +388,14 @@ class LocalChain:
         )
         return res
 
+    """ just view, don't store anything """
+    def view(self, call, view_results=None):
+        res = call.onchain_view(
+            storage=self.storage,
+            balance=self.balance,
+            view_results=view_results
+        )
+        return res
+
     def advance_blocks(self, count=1):
         self.now += count * SECONDS_PER_BLOCK
-
