@@ -64,6 +64,7 @@ function get_balance_of(
       const request     : balance_of_request_t)
                         : list(balance_of_response_t) is
       block {
+        require(request.token_id < s.wrapped_token_count, Errors.fa2_token_undefined);
         (* Retrieve the asked account from the storage *)
         const account_key = (request.owner, request.token_id);
         const balance_ = unwrap_or(s.ledger[account_key], 0n);
