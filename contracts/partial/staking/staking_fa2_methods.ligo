@@ -17,17 +17,16 @@ function iterate_transfer (
         operations := updated_reward.0;
         var s := updated_reward.1;
 
+        require(transfer.token_id = 0n, Errors.fa2_token_undefined);
         const sender_allowances = unwrap_or(s.allowances[trx_params.from_], Constants.empty_allowances);
         (* Check permissions *)
         require(trx_params.from_ = Tezos.sender
           or Set.mem(Tezos.sender, sender_allowances), Errors.fa2_not_operator);
 
         const sender_balance = unwrap(s.ledger[trx_params.from_], Errors.fa2_low_balance);
-        (* Balance check *)
-        require(sender_balance >= transfer.amount, Errors.fa2_low_balance);
 
         (* Update sender account *)
-        s.ledger[trx_params.from_] := get_nat_or_fail(sender_balance - transfer.amount, Errors.not_nat);
+        s.ledger[trx_params.from_] := get_nat_or_fail(sender_balance - transfer.amount, Errors.fa2_low_balance);
 
         (* Create or get destination account *)
         const destination_balance = unwrap_or(s.ledger[transfer.to_], 0n);
@@ -50,6 +49,7 @@ function iterate_update_operators(
     end;
 
     require(Tezos.sender = param.owner, Errors.fa2_not_owner);
+    require(param.token_id = 0n, Errors.fa2_token_undefined);
 
     const account_allowances = unwrap_or(s.allowances[param.owner], Constants.empty_allowances);
     s.allowances[param.owner] := Set.update(param.operator, should_add, account_allowances);
@@ -68,6 +68,7 @@ function get_balance_of(
       const request     : balance_of_request_t)
                         : list(balance_of_response_t) is
       block {
+        require(request.token_id = 0n, Errors.fa2_token_undefined);
         (* Retrieve the asked account from the storage *)
         const balance_ = unwrap_or(s.ledger[request.owner], 0n);
 
