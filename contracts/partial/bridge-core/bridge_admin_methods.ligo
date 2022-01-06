@@ -52,22 +52,13 @@ function change_fee_collector(
     s.fee_collector := new_address;
   } with s
 
-function add_claimer(
+function change_claimer(
   const address_        : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.approved_claimers := Set.add(address_, s.approved_claimers)
-  } with s
-
-function remove_claimer(
-  const address_        : address;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.approved_claimers := Set.remove(address_, s.approved_claimers)
+    s.approved_claimer := address_;
   } with s
 
 (* Stop bridge protocol entrypoint *)

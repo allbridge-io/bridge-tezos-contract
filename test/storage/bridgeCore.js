@@ -7,7 +7,7 @@ module.exports = {
   bridge_manager: alice.pkh,
   stop_manager: alice.pkh,
   validator: null,
-  approved_claimers: [secpSigner.pkh],
+  approved_claimer: secpSigner.pkh,
   fee_oracle: null,
   fee_collector: bob.pkh,
   asset_count: 0,
@@ -141,7 +141,7 @@ module.exports = {
         ],
         errors: [],
       }),
-      "ascii"
+      "ascii",
     ).toString("hex"),
   }),
   token_metadata: MichelsonMap.fromLiteral({}),

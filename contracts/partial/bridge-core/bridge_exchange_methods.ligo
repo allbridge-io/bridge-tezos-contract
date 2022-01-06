@@ -97,7 +97,7 @@ function unlock_asset(
     require(s.enabled, Errors.bridge_disabled);
     require(asset.enabled, Errors.asset_disabled);
 
-    const fee = if s.approved_claimers contains Tezos.sender
+    const fee = if s.approved_claimer = Tezos.sender
       then get_oracle_fee(
         record[
           amount = params.amount;

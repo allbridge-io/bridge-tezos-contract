@@ -17,8 +17,7 @@ type parameter_t        is
   | Change_validator      of address
   | Change_fee_oracle     of address
   | Change_fee_collector  of address
-  | Add_claimer           of address
-  | Remove_claimer        of address
+  | Change_claimer        of address
   | Stop_bridge           of unit
   | Start_bridge          of unit
   | Stop_asset            of asset_id_t
@@ -43,8 +42,7 @@ function main(
   | Change_validator(params)      -> (Constants.no_operations, change_validator(params, s))
   | Change_fee_oracle(params)     -> (Constants.no_operations, change_fee_oracle(params, s))
   | Change_fee_collector(params)  -> (Constants.no_operations, change_fee_collector(params, s))
-  | Add_claimer(params)    -> (Constants.no_operations, add_claimer(params, s))
-  | Remove_claimer(params) -> (Constants.no_operations, remove_claimer(params, s))
+  | Change_claimer(params)        -> (Constants.no_operations, change_claimer(params, s))
   | Stop_bridge            -> (Constants.no_operations, stop_bridge(s))
   | Start_bridge           -> (Constants.no_operations, start_bridge(s))
   | Stop_asset(params)     -> (Constants.no_operations, stop_asset(params, s))

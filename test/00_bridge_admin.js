@@ -122,38 +122,20 @@ describe("BridgeCore Admin tests", async function () {
       strictEqual(bridge.storage.fee_collector, bob.pkh);
     });
   });
-  describe("Testing entrypoint: Add_claimer", async function () {
-    it("Shouldn't add approved claimer if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_claimer", async function () {
+    it("Shouldn't changing approved claimer if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.updateClaimers("add_claimer", bob.pkh), err => {
+      await rejects(bridge.сhangeAddress("change_claimer", bob.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
     });
-    it("Should allow add claimer to approved claimers", async function () {
+    it("Should allow change claimer to approved claimers", async function () {
       Tezos.setSignerProvider(signerBob);
 
-      await bridge.updateClaimers("add_claimer", bob.pkh);
+      await bridge.сhangeAddress("change_claimer", bob.pkh);
       await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.approved_claimers, [
-        bob.pkh,
-        secpSigner.pkh,
-      ]);
-    });
-  });
-  describe("Testing entrypoint: Remove_claimer", async function () {
-    it("Shouldn't remove claimer if the user is not an owner", async function () {
-      Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.updateClaimers("add_claimer", bob.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-owner");
-        return true;
-      });
-    });
-    it("Should allow remove claimer  from approved claimers", async function () {
-      Tezos.setSignerProvider(signerBob);
-      await bridge.updateClaimers("remove_claimer", bob.pkh);
-      await bridge.updateStorage();
-      deepStrictEqual(bridge.storage.approved_claimers, [secpSigner.pkh]);
+      deepStrictEqual(bridge.storage.approved_claimer, bob.pkh);
     });
   });
   describe("Testing entrypoint: Add_asset", async function () {

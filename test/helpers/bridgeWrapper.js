@@ -47,12 +47,6 @@ module.exports = class BridgeCore {
     await confirmOperation(Tezos, operation.hash);
   }
 
-  async updateClaimers(typeOperation, address) {
-    const operation = await this.contract.methods[typeOperation](
-      address,
-    ).send();
-    await confirmOperation(Tezos, operation.hash);
-  }
   async stopBridge() {
     const operation = await this.contract.methods.stop_bridge("unit").send();
     await confirmOperation(Tezos, operation.hash);
