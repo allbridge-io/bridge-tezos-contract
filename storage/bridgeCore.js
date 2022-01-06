@@ -5,7 +5,7 @@ module.exports = {
   bridge_manager: null,
   stop_manager: null,
   validator: null,
-  approved_claimers: [],
+  approved_claimer: secpSigner.pkh,
   fee_oracle: null,
   fee_collector: null,
   asset_count: 0,
@@ -139,7 +139,7 @@ module.exports = {
         ],
         errors: [],
       }),
-      "ascii"
+      "ascii",
     ).toString("hex"),
   }),
   token_metadata: MichelsonMap.fromLiteral({}),
