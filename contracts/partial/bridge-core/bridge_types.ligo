@@ -22,10 +22,10 @@ type asset_t            is [@layout:comb] record[
 ]
 
 type asset_map_t        is big_map(asset_id_t, asset_t)
-type asset_map_ids_t    is big_map(bytes, asset_id_t)
+type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
 
 type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
-type wrapped_token_ids_map_t is big_map(bytes, token_id_t)
+type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
 
 type claimer_set_t      is set(address);
 

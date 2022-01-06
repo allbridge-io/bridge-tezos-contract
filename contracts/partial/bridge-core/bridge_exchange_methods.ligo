@@ -29,7 +29,7 @@ function lock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[Bytes.pack(info)], Errors.token_not_supported);
+      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
       const sender_key : ledger_key_t = (Tezos.sender, token_id);
       const account_balance = unwrap(s.ledger[sender_key], Errors.zero_balance);
 
@@ -113,7 +113,7 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[Bytes.pack(info)], Errors.token_not_supported);
+      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
       const receiver_key = (params.receiver, token_id);
       const receiver_balance = unwrap_or(s.ledger[receiver_key], 0n);
       s.ledger[receiver_key] := receiver_balance + unlocked_amount;
