@@ -4,6 +4,7 @@ const { rejects, strictEqual } = require("assert");
 
 const Bridge = require("./helpers/bridgeWrapper");
 const { migrate } = require("../scripts/helpers");
+const { confirmOperation } = require("../scripts/confirmation");
 const toBytes = require("../scripts/toBytesForSign");
 
 const transferAmount = 1000;
@@ -144,7 +145,7 @@ describe("Staking FA2 methods test", async function () {
     });
     it("Should allow get balance", async function () {
       const op = await gbContract.methods.balance_of(bob.pkh, 0).send();
-      await op.confirmation();
+      await confirmOperation(Tezos, op.hash);
       const storage = await gbContract.storage();
 
       strictEqual(storage.response.toNumber(), transferAmount);
