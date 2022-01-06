@@ -84,7 +84,7 @@ function start_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.stop_manager, Errors.not_manager);
+    check_permission(s.bridge_manager, Errors.not_manager);
     s.enabled := True;
   } with s
 

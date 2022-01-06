@@ -332,7 +332,7 @@ describe("BridgeCore Admin tests", async function () {
     });
   });
   describe("Testing entrypoint: Start_bridge", async function () {
-    it("Shouldn't start bridge if the user is not stop manager", async function () {
+    it("Shouldn't start bridge if the user is not bridge manager", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(bridge.startBridge(), err => {
         strictEqual(err.message, "Bridge-core/not-manager");
