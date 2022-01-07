@@ -91,6 +91,29 @@ class StakingTest(TestCase):
         self.assertEqual(trxs[0]["source"], contract_self_address)
         self.assertAlmostEqual(trxs[0]["amount"], 200_666, delta=1)
 
+    def test_multistep_distribution(self):
+        chain = LocalChain(storage=self.storage)
+
+        initial_investment = 100_000
+        res = chain.execute(self.ct.deposit(initial_investment), sender=alice)
+        res = chain.execute(self.ct.deposit(initial_investment), sender=bob)
+        res = chain.execute(self.ct.add_reward(0, 10 * 30, 10_000), sender=admin)
+        
+        chain.advance_blocks(10)
+
+        alice_withdrawn = 0
+        steps = 10
+        shares_per_step = initial_investment // 10
+        for _ in range(steps):
+            res = chain.execute(self.ct.withdraw(shares_per_step),sender=alice)
+            transfers = parse_transfers(res)
+            alice_withdrawn += transfers[0]["amount"]
+
+        res = chain.execute(self.ct.withdraw(initial_investment), sender=bob)
+        trxs = parse_transfers(res)
+        bob_withdrawn = trxs[0]["amount"]
+        self.assertAlmostEqual(bob_withdrawn, alice_withdrawn, delta=1)
+
     def test_multiple_periods(self):
         chain = LocalChain(storage=self.storage)
 
