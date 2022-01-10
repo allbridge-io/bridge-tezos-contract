@@ -1,11 +1,10 @@
 (* Perform minting new tokens *)
 function mint (
-  const s               : storage_t;
-  const params          : mint_params_t)
+  const params          : mint_params_t;
+  const s               : storage_t)
                         : storage_t is
   block {
-    (* Ensure sender has the minter permissions *)
-    require(s.minters contains Tezos.sender, Errors.not_minter);
+    require(Tezos.sender = s.bridge, Errors.not_bridge);
 
     function make_mint(
       var s             : storage_t;
@@ -28,8 +27,8 @@ function mint (
   } with (List.fold(make_mint, params, s))
 
 function create_token(
-  var s                 : storage_t;
-  const new_token       : new_token_t)
+  const new_token       : new_token_t;
+  var s                 : storage_t)
                         : storage_t is
   block {
     require(Tezos.sender = s.owner, Errors.not_owner);
@@ -48,8 +47,7 @@ function burn(
   var s                 : storage_t)
                         : storage_t is
   block {
-    require(s.minters contains Tezos.sender, Errors.not_minter);
-    require(Tezos.source = params.account, Errors.not_account_owner);
+    require(Tezos.sender = s.bridge, Errors.not_bridge);
 
     const token_supply = unwrap(s.tokens_supply[params.token_id], Errors.token_undefined);
     s.tokens_supply[params.token_id] := get_nat_or_fail(token_supply - params.amount, Errors.not_nat);

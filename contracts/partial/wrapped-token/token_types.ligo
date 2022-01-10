@@ -22,12 +22,12 @@ type token_metadata_t   is [@layout:comb] record [
 
 type storage_t          is [@layout:comb] record [
   owner                   : address;
+  bridge                  : address;
   ledger                  : ledger_t;
   allowances              : allowances_t;
   tokens_supply           : big_map(token_id_t, nat);
   metadata                : big_map(string, bytes);
   token_metadata          : big_map(token_id_t, token_metadata_t);
-  minters                 : set(address);
   token_count             : nat;
   token_infos             : token_map_t;
   token_ids               : token_ids_map_t;
