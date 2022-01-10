@@ -3,8 +3,9 @@ module Errors is {
   const intersected_period    : string = "Bridge-staking/intersected-period";
   const wrong_period_time     : string = "Bridge-staking/wrong-period-time";
   const zero_period_reward    : string = "Bridge-staking/zero-period-reward";
-  const overdue_period        : string = "Bridge-staking/overdue-period";
+  const earlier_period        : string = "Bridge-staking/earlier-start-period";
   const wrong_time            : string = "Bridge-staking/wrong-reward-time";
+  const period_not_over       : string = "Bridge-staking/previous-period-not-over";
 
   const zero_transfer         : string = "Bridge-staking/zero-transfer";
   const zero_deposit          : string = "Bridge-staking/zero-deposit";
