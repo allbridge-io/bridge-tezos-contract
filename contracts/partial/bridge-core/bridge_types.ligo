@@ -59,6 +59,11 @@ type lock_asset_t       is [@layout:comb] record[
   recipient               : bytes;
 ]
 
+type remove_asset_t     is [@layout:comb] record[
+  asset_id                : asset_id_t;
+  recipient               : address;
+]
+
 type unlock_asset_t     is [@layout:comb] record[
   chain_id                : chain_id_t;
   lock_id                 : nat;

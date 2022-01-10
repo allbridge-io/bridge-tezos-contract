@@ -129,3 +129,24 @@ function add_asset(
     s.asset_count := s.asset_count + 1n;
 
   } with s
+
+function remove_asset(
+  const params           : remove_asset_t;
+  var s                  : storage_t)
+                         : return_t is
+  block {
+    check_permission(s.bridge_manager, Errors.not_manager);
+
+    const asset = unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
+    remove asset.asset_type from map s.bridge_asset_ids;
+    remove params.asset_id from map s.bridge_assets;
+
+    const operations = list[
+      wrap_transfer(
+        Tezos.self_address,
+        params.recipient,
+        asset.locked_amount,
+        asset.asset_type
+      )
+    ];
+  } with (operations, s)
