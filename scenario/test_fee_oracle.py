@@ -30,16 +30,23 @@ class OracleFeeTest(TestCase):
         storage = cls.ct.storage.dummy()
         storage["owner"] = admin
         storage["staking_address"] = staking
+        storage["fee_multiplier_f"] = 1000
+        storage["base_fee_f"] = 1000
         cls.storage = storage
 
     def test_calculate_fee(self):
         chain = LocalChain(storage=self.storage)
 
-        chain.execute(self.ct.change_token_fee(wrapped_asset_a, 100), sender=admin)
+        chain.execute(self.ct.change_token_fee(wrapped_asset_a, 1000), sender=admin)
 
         fee = chain.view(self.ct.calculate_fee(
-            amount=1_000_000,
+            amount=1000,
             token=wrapped_asset_a,
             account=alice), view_results=vr)
+        self.assertEqual(fee, 1000)
 
-        pprint(fee)
+        fee = chain.view(self.ct.calculate_fee(
+            amount=10_000_000,
+            token=wrapped_asset_a,
+            account=alice), view_results=vr)
+        self.assertEqual(fee, 9900)

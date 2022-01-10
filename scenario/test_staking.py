@@ -48,7 +48,13 @@ class StakingTest(TestCase):
 
         res = chain.execute(self.ct.deposit(100_000))
         res = chain.execute(self.ct.add_reward(0, 10 * 30, 100), sender=admin)
-        # TODO verify money is taken from admin
+        trxs = parse_transfers(res)
+        self.assertEqual(len(trxs), 1)
+        self.assertEqual(trxs[0]["amount"], 100)
+        self.assertEqual(trxs[0]["destination"], contract_self_address)
+        self.assertEqual(trxs[0]["source"], admin)
+        
+
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 1)
         self.assertEqual(trxs[0]["amount"], 100)
@@ -323,3 +329,32 @@ class StakingTest(TestCase):
         res = chain.execute(self.ct.withdraw(bob_shares), sender=bob)
         trxs = parse_transfers(res)
         print("Bob staked", 10_000, "in the middle. Withdrawn", trxs[0]["amount"])
+
+    def test_underlying_accuracy(self):
+        chain = LocalChain(storage=self.storage)
+
+        chain.execute(self.ct.deposit(1_000_000))
+        res = chain.execute(self.ct.add_reward(0, 1, int(0.1 * PRECISION)), sender=admin)
+
+        chain.advance_blocks(1)
+        
+        total_withdrawn = 0
+        shares_to_withdraw = 100
+        for i in range(shares_to_withdraw):
+            res = chain.execute(self.ct.withdraw(1))
+            print("one share transfer\n")
+            transfers = parse_transfers(res)
+            pprint(transfers)
+            total_withdrawn += transfers[0]["amount"]
+            
+        res = chain.execute(self.ct.withdraw(shares_to_withdraw))
+        print("one share transfer\n")
+        transfers = parse_transfers(res)
+        pprint(transfers)
+
+        self.assertEqual(transfers[0]["amount"], total_withdrawn)
+
+        all_shares = chain.storage["ledger"][me]
+        res = chain.execute(self.ct.withdraw(all_shares))
+        transfers = parse_transfers(res)
+        pprint(transfers)
