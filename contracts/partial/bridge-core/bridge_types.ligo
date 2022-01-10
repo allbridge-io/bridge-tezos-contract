@@ -37,17 +37,9 @@ type storage_t          is [@layout:comb] record[
   bridge_asset_ids        : asset_map_ids_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
-  token_metadata          : big_map(token_id_t, token_metadata_t)
 ]
 
 type return_t           is list (operation) * storage_t
-
-type token_metadata_params_t is [@layout:comb] record[
-  symbol                       : bytes;
-  name                         : bytes;
-  decimals                     : bytes;
-  icon                         : bytes;
-]
 
 type new_asset_t        is asset_standard_t
 

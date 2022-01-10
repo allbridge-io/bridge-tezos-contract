@@ -26,12 +26,11 @@ type storage_t          is [@layout:comb] record [
   ledger                  : ledger_t;
   allowances              : allowances_t;
   tokens_supply           : big_map(token_id_t, nat);
-  metadata                : big_map(string, bytes);
-  token_metadata          : big_map(token_id_t, token_metadata_t);
   token_count             : nat;
   token_infos             : token_map_t;
   token_ids               : token_ids_map_t;
-  total_mint_percent      : nat;
+  metadata                : big_map(string, bytes);
+  token_metadata          : big_map(token_id_t, token_metadata_t);
 ]
 
 type return_t           is list(operation) * storage_t
