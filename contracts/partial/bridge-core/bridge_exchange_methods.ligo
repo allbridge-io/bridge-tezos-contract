@@ -41,7 +41,7 @@ function lock_asset(
           burn_params,
           0mutez,
           unwrap(
-            (Tezos.get_entrypoint_opt("burn", token_.address) : option(contract(burn_params_t))),
+            (Tezos.get_entrypoint_opt("%burn", token_.address) : option(contract(burn_params_t))),
             Errors.burn_etp_404)
         );
         wrap_transfer(
@@ -137,7 +137,7 @@ function unlock_asset(
           mint_params,
           0mutez,
           unwrap(
-            (Tezos.get_entrypoint_opt("mint", token_.address) : option(contract(mint_params_t))),
+            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
             Errors.mint_etp_404
           )
         );
