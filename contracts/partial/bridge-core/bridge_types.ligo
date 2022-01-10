@@ -53,7 +53,7 @@ type new_asset_t        is asset_standard_t
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
-  lock_id                 : nat;
+  lock_id                 : lock_id_t;
   asset_id                : asset_id_t;
   amount                  : nat;
   recipient               : bytes;
@@ -66,7 +66,7 @@ type remove_asset_t     is [@layout:comb] record[
 
 type unlock_asset_t     is [@layout:comb] record[
   chain_id                : chain_id_t;
-  lock_id                 : nat;
+  lock_id                 : lock_id_t;
   asset_id                : asset_id_t;
   amount                  : nat;
   recipient               : address;

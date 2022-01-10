@@ -1,5 +1,3 @@
-type lock_id_t          is nat
-
 type lock_map_t         is big_map(lock_id_t, validate_lock_t)
 type unlock_map_t       is big_map(lock_id_t, validate_unlock_t)
 
