@@ -107,7 +107,7 @@ function start_asset(
 
 (* Add new asset entrypoint *)
 function add_asset(
-  const params           : new_asset_t;
+  const new_asset_type   : new_asset_t;
   var s                  : storage_t)
                          : storage_t is
   block {
@@ -116,37 +116,16 @@ function add_asset(
     require(s.enabled, Errors.bridge_disabled);
 
     var new_asset := record[
-      asset_type = params.asset_type;
+      asset_type = new_asset_type;
       locked_amount = 0n;
       enabled = True;
     ];
-    case params.asset_type of
-    | Wrapped(info) -> {
-      (* Check if the asset exists *)
-      require_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
-
-      s.wrapped_token_infos[s.wrapped_token_count] := info;
-      s.wrapped_token_ids[info] := s.wrapped_token_count;
-      const metadata_params = unwrap(params.metadata, Errors.not_metadata);
-      const token_info = map[
-        "symbol" -> metadata_params.symbol;
-        "name" -> metadata_params.name;
-        "decimals" -> metadata_params.decimals;
-        "icon" -> metadata_params.icon
-      ];
-      s.token_metadata[s.wrapped_token_count] := record[
-        token_id = s.wrapped_token_count;
-        token_info = token_info];
-      s.wrapped_token_count := s.wrapped_token_count + 1n;
-    }
-    | _ -> skip
-    end;
 
     (* Сheck that such an asset has not been added already *)
-    require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
+    require_none(s.bridge_asset_ids[new_asset_type], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
-    s.bridge_asset_ids[params.asset_type] := s.asset_count;
+    s.bridge_asset_ids[new_asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s

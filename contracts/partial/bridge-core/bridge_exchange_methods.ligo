@@ -28,19 +28,29 @@ function lock_asset(
 
     var operations := Constants.no_operations;
     case asset.asset_type of
-    | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
-      const sender_key : ledger_key_t = (Tezos.sender, token_id);
-      const account_balance = unwrap(s.ledger[sender_key], Errors.zero_balance);
-
-      s.ledger[sender_key] := get_nat_or_fail(account_balance - lock_amount, Errors.insufficient_balance);
-
-      const collector_key = (s.fee_collector, token_id);
-      const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
-
-      s.ledger[collector_key ] := collector_balance + fee;
-
+    | Wrapped(token_) -> {
       asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount, Errors.not_nat);
+
+      const burn_params : burn_params_t = record[
+        token_id = token_.id;
+        account = Tezos.sender;
+        amount = locked_amount
+      ];
+      operations := list[
+        Tezos.transaction(
+          burn_params,
+          0mutez,
+          unwrap(
+            (Tezos.get_entrypoint_opt("burn", token_.address) : option(contract(burn_params_t))),
+            Errors.burn_etp_404)
+        );
+        wrap_transfer(
+          Tezos.sender,
+          s.fee_collector,
+          fee,
+          asset.asset_type
+        )
+      ]
      }
     | Tez -> {
       operations := wrap_transfer(
@@ -73,7 +83,7 @@ function lock_asset(
     var validate_lock := record[
       lock_id = params.lock_id;
       sender = Tezos.sender;
-      recipient = params.receiver;
+      recipient = params.recipient;
       amount = locked_amount;
       asset = asset.asset_type;
       destination_chain_id = params.chain_id
@@ -112,22 +122,37 @@ function unlock_asset(
 
     var operations := Constants.no_operations;
     case asset.asset_type of
-    | Wrapped(info) -> {
-      const token_id = unwrap(s.wrapped_token_ids[info], Errors.token_not_supported);
-      const receiver_key = (params.receiver, token_id);
-      const receiver_balance = unwrap_or(s.ledger[receiver_key], 0n);
-      s.ledger[receiver_key] := receiver_balance + unlocked_amount;
-
+    | Wrapped(token_) -> {
       asset.locked_amount := asset.locked_amount + params.amount;
 
-      const collector_key = (s.fee_collector, token_id);
-      const collector_balance = unwrap_or(s.ledger[collector_key], 0n);
-      s.ledger[collector_key] := collector_balance + fee;
+      const mint_params : mint_params_t = list[
+        record[
+          token_id = token_.id;
+          recipient = params.recipient;
+          amount = unlocked_amount
+        ]
+      ];
+      operations := list[
+        Tezos.transaction(
+          mint_params,
+          0mutez,
+          unwrap(
+            (Tezos.get_entrypoint_opt("mint", token_.address) : option(contract(mint_params_t))),
+            Errors.mint_etp_404
+          )
+        );
+        wrap_transfer(
+          Tezos.sender,
+          s.fee_collector,
+          fee,
+          asset.asset_type
+        )
+      ]
      }
     | _ -> {
       operations := wrap_transfer(
         Tezos.self_address,
-        params.receiver,
+        params.recipient,
         unlocked_amount,
         asset.asset_type
       ) # operations;
@@ -147,7 +172,7 @@ function unlock_asset(
 
     var validate_unlock := record[
       lock_id = params.lock_id;
-      recipient = params.receiver;
+      recipient = params.recipient;
       amount = params.amount;
       chain_from_id = params.chain_id;
       asset = asset.asset_type;
