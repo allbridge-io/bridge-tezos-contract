@@ -60,3 +60,36 @@ function wrap_transfer(
         token_.id,
         token_.address)
     end;
+
+function pow(
+  var value             : nat;
+  const p               : nat)
+                        : nat is
+  block {
+    var result := value;
+
+    for i := 2 to int(p)
+      block {
+      result := result * value;
+    }
+  } with result
+
+function to_precision(
+  const value           : nat;
+  const precision       : nat)
+                        : nat is
+  if precision > Constants.precision
+  then value / pow(10n, get_nat_or_fail(precision - Constants.precision, Errors.not_nat))
+  else if precision < Constants.precision
+    then value * pow(10n, get_nat_or_fail(Constants.precision - precision, Errors.not_nat))
+    else value
+
+function from_precision(
+  const value           : nat;
+  const precision       : nat)
+                        : nat is
+  if precision > Constants.precision
+  then value * pow(10n, get_nat_or_fail(precision - Constants.precision, Errors.not_nat))
+  else if precision < Constants.precision
+    then value / pow(10n, get_nat_or_fail(Constants.precision - precision, Errors.not_nat))
+    else value

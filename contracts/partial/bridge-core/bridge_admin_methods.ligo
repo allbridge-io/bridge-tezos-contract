@@ -107,7 +107,7 @@ function start_asset(
 
 (* Add new asset entrypoint *)
 function add_asset(
-  const new_asset_type   : new_asset_t;
+  const params           : new_asset_t;
   var s                  : storage_t)
                          : storage_t is
   block {
@@ -116,16 +116,17 @@ function add_asset(
     require(s.enabled, Errors.bridge_disabled);
 
     var new_asset := record[
-      asset_type = new_asset_type;
+      asset_type = params.asset_type;
+      decimals = params.decimals;
       locked_amount = 0n;
       enabled = True;
     ];
 
     (* Сheck that such an asset has not been added already *)
-    require_none(s.bridge_asset_ids[new_asset_type], Errors.bridge_exist);
+    require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
-    s.bridge_asset_ids[new_asset_type] := s.asset_count;
+    s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s
