@@ -7,7 +7,7 @@ function validate_lock(
     (* Check sender is bridge-core conract *)
     check_permission(s.bridge, Errors.not_bridge);
 
-    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(int)), Errors.wrong_lock_id);
+    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(nat)), Errors.wrong_lock_id);
     require(unpacked_lock_id / Constants.foo = Constants.lock_version, Errors.wrong_lock_version);
 
     assert_with_error(
@@ -29,7 +29,7 @@ function validate_unlock(
   block {
     (* Check sender is bridge-core conract *)
     check_permission(s.bridge, Errors.not_bridge);
-    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(int)), Errors.wrong_lock_id);
+    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(nat)), Errors.wrong_lock_id);
     require(unpacked_lock_id / Constants.foo = Constants.lock_version, Errors.wrong_lock_version);
 
     (* Check if the unlock has been not validated earlier *)
