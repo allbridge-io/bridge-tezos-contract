@@ -46,6 +46,17 @@ describe("BridgeCore Exchange tests", async function () {
 
       bridge = await new BridgeCore().init();
 
+      await bridge.wrappedToken.createToken(
+        bscChainId,
+        Buffer.from("bscAddress", "ascii").toString("hex"),
+        MichelsonMap.fromLiteral({
+          symbol: Buffer.from("wABR").toString("hex"),
+          name: Buffer.from("Wrapped ABR").toString("hex"),
+          decimals: Buffer.from("6").toString("hex"),
+          icon: Buffer.from("").toString("hex"),
+        }),
+      );
+
       const fa12Asset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,

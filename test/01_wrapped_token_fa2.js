@@ -8,7 +8,7 @@ const { confirmOperation } = require("../scripts/confirmation");
 const toBytes = require("../scripts/toBytesForSign");
 
 const transferAmount = 1000;
-describe("Bridge FA2 methods test", async function () {
+describe("Wrapped token FA2 methods test", async function () {
   let bridge;
   const bscChainId = Buffer.from("56", "ascii").toString("hex");
   before(async () => {

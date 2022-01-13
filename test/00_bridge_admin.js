@@ -9,6 +9,9 @@ const BridgeCore = require("./helpers/bridgeWrapper");
 const Token = require("./helpers/tokenWrapper");
 
 const { alice, bob, secpSigner } = require("../scripts/sandbox/accounts");
+const { MichelsonMap } = require("@taquito/taquito");
+const lockIdToBytes = require("../scripts/lockIdToBytes");
+const toBytes = require("../scripts/toBytesForSign");
 
 describe("BridgeCore Admin tests", async function () {
   let bridge;
@@ -23,6 +26,57 @@ describe("BridgeCore Admin tests", async function () {
       fa2Token = await new Token("fa2").init();
 
       bridge = await new BridgeCore().init();
+
+      await bridge.wrappedToken.createToken(
+        bscChainId,
+        Buffer.from("bscAddress", "ascii").toString("hex"),
+        MichelsonMap.fromLiteral({
+          symbol: Buffer.from("wABR").toString("hex"),
+          name: Buffer.from("Wrapped ABR").toString("hex"),
+          decimals: Buffer.from("6").toString("hex"),
+          icon: Buffer.from("").toString("hex"),
+        }),
+      );
+      const newAssetParam = {
+        assetType: "wrapped",
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
+        decimals: 6,
+      };
+      await bridge.addAsset(newAssetParam);
+      // Tezos.setSignerProvider(signerBob);
+      // await bridge.wrappedToken.approveToken(bridge.address, bob.pkh, 0);
+
+      const lockId_7 = lockIdToBytes("00ffffffffffffffffffffffffffff07");
+
+      const keccakBytes = toBytes({
+        lockId: lockId_7,
+        recipient: bob.pkh,
+        amount: 10000,
+        chainFromId: bscChainId,
+        assetType: "wrapped",
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
+      });
+      const signature = await signerSecp.sign(keccakBytes);
+
+      // await fa12Token.approveToken(bridge.address, 100000);
+
+      // await fa2Token.approveToken(
+      //   bridge.address,
+      //   100000,
+      //   bob.pkh,
+      //   fa2Token.tokenId,
+      // );
+      // Tezos.setSignerProvider(signerAlice);
+      await bridge.unlockAsset(
+        bscChainId,
+        lockId_7,
+        0,
+        10000,
+        bob.pkh,
+        signature.sig,
+      );
     } catch (e) {
       console.log(e);
     }
@@ -145,6 +199,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
+          decimals: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/not-manager");
@@ -157,14 +212,15 @@ describe("BridgeCore Admin tests", async function () {
       const newAsset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
+        decimals: 6,
       };
-
+      const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(
         bridge.storage.asset_count.toNumber() - 1,
       );
-      strictEqual(bridge.storage.asset_count.toNumber(), 1);
+      strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
 
       notStrictEqual(
@@ -177,6 +233,7 @@ describe("BridgeCore Admin tests", async function () {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
+        decimals: 6,
       };
 
       const prevAssetCount = bridge.storage.asset_count.toNumber();
@@ -194,6 +251,7 @@ describe("BridgeCore Admin tests", async function () {
     it("Should allow add tez asset", async function () {
       const newAsset = {
         assetType: "tez",
+        decimals: 6,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -207,52 +265,31 @@ describe("BridgeCore Admin tests", async function () {
         undefined,
       );
     });
-    it("Should allow add wrapped asset", async function () {
-      const newAsset = {
-        assetType: "wrapped",
-        chainId: bscChainId,
-        tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
-      };
-      const prevAssetCount = bridge.storage.asset_count.toNumber();
-      const prevWrappedCount = bridge.storage.wrapped_token_count.toNumber();
+    // it("Should allow add wrapped asset", async function () {
+    //   const prevAssetCount = bridge.storage.asset_count.toNumber();
 
-      const newAssetParam = {
-        assetType: "wrapped",
-        chainId: bscChainId,
-        tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
-
-        symbol: Buffer.from("wABR").toString("hex"),
-        name: Buffer.from("Wrapped ABR").toString("hex"),
-        decimals: Buffer.from("6").toString("hex"),
-        icon: Buffer.from("").toString("hex"),
-      };
-      await bridge.addAsset(newAssetParam);
-      await bridge.updateStorage();
-      const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
-      const addedWrapped = await bridge.storage.wrapped_token_infos.get(
-        prevWrappedCount,
-      );
-      strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
-      strictEqual(
-        bridge.storage.wrapped_token_count.toNumber(),
-        prevWrappedCount + 1,
-      );
-      notStrictEqual(addedAsset, undefined);
-      notStrictEqual(
-        await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
-        undefined,
-      );
-      notStrictEqual(addedWrapped, undefined);
-      notStrictEqual(
-        await bridge.storage.wrapped_token_ids.get(addedWrapped),
-        undefined,
-      );
-    });
+    //   const newAssetParam = {
+    //     assetType: "wrapped",
+    //     tokenId: 0,
+    //     tokenAddress: bridge.wrappedToken.address,
+    //     decimals: 6,
+    //   };
+    //   await bridge.addAsset(newAssetParam);
+    //   await bridge.updateStorage();
+    //   const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
+    //   strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
+    //   notStrictEqual(addedAsset, undefined);
+    //   notStrictEqual(
+    //     await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
+    //     undefined,
+    //   );
+    // });
     it("Shouldn't add asset if asset is exists", async function () {
       await rejects(
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
+          decimals: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-exist");
@@ -280,6 +317,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
+          decimals: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-disabled");
@@ -291,7 +329,7 @@ describe("BridgeCore Admin tests", async function () {
       await rejects(
         bridge.lockAsset(
           bscChainId,
-          1,
+          Buffer.from("12", "ascii").toString("hex"),
           1,
           1000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -305,7 +343,14 @@ describe("BridgeCore Admin tests", async function () {
     it("Shouldn't unlock asset if bridge is disabled", async function () {
       const signature = await Tezos.signer.sign(bscChainId);
       await rejects(
-        bridge.unlockAsset(bscChainId, 1, 1, 1000, alice.pkh, signature.sig),
+        bridge.unlockAsset(
+          bscChainId,
+          Buffer.from("12", "ascii").toString("hex"),
+          1,
+          1000,
+          alice.pkh,
+          signature.sig,
+        ),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-disabled");
           return true;
@@ -347,7 +392,7 @@ describe("BridgeCore Admin tests", async function () {
       await rejects(
         bridge.lockAsset(
           bscChainId,
-          1,
+          Buffer.from("12", "ascii").toString("hex"),
           0,
           1000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -361,7 +406,14 @@ describe("BridgeCore Admin tests", async function () {
     it("Shouldn't unlock asset if bridge is disabled", async function () {
       const signature = await Tezos.signer.sign(bscChainId);
       await rejects(
-        bridge.unlockAsset(bscChainId, 1, 0, 1000, alice.pkh, signature.sig),
+        bridge.unlockAsset(
+          bscChainId,
+          Buffer.from("12", "ascii").toString("hex"),
+          0,
+          1000,
+          alice.pkh,
+          signature.sig,
+        ),
         err => {
           strictEqual(err.message, "Bridge-core/asset-disabled");
           return true;
@@ -383,6 +435,46 @@ describe("BridgeCore Admin tests", async function () {
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(0);
       strictEqual(asset.enabled, true);
+    });
+  });
+  describe("Testing entrypoint: Remove_asset", async function () {
+    before(async () => {
+      Tezos.setSignerProvider(signerAlice);
+
+      const lockId_7 = lockIdToBytes("00ffffffffffffffffffffffffffff07");
+
+      const keccakBytes = toBytes({
+        lockId: lockId_7,
+        recipient: bob.pkh,
+        amount: 10000,
+        chainFromId: bscChainId,
+        assetType: "wrapped",
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
+      });
+      const signature = await signerSecp.sign(keccakBytes);
+      await bridge.unlockAsset(
+        bscChainId,
+        lockId_7,
+        0,
+        10000,
+        bob.pkh,
+        signature.sig,
+      );
+    });
+    it("Shouldn't remove asset if the user is not bridge manager", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(bridge.removeAsset(0, alice.pkh), err => {
+        strictEqual(err.message, "Bridge-core/not-manager");
+        return true;
+      });
+    });
+    it("Should allow remove fa12 asset", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await bridge.removeAsset(0, alice.pkh);
+      await bridge.updateStorage();
+      const asset = await bridge.storage.bridge_assets.get(0);
+      strictEqual(asset, undefined);
     });
   });
 });

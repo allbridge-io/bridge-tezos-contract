@@ -4,10 +4,11 @@ const { migrate } = require("../../scripts/helpers");
 const { confirmOperation } = require("../../scripts/confirmation");
 const { tzip16 } = require("@taquito/tzip16");
 const bridgeStorage = require("../storage/bridgeCore");
-
+const tokenStorage = require("../storage/wrappedToken");
 const FeeOracle = require("./feeOracleWrapper");
 const Validator = require("./validatorWrapper");
 const Staking = require("./stakingWrapper");
+const WrappedToken = require("./wrappedTokenWrapper");
 
 module.exports = class BridgeCore {
   address;
@@ -27,6 +28,8 @@ module.exports = class BridgeCore {
     this.contract = await Tezos.contract.at(deployedContract, tzip16);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
+    tokenStorage.bridge = this.address;
+    this.wrappedToken = await new WrappedToken().init(this.address);
 
     this.staking = await new Staking().init(params, this.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
@@ -74,29 +77,31 @@ module.exports = class BridgeCore {
     switch (assetType) {
       case "fa12":
         operation = await this.contract.methods
-          .add_asset("fa12", params.tokenAddress, null)
+          .add_asset("fa12", params.tokenAddress, params.decimals)
           .send();
         break;
       case "fa2":
         operation = await this.contract.methods
-          .add_asset("fa2", params.tokenAddress, params.tokenId, null)
+          .add_asset(
+            "fa2",
+            params.tokenAddress,
+            params.tokenId,
+            params.decimals,
+          )
           .send();
         break;
       case "tez":
         operation = await this.contract.methods
-          .add_asset("tez", null, null)
+          .add_asset("tez", null, params.decimals)
           .send();
         break;
       case "wrapped":
         operation = await this.contract.methods
           .add_asset(
             "wrapped",
-            params.chainId,
             params.tokenAddress,
-            params.symbol,
-            params.name,
+            params.tokenId,
             params.decimals,
-            params.icon,
           )
           .send();
         break;
@@ -113,6 +118,12 @@ module.exports = class BridgeCore {
   async unlockAsset(chainId, lockId, assetId, amount, receiver, signature) {
     const operation = await this.contract.methods
       .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async removeAsset(assetId, receiver) {
+    const operation = await this.contract.methods
+      .remove_asset(assetId, receiver)
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

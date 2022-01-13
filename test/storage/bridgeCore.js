@@ -13,11 +13,6 @@ module.exports = {
   asset_count: 0,
   bridge_assets: MichelsonMap.fromLiteral({}),
   bridge_asset_ids: MichelsonMap.fromLiteral({}),
-  wrapped_token_count: 0,
-  wrapped_token_infos: MichelsonMap.fromLiteral({}),
-  wrapped_token_ids: MichelsonMap.fromLiteral({}),
-  ledger: MichelsonMap.fromLiteral({}),
-  allowances: MichelsonMap.fromLiteral({}),
   enabled: true,
   metadata: MichelsonMap.fromLiteral({
     "": Buffer.from("tezos-storage:meta", "ascii").toString("hex"),
@@ -144,5 +139,4 @@ module.exports = {
       "ascii",
     ).toString("hex"),
   }),
-  token_metadata: MichelsonMap.fromLiteral({}),
 };
