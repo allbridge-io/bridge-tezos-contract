@@ -4,7 +4,7 @@ const network = envJs.network;
 const env = process.env;
 const bridgeStorage = require("../storage/bridgeCore");
 
-module.exports = async (tezos) => {
+module.exports = async tezos => {
   const sender = await tezos.signer.publicKeyHash();
   const validatorAddress = require("../builds/validator.json").networks[
     network
@@ -18,7 +18,7 @@ module.exports = async (tezos) => {
   bridgeStorage.validator = validatorAddress;
   bridgeStorage.fee_oracle = oracleAddress;
   bridgeStorage.fee_collector = env.FEE_COLLECTOR;
-  bridgeStorage.approved_claimers = [];
+  bridgeStorage.approved_claimer = env.APPROVED_CLAIMER;
 
   const bridgeAddress = await migrate(tezos, "bridge_core", bridgeStorage);
 
