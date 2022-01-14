@@ -1,32 +1,32 @@
 const { Parser, packDataBytes } = require("@taquito/michel-codec");
-function fromExp(n) {
-  var sign = +n < 0 ? "-" : "",
-    toStr = n.toString();
-  if (!/e/i.test(toStr)) {
-    return n;
+function fromExp(s) {
+  function add(x, y) {
+    var c = 0,
+      r = [];
+    var x = x.split("").map(Number);
+    var y = y.split("").map(Number);
+    while (x.length || y.length) {
+      var s = (x.pop() || 0) + (y.pop() || 0) + c;
+      r.unshift(s < 10 ? s : s - 10);
+      c = s < 10 ? 0 : 1;
+    }
+    if (c) r.unshift(c);
+    return r.join("");
   }
-  var [lead, decimal, pow] = n
-    .toString()
-    .replace(/^-/, "")
-    .replace(/^([0-9]+)(e.*)/, "$1.$2")
-    .split(/e|\./);
-  return +pow < 0
-    ? sign +
-        "0." +
-        "0".repeat(Math.max(Math.abs(pow) - 1 || 0, 0)) +
-        lead +
-        decimal
-    : sign +
-        lead +
-        (+pow >= decimal.length
-          ? decimal + "0".repeat(Math.max(+pow - decimal.length || 0, 0))
-          : decimal.slice(0, +pow) + "." + decimal.slice(+pow));
+
+  var dec = "0";
+  s.split("").forEach(function (chr) {
+    var n = parseInt(chr, 16);
+    for (var t = 8; t; t >>= 1) {
+      dec = add(dec, dec);
+      if (n & t) dec = add(dec, "1");
+    }
+  });
+  return dec;
 }
 module.exports = function (lockIdHex) {
   const parser = new Parser();
-  const dataJSON = parser.parseMichelineExpression(
-    fromExp(parseInt(lockIdHex, 16)).toString(),
-  );
+  const dataJSON = parser.parseMichelineExpression(fromExp(lockIdHex));
   const typeJSON = parser.parseMichelineExpression("nat");
   const packed = packDataBytes(dataJSON, typeJSON);
   return packed.bytes;
