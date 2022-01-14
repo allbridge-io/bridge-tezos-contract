@@ -26,15 +26,30 @@ module.exports = class WrappedToken {
   async updateStorage() {
     this.storage = await this.contract.storage();
   }
-
-  async approveToken(operator, owner = null, token_id = 0) {
+  async mint(amount, tokenId, recipient) {
+    const operation = await this.contract.methods
+      .mint([{ token_id: tokenId, recipient: recipient, amount: amount }])
+      .send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async burn(amount, tokenId, account) {
+    const operation = await this.contract.methods
+      .burn(tokenId, account, amount)
+      .send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async сhangeAddress(typeAddress, address) {
+    const operation = await this.contract.methods[typeAddress](address).send();
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async updateOperator(action, owner, operator, tokenId = 0) {
     const operation = await this.contract.methods
       .update_operators([
         {
-          add_operator: {
+          [action]: {
             owner: owner,
             operator: operator,
-            token_id: token_id,
+            token_id: tokenId,
           },
         },
       ])
@@ -63,9 +78,10 @@ module.exports = class WrappedToken {
     await this.updateStorage();
 
     try {
-      const account = await this.storage.account_info.get(address);
-
-      const balance = await account.balances.get(token_id.toString());
+      const balance = await this.storage.ledger.get([
+        address,
+        this.tokenId.toString(),
+      ]);
       return balance.toNumber();
     } catch (e) {
       return 0;

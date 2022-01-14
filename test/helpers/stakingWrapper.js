@@ -13,13 +13,11 @@ module.exports = class Staking {
   constructor() {}
   async init(params = false, bridgeAddress = alice.pkh) {
     if (params) {
-      stakingStorage.periods = [
-        {
-          start_period: params.startPeriod,
-          end_period: params.endPeriod,
-          abr_per_sec_f: params.abrPerSec,
-        },
-      ];
+      stakingStorage.period = {
+        start_period: params.startPeriod,
+        end_period: params.endPeriod,
+        abr_per_sec_f: params.abrPerSec,
+      };
     }
     stakingStorage.deposit_token.address = bridgeAddress;
 

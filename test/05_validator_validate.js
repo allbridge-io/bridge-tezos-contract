@@ -9,6 +9,7 @@ const Validator = require("./helpers/validatorWrapper");
 
 const { alice, bob } = require("../scripts/sandbox/accounts");
 const toBytes = require("../scripts/toBytesForSign");
+const lockIdToBytes = require("../scripts/lockIdToBytes");
 
 describe("BridgeValidator Validate tests", async function () {
   let validator;
@@ -30,7 +31,7 @@ describe("BridgeValidator Validate tests", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         validator.validateLock(
-          0,
+          lockIdToBytes("00ffffffffffffffffffffffffffff00"),
           alice.pkh,
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -48,7 +49,7 @@ describe("BridgeValidator Validate tests", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         validator.validateLock(
-          0,
+          lockIdToBytes("00ffffffffffffffffffffffffffff00"),
           alice.pkh,
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -69,7 +70,7 @@ describe("BridgeValidator Validate tests", async function () {
       const lockAmount = 10000;
 
       await validator.validateLock(
-        0,
+        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
         bob.pkh,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -78,14 +79,16 @@ describe("BridgeValidator Validate tests", async function () {
         tokenAddress,
       );
       await validator.updateStorage();
-      const newLock = await validator.storage.validated_locks.get(0);
+      const newLock = await validator.storage.validated_locks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
+      );
       notStrictEqual(newLock, undefined);
     });
     it("Should validate lock fa2 asset", async function () {
       const lockAmount = 10000;
 
       await validator.validateLock(
-        1,
+        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
         bob.pkh,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -95,13 +98,15 @@ describe("BridgeValidator Validate tests", async function () {
         0,
       );
       await validator.updateStorage();
-      const newLock = await validator.storage.validated_locks.get(1);
+      const newLock = await validator.storage.validated_locks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
+      );
       notStrictEqual(newLock, undefined);
     });
     it("Should validate lock tez asset", async function () {
       const lockAmount = 10000;
       await validator.validateLock(
-        2,
+        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
         bob.pkh,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -109,29 +114,33 @@ describe("BridgeValidator Validate tests", async function () {
         "tez",
       );
       await validator.updateStorage();
-      const newLock = await validator.storage.validated_locks.get(2);
+      const newLock = await validator.storage.validated_locks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
+      );
       notStrictEqual(newLock, undefined);
     });
     it("Should validate lock wrapped asset", async function () {
       const lockAmount = 10000;
       await validator.validateLock(
-        3,
+        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
         bob.pkh,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         bscChainId,
         "wrapped",
-        Buffer.from(tokenAddress, "ascii").toString("hex"),
-        bscChainId,
+        alice.pkh,
+        0,
       );
       await validator.updateStorage();
-      const newLock = await validator.storage.validated_locks.get(3);
+      const newLock = await validator.storage.validated_locks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
+      );
       notStrictEqual(newLock, undefined);
     });
     it("Shouldn't validate if lock is validated", async function () {
       await rejects(
         validator.validateLock(
-          0,
+          lockIdToBytes("00ffffffffffffffffffffffffffff00"),
           bob.pkh,
           10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -154,7 +163,7 @@ describe("BridgeValidator Validate tests", async function () {
       );
       await rejects(
         validator.validateUnlock(
-          0,
+          lockIdToBytes("00ffffffffffffffffffffffffffff00"),
           alice.pkh,
           1111111,
           tezosChainId,
@@ -175,7 +184,7 @@ describe("BridgeValidator Validate tests", async function () {
       );
       await rejects(
         validator.validateUnlock(
-          0,
+          lockIdToBytes("00ffffffffffffffffffffffffffff00"),
           alice.pkh,
           1111111,
           tezosChainId,
@@ -193,7 +202,7 @@ describe("BridgeValidator Validate tests", async function () {
       Tezos.setSignerProvider(signerAlice);
       const unlockAmount = 10000;
       const keccakBytes = toBytes({
-        lockId: 0,
+        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
@@ -204,7 +213,7 @@ describe("BridgeValidator Validate tests", async function () {
 
       const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
-        0,
+        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
         alice.pkh,
         unlockAmount,
         bscChainId,
@@ -213,13 +222,15 @@ describe("BridgeValidator Validate tests", async function () {
         tokenAddress,
       );
       await validator.updateStorage();
-      const newUnlock = await validator.storage.validated_unlocks.get(0);
+      const newUnlock = await validator.storage.validated_unlocks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
+      );
       notStrictEqual(newUnlock, undefined);
     });
     it("Should validate unlock fa2 asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = await toBytes({
-        lockId: 1,
+        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff01"),
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
@@ -231,7 +242,7 @@ describe("BridgeValidator Validate tests", async function () {
 
       const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
-        1,
+        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
         alice.pkh,
         unlockAmount,
         bscChainId,
@@ -241,13 +252,15 @@ describe("BridgeValidator Validate tests", async function () {
         0,
       );
       await validator.updateStorage();
-      const newUnlock = await validator.storage.validated_unlocks.get(1);
+      const newUnlock = await validator.storage.validated_unlocks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
+      );
       notStrictEqual(newUnlock, undefined);
     });
     it("Should validate unlock tez asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = await toBytes({
-        lockId: 2,
+        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff02"),
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
@@ -256,7 +269,7 @@ describe("BridgeValidator Validate tests", async function () {
 
       const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
-        2,
+        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
         alice.pkh,
         unlockAmount,
         bscChainId,
@@ -264,34 +277,39 @@ describe("BridgeValidator Validate tests", async function () {
         "tez",
       );
       await validator.updateStorage();
-      const newUnlock = await validator.storage.validated_unlocks.get(2);
+      const newUnlock = await validator.storage.validated_unlocks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
+      );
       notStrictEqual(newUnlock, undefined);
     });
     it("Should validate unlock wrapped asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = await toBytes({
-        lockId: 3,
+        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff03"),
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
         assetType: "wrapped",
         chainId: bscChainId,
-        tokenAddress: Buffer.from(tokenAddress, "ascii").toString("hex"),
+        tokenAddress: alice.pkh,
+        tokenId: 0,
       });
 
       const signature = await signerSecp.sign(keccakBytes);
       await validator.validateUnlock(
-        3,
+        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
         alice.pkh,
         unlockAmount,
         bscChainId,
         signature.sig,
         "wrapped",
-        Buffer.from(tokenAddress, "ascii").toString("hex"),
-        bscChainId,
+        alice.pkh,
+        0,
       );
       await validator.updateStorage();
-      const newUnlock = await validator.storage.validated_unlocks.get(3);
+      const newUnlock = await validator.storage.validated_unlocks.get(
+        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
+      );
       notStrictEqual(newUnlock, undefined);
     });
     it("Shouldn't validate if unlock is validated", async function () {
@@ -300,14 +318,14 @@ describe("BridgeValidator Validate tests", async function () {
       );
       await rejects(
         validator.validateUnlock(
-          3,
+          lockIdToBytes("00ffffffffffffffffffffffffffff03"),
           alice.pkh,
           10000,
           bscChainId,
           signature.sig,
           "wrapped",
-          Buffer.from(tokenAddress, "ascii").toString("hex"),
-          bscChainId,
+          alice.pkh,
+          0,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/unlock-already-exists");

@@ -31,7 +31,7 @@ module.exports = class BridgeCore {
     tokenStorage.bridge = this.address;
     this.wrappedToken = await new WrappedToken().init(this.address);
 
-    this.staking = await new Staking().init(params, this.address);
+    this.staking = await new Staking().init(params, this.wrappedToken.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
     await this.feeOracle.сhangeStaking(this.staking.address);
@@ -124,44 +124,6 @@ module.exports = class BridgeCore {
   async removeAsset(assetId, receiver) {
     const operation = await this.contract.methods
       .remove_asset(assetId, receiver)
-      .send();
-    await confirmOperation(Tezos, operation.hash);
-  }
-  async getBalance(address, tokenId) {
-    await this.updateStorage();
-    const balance = await this.storage.ledger.get([
-      address,
-      tokenId.toString(),
-    ]);
-
-    try {
-      return balance.toNumber();
-    } catch (e) {
-      return 0;
-    }
-  }
-  async transfer(from, receiver, amount) {
-    const operation = await this.contract.methods
-      .transfer([
-        {
-          from_: from,
-          txs: [{ to_: receiver, token_id: 0, amount: amount }],
-        },
-      ])
-      .send();
-    await confirmOperation(Tezos, operation.hash);
-  }
-  async updateOperator(action, owner, operator, tokenId) {
-    const operation = await this.contract.methods
-      .update_operators([
-        {
-          [action]: {
-            owner: owner,
-            operator: operator,
-            token_id: tokenId,
-          },
-        },
-      ])
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

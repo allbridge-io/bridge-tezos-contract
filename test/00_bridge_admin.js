@@ -1,4 +1,5 @@
 const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
+const { eve, dev } = require("../scripts/sandbox/accounts");
 const {
   rejects,
   strictEqual,
@@ -37,46 +38,8 @@ describe("BridgeCore Admin tests", async function () {
           icon: Buffer.from("").toString("hex"),
         }),
       );
-      const newAssetParam = {
-        assetType: "wrapped",
-        tokenId: 0,
-        tokenAddress: bridge.wrappedToken.address,
-        decimals: 6,
-      };
-      await bridge.addAsset(newAssetParam);
       // Tezos.setSignerProvider(signerBob);
       // await bridge.wrappedToken.approveToken(bridge.address, bob.pkh, 0);
-
-      const lockId_7 = lockIdToBytes("00ffffffffffffffffffffffffffff07");
-
-      const keccakBytes = toBytes({
-        lockId: lockId_7,
-        recipient: bob.pkh,
-        amount: 10000,
-        chainFromId: bscChainId,
-        assetType: "wrapped",
-        tokenId: 0,
-        tokenAddress: bridge.wrappedToken.address,
-      });
-      const signature = await signerSecp.sign(keccakBytes);
-
-      // await fa12Token.approveToken(bridge.address, 100000);
-
-      // await fa2Token.approveToken(
-      //   bridge.address,
-      //   100000,
-      //   bob.pkh,
-      //   fa2Token.tokenId,
-      // );
-      // Tezos.setSignerProvider(signerAlice);
-      await bridge.unlockAsset(
-        bscChainId,
-        lockId_7,
-        0,
-        10000,
-        bob.pkh,
-        signature.sig,
-      );
     } catch (e) {
       console.log(e);
     }
@@ -143,6 +106,7 @@ describe("BridgeCore Admin tests", async function () {
       await bridge.сhangeAddress("change_validator", bob.pkh);
       await bridge.updateStorage();
       strictEqual(bridge.storage.validator, bob.pkh);
+      await bridge.сhangeAddress("change_validator", bridge.validator.address);
     });
   });
   describe("Testing entrypoint: Change_fee_oracle", async function () {
@@ -158,6 +122,7 @@ describe("BridgeCore Admin tests", async function () {
       await bridge.сhangeAddress("change_fee_oracle", bob.pkh);
       await bridge.updateStorage();
       strictEqual(bridge.storage.fee_oracle, bob.pkh);
+      await bridge.сhangeAddress("change_fee_oracle", bridge.feeOracle.address);
     });
   });
   describe("Testing entrypoint: Change_fee_collector", async function () {
@@ -171,9 +136,9 @@ describe("BridgeCore Admin tests", async function () {
 
     it("Should allow change fee collector", async function () {
       Tezos.setSignerProvider(signerBob);
-      await bridge.сhangeAddress("change_fee_collector", bob.pkh);
+      await bridge.сhangeAddress("change_fee_collector", eve.pkh);
       await bridge.updateStorage();
-      strictEqual(bridge.storage.fee_collector, bob.pkh);
+      strictEqual(bridge.storage.fee_collector, eve.pkh);
     });
   });
   describe("Testing entrypoint: Change_claimer", async function () {
@@ -265,25 +230,25 @@ describe("BridgeCore Admin tests", async function () {
         undefined,
       );
     });
-    // it("Should allow add wrapped asset", async function () {
-    //   const prevAssetCount = bridge.storage.asset_count.toNumber();
+    it("Should allow add wrapped asset", async function () {
+      const prevAssetCount = bridge.storage.asset_count.toNumber();
 
-    //   const newAssetParam = {
-    //     assetType: "wrapped",
-    //     tokenId: 0,
-    //     tokenAddress: bridge.wrappedToken.address,
-    //     decimals: 6,
-    //   };
-    //   await bridge.addAsset(newAssetParam);
-    //   await bridge.updateStorage();
-    //   const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
-    //   strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
-    //   notStrictEqual(addedAsset, undefined);
-    //   notStrictEqual(
-    //     await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
-    //     undefined,
-    //   );
-    // });
+      const newAssetParam = {
+        assetType: "wrapped",
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
+        decimals: 6,
+      };
+      await bridge.addAsset(newAssetParam);
+      await bridge.updateStorage();
+      const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
+      strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
+      notStrictEqual(addedAsset, undefined);
+      notStrictEqual(
+        await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
+        undefined,
+      );
+    });
     it("Shouldn't add asset if asset is exists", async function () {
       await rejects(
         bridge.addAsset({
@@ -440,11 +405,69 @@ describe("BridgeCore Admin tests", async function () {
   describe("Testing entrypoint: Remove_asset", async function () {
     before(async () => {
       Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa12",
+        tokenAddress: fa12Token.address,
+        fee: 1,
+      });
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa2",
+        tokenAddress: fa2Token.address,
+        tokenId: 0,
+        fee: 1,
+      });
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "tez",
+        fee: 1,
+      });
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "wrapped",
+        tokenAddress: bridge.wrappedToken.address,
+        tokenId: 0,
+        fee: 1,
+      });
+      const lockAmount = 10000;
 
-      const lockId_7 = lockIdToBytes("00ffffffffffffffffffffffffffff07");
+      Tezos.setSignerProvider(signerBob);
+      await fa12Token.approveToken(bridge.address, lockAmount);
+
+      await fa2Token.approveToken(
+        bridge.address,
+        lockAmount,
+        bob.pkh,
+        fa2Token.tokenId,
+      );
+      await bridge.lockAsset(
+        bscChainId,
+        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
+        0,
+        lockAmount,
+        Buffer.from(alice.pkh, "ascii").toString("hex"),
+      );
+
+      await bridge.lockAsset(
+        bscChainId,
+        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
+        1,
+        lockAmount,
+        Buffer.from(alice.pkh, "ascii").toString("hex"),
+      );
+
+      await bridge.lockAsset(
+        bscChainId,
+        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
+        2,
+        0,
+        Buffer.from(alice.pkh, "ascii").toString("hex"),
+        lockAmount / 1e6,
+      );
+
+      Tezos.setSignerProvider(signerAlice);
+
+      const lockId = lockIdToBytes("00ffffffffffffffffffffffffffff00");
 
       const keccakBytes = toBytes({
-        lockId: lockId_7,
+        lockId: lockId,
         recipient: bob.pkh,
         amount: 10000,
         chainFromId: bscChainId,
@@ -455,8 +478,8 @@ describe("BridgeCore Admin tests", async function () {
       const signature = await signerSecp.sign(keccakBytes);
       await bridge.unlockAsset(
         bscChainId,
-        lockId_7,
-        0,
+        lockId,
+        3,
         10000,
         bob.pkh,
         signature.sig,
@@ -471,9 +494,44 @@ describe("BridgeCore Admin tests", async function () {
     });
     it("Should allow remove fa12 asset", async function () {
       Tezos.setSignerProvider(signerBob);
-      await bridge.removeAsset(0, alice.pkh);
+      const prevBalance = await fa12Token.getBalance(bridge.address);
+      const prevAsset = await bridge.storage.bridge_assets.get(0);
+
+      await bridge.removeAsset(0, dev.pkh);
       await bridge.updateStorage();
+      const devBalance = await fa12Token.getBalance(dev.pkh);
+      const bridgeBalance = await fa12Token.getBalance(bridge.address);
       const asset = await bridge.storage.bridge_assets.get(0);
+
+      strictEqual(asset, undefined);
+      strictEqual(devBalance, prevBalance);
+      strictEqual(bridgeBalance, 0);
+    });
+    it("Should allow remove fa2 asset", async function () {
+      Tezos.setSignerProvider(signerBob);
+      const prevBalance = await fa2Token.getBalance(bridge.address);
+      await bridge.removeAsset(1, dev.pkh);
+      await bridge.updateStorage();
+      const devBalance = await fa12Token.getBalance(dev.pkh);
+      const bridgeBalance = await fa12Token.getBalance(bridge.address);
+      const asset = await bridge.storage.bridge_assets.get(1);
+      strictEqual(asset, undefined);
+      strictEqual(devBalance, prevBalance);
+      strictEqual(bridgeBalance, 0);
+    });
+    it("Should allow remove Tez asset", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await bridge.removeAsset(2, alice.pkh);
+      await bridge.updateStorage();
+      const asset = await bridge.storage.bridge_assets.get(2);
+      strictEqual(asset, undefined);
+    });
+    it("Should allow remove wrapped asset", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await bridge.removeAsset(3, dev.pkh);
+      await bridge.updateStorage();
+
+      const asset = await bridge.storage.bridge_assets.get(3);
       strictEqual(asset, undefined);
     });
   });

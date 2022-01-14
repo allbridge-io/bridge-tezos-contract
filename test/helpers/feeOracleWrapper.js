@@ -1,5 +1,4 @@
 const { Tezos, signerAlice, alice } = require("../utils/cli");
-
 const { migrate } = require("../../scripts/helpers");
 const { confirmOperation } = require("../../scripts/confirmation");
 
@@ -66,8 +65,8 @@ module.exports = class Validator {
           case "wrapped":
             operation = await this.contract.methods[feeType](
               "wrapped",
-              value.chainId,
               value.tokenAddress,
+              value.tokenId,
               value.fee,
             ).send();
             break;
