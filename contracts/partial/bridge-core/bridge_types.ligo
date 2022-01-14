@@ -70,3 +70,5 @@ type unlock_asset_t     is [@layout:comb] record[
 ]
 
 type response_fee_t     is nat;
+
+type wabr_balance_t     is (address * nat)

@@ -34,7 +34,14 @@ function lock_asset(
       const burn_params : burn_params_t = record[
         token_id = token_.id;
         account = Tezos.sender;
-        amount = locked_amount
+        amount = lock_amount
+      ];
+      const mint_params : mint_params_t = list[
+        record[
+          token_id = token_.id;
+          recipient = s.fee_collector;
+          amount = fee
+        ]
       ];
       operations := list[
         Tezos.transaction(
@@ -44,12 +51,14 @@ function lock_asset(
             (Tezos.get_entrypoint_opt("%burn", token_.address) : option(contract(burn_params_t))),
             Errors.burn_etp_404)
         );
-        wrap_transfer(
-          Tezos.sender,
-          s.fee_collector,
-          fee,
-          asset.asset_type
-        )
+        Tezos.transaction(
+          mint_params,
+          0mutez,
+          unwrap(
+            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
+            Errors.mint_etp_404
+          )
+        );
       ]
      }
     | Tez -> {

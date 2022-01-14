@@ -142,12 +142,13 @@ function remove_asset(
     remove asset.asset_type from map s.bridge_asset_ids;
     remove params.asset_id from map s.bridge_assets;
 
-    const operations = list[
-      wrap_transfer(
+    const operations = case asset.asset_type of
+    | Wrapped(_) -> (nil: list(operation))
+    | _ -> list[wrap_transfer(
         Tezos.self_address,
         params.recipient,
         asset.locked_amount,
-        asset.asset_type
-      )
-    ];
+        asset.asset_type)
+      ]
+    end;
   } with (operations, s)

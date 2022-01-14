@@ -55,5 +55,5 @@ function burn(
     const ledger_key = (params.account, params.token_id);
     const account_balance = unwrap_or(s.ledger[ledger_key], 0n);
 
-    s.ledger[ledger_key] := get_nat_or_fail(account_balance - params.amount, Errors.not_nat);
+    s.ledger[ledger_key] := get_nat_or_fail(account_balance - params.amount, Errors.fa2_low_balance);
   } with s
