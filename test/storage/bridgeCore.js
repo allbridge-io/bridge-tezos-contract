@@ -13,6 +13,7 @@ module.exports = {
   asset_count: 0,
   bridge_assets: MichelsonMap.fromLiteral({}),
   bridge_asset_ids: MichelsonMap.fromLiteral({}),
+  pows: MichelsonMap.fromLiteral({}),
   enabled: true,
   metadata: MichelsonMap.fromLiteral({
     "": Buffer.from("tezos-storage:meta", "ascii").toString("hex"),
