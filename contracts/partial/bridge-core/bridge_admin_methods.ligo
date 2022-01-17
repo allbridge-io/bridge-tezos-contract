@@ -39,7 +39,7 @@ function change_fee_oracle(
   var s                 : storage_t)
                         : storage_t is
   block {
-    require(Tezos.sender = s.owner or Tezos.sender = s.bridge_manager, Errors.not_owner);
+    check_permission(s.bridge_manager, Errors.not_manager);
     s.fee_oracle := new_address;
   } with s
 
@@ -48,7 +48,7 @@ function change_fee_collector(
   var s                 : storage_t)
                         : storage_t is
   block {
-    require(Tezos.sender = s.owner or Tezos.sender = s.bridge_manager, Errors.not_owner);
+    check_permission(s.bridge_manager, Errors.not_manager);
     s.fee_collector := new_address;
   } with s
 
