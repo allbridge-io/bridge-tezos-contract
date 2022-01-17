@@ -17,7 +17,7 @@ type token_ids_map_t    is big_map(token_t, token_id_t)
 
 type token_metadata_t   is [@layout:comb] record [
   token_id                : token_id_t;
-  token_info              : map (string, bytes);
+  token_info              : map(string, bytes);
 ]
 
 type storage_t          is [@layout:comb] record [
@@ -34,11 +34,6 @@ type storage_t          is [@layout:comb] record [
 ]
 
 type return_t           is list(operation) * storage_t
-
-type update_minter_t    is [@layout:comb] record [
-  minter                  : address;
-  allowed                 : bool;
-]
 
 type new_token_t        is [@layout:comb] record [
   token                   : token_t;
