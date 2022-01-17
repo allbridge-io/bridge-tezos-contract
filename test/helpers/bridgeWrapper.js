@@ -127,4 +127,8 @@ module.exports = class BridgeCore {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
+  async addPow(pow, value) {
+    const operation = await this.contract.methods.add_pow(pow, value).send();
+    await confirmOperation(Tezos, operation.hash);
+  }
 };

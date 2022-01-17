@@ -38,8 +38,6 @@ describe("BridgeCore Admin tests", async function () {
           icon: Buffer.from("").toString("hex"),
         }),
       );
-      // Tezos.setSignerProvider(signerBob);
-      // await bridge.wrappedToken.approveToken(bridge.address, bob.pkh, 0);
     } catch (e) {
       console.log(e);
     }
@@ -64,10 +62,13 @@ describe("BridgeCore Admin tests", async function () {
   describe("Testing entrypoint: Change_bridge_manager", async function () {
     it("Shouldn't changing bridge manager if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-owner");
-        return true;
-      });
+      await rejects(
+        bridge.сhangeAddress("change_bridge_manager", bob.pkh),
+        err => {
+          strictEqual(err.message, "Bridge-core/not-owner");
+          return true;
+        },
+      );
     });
     it("Should allow change bridge manager", async function () {
       Tezos.setSignerProvider(signerBob);
@@ -80,10 +81,13 @@ describe("BridgeCore Admin tests", async function () {
   describe("Testing entrypoint: Change_stop_manager", async function () {
     it("Shouldn't changing stop manager if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-owner");
-        return true;
-      });
+      await rejects(
+        bridge.сhangeAddress("change_stop_manager", bob.pkh),
+        err => {
+          strictEqual(err.message, "Bridge-core/not-owner");
+          return true;
+        },
+      );
     });
 
     it("Should allow change stop manager", async function () {
@@ -96,7 +100,7 @@ describe("BridgeCore Admin tests", async function () {
   describe("Testing entrypoint: Change_validator", async function () {
     it("Shouldn't changing validator if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
+      await rejects(bridge.сhangeAddress("change_validator", bob.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
@@ -110,10 +114,10 @@ describe("BridgeCore Admin tests", async function () {
     });
   });
   describe("Testing entrypoint: Change_fee_oracle", async function () {
-    it("Shouldn't changing fee oracle if the user is not an owner", async function () {
+    it("Shouldn't changing fee oracle if the user is not an bridge manager", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-owner");
+      await rejects(bridge.сhangeAddress("change_fee_oracle", bob.pkh), err => {
+        strictEqual(err.message, "Bridge-core/not-manager");
         return true;
       });
     });
@@ -126,12 +130,15 @@ describe("BridgeCore Admin tests", async function () {
     });
   });
   describe("Testing entrypoint: Change_fee_collector", async function () {
-    it("Shouldn't changing fee collector if the user is not an owner", async function () {
+    it("Shouldn't changing fee collector if the user is not an bridge manager", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-owner");
-        return true;
-      });
+      await rejects(
+        bridge.сhangeAddress("change_fee_collector", bob.pkh),
+        err => {
+          strictEqual(err.message, "Bridge-core/not-manager");
+          return true;
+        },
+      );
     });
 
     it("Should allow change fee collector", async function () {
@@ -324,10 +331,10 @@ describe("BridgeCore Admin tests", async function () {
     });
   });
   describe("Testing entrypoint: Start_bridge", async function () {
-    it("Shouldn't start bridge if the user is not bridge manager", async function () {
+    it("Shouldn't start bridge if the user is not owner", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(bridge.startBridge(), err => {
-        strictEqual(err.message, "Bridge-core/not-manager");
+        strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
     });
@@ -533,6 +540,23 @@ describe("BridgeCore Admin tests", async function () {
 
       const asset = await bridge.storage.bridge_assets.get(3);
       strictEqual(asset, undefined);
+    });
+  });
+  describe("Testing entrypoint: Add_pow", async function () {
+    it("Shouldn't add pow if the user is not an bridge manager", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(bridge.addPow(5, 10 ** 5), err => {
+        strictEqual(err.message, "Bridge-core/not-manager");
+        return true;
+      });
+    });
+    it("Should allow add pow", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      await bridge.addPow(6, 10 ** 6);
+      await bridge.updateStorage();
+      const newPow = await bridge.storage.pows.get("6");
+      strictEqual(newPow.toNumber(), 10 ** 6);
     });
   });
 });
