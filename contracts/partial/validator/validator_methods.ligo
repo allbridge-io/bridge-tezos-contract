@@ -6,9 +6,7 @@ function validate_lock(
   block {
     (* Check sender is bridge-core conract *)
     check_permission(s.bridge, Errors.not_bridge);
-
-    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(nat)), Errors.wrong_lock_id);
-    require(unpacked_lock_id / Constants.foo = Constants.lock_version, Errors.wrong_lock_version);
+    check_lock_id(params.lock_id);
 
     assert_with_error(
       params.destination_chain_id =/= Constants.tezos_chain_id,
@@ -29,8 +27,7 @@ function validate_unlock(
   block {
     (* Check sender is bridge-core conract *)
     check_permission(s.bridge, Errors.not_bridge);
-    const unpacked_lock_id = unwrap((Bytes.unpack(params.lock_id) : option(nat)), Errors.wrong_lock_id);
-    require(unpacked_lock_id / Constants.foo = Constants.lock_version, Errors.wrong_lock_version);
+    check_lock_id(params.lock_id);
 
     (* Check if the unlock has been not validated earlier *)
     require_none(s.validated_unlocks[params.lock_id], Errors.unlock_exist);
