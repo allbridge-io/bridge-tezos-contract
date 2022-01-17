@@ -152,3 +152,12 @@ function remove_asset(
       ]
     end;
   } with (operations, s)
+
+function add_pow(
+  const params          : new_pow_t;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.bridge_manager, Errors.not_manager);
+    s.pows[params.pow] := params.value;
+  } with s

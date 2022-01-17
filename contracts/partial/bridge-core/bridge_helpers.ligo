@@ -61,35 +61,24 @@ function wrap_transfer(
         token_.address)
     end;
 
-function pow(
-  var value             : nat;
-  const p               : nat)
-                        : nat is
-  block {
-    var result := value;
-
-    for i := 2 to int(p)
-      block {
-      result := result * value;
-    }
-  } with result
-
 function to_precision(
   const value           : nat;
-  const precision       : nat)
+  const precision       : nat;
+  const pows            : pow_map_t)
                         : nat is
   if precision > Constants.power
-  then value / pow(10n, get_nat_or_fail(precision - Constants.power, Errors.not_nat))
+  then value / unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
   else if precision < Constants.power
-    then value * pow(10n, get_nat_or_fail(Constants.power - precision, Errors.not_nat))
+    then value * unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
     else value
 
 function from_precision(
   const value           : nat;
-  const precision       : nat)
+  const precision       : nat;
+  const pows            : pow_map_t)
                         : nat is
   if precision > Constants.power
-  then value * pow(10n, get_nat_or_fail(precision - Constants.power, Errors.not_nat))
+  then value * unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
   else if precision < Constants.power
-    then value / pow(10n, get_nat_or_fail(Constants.power - precision, Errors.not_nat))
+    then value / unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
     else value

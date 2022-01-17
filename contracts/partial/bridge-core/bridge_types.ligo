@@ -25,6 +25,8 @@ type asset_t            is [@layout:comb] record[
 type asset_map_t        is big_map(asset_id_t, asset_t)
 type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
 
+type pow_map_t          is big_map(nat, nat)
+
 type storage_t          is [@layout:comb] record[
   owner                   : address;
   bridge_manager          : address;
@@ -36,6 +38,7 @@ type storage_t          is [@layout:comb] record[
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   bridge_asset_ids        : asset_map_ids_t;
+  pows                    : pow_map_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
 ]
@@ -72,3 +75,8 @@ type unlock_asset_t     is [@layout:comb] record[
 type response_fee_t     is nat;
 
 type wabr_balance_t     is (address * nat)
+
+type new_pow_t          is [@layout:comb] record[
+  pow                     : nat;
+  value                   : nat;
+]
