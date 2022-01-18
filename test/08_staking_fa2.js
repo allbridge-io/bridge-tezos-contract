@@ -1,11 +1,13 @@
 const { Tezos, signerAlice, alice, bob, signerSecp } = require("./utils/cli");
 
 const { rejects, strictEqual } = require("assert");
-
+const { MichelsonMap } = require("@taquito/taquito");
 const Bridge = require("./helpers/bridgeWrapper");
 const { migrate } = require("../scripts/helpers");
 const { confirmOperation } = require("../scripts/confirmation");
 const toBytes = require("../scripts/toBytesForSign");
+
+const lockIdToBytes = require("../scripts/lockIdToBytes");
 
 const transferAmount = 1000;
 describe("Staking FA2 methods test", async function () {
@@ -18,37 +20,44 @@ describe("Staking FA2 methods test", async function () {
       bridge = await new Bridge().init();
       staking = bridge.staking;
 
+      await bridge.wrappedToken.createToken(
+        bscChainId,
+        Buffer.from("bscAddress", "ascii").toString("hex"),
+        MichelsonMap.fromLiteral({
+          symbol: Buffer.from("wABR").toString("hex"),
+          name: Buffer.from("Wrapped ABR").toString("hex"),
+          decimals: Buffer.from("6").toString("hex"),
+          icon: Buffer.from("").toString("hex"),
+        }),
+      );
       const wrappedAsset = {
         assetType: "wrapped",
-        chainId: bscChainId,
-        tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
-        symbol: Buffer.from("wABR").toString("hex"),
-        name: Buffer.from("Wrapped ABR").toString("hex"),
-        decimals: Buffer.from("6").toString("hex"),
-        icon: Buffer.from("").toString("hex"),
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
+        decimals: 6,
       };
-
       await bridge.addAsset(wrappedAsset);
+
       const keccakBytes = await toBytes({
-        lockId: 0,
+        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
         recipient: alice.pkh,
         amount: 10000,
         chainFromId: bscChainId,
         assetType: "wrapped",
-        chainId: bscChainId,
-        tokenAddress: Buffer.from("bscAddress", "ascii").toString("hex"),
+        tokenId: 0,
+        tokenAddress: bridge.wrappedToken.address,
       });
       const signature = await signerSecp.sign(keccakBytes);
 
       await bridge.unlockAsset(
         bscChainId,
-        0,
+        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
         0,
         10000,
         alice.pkh,
         signature.sig,
       );
-      await bridge.updateOperator(
+      await bridge.wrappedToken.updateOperator(
         "add_operator",
         alice.pkh,
         staking.address,

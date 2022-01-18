@@ -8,11 +8,11 @@
     "@taquito/tzip16": "^11.0.1",
     "dotenv": "^10.0.0",
     "fs": "0.0.2",
-    "yargs": "^17.0.1",
+    "keccak256": "^1.0.3",
     "mocha": "^9.0.0",
-    "keccak256": "^1.0.3"
+    "yargs": "^17.0.1"
   },
-   "engines": {
+  "engines": {
     "yarn": "^1.22.10"
   },
   "scripts": {

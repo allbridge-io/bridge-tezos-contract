@@ -15,18 +15,12 @@ function add_reward(
     check_permission(s.owner, Errors.not_owner);
 
     require(params.end_period > params.start_period, Errors.wrong_period_time);
-    require(params.start_period >= Tezos.now, Errors.overdue_period);
+    require(params.start_period >= Tezos.now, Errors.earlier_period);
 
     require(params.amount > 0n, Errors.zero_period_reward);
 
-    for element in set s.periods
-    block {
-      require(
-        (params.start_period > element.end_period and params.start_period > element.start_period)
-          or (params.start_period < element.end_period and params.end_period < element.start_period),
-        Errors.intersected_period
-      );
-    };
+    require(Tezos.now >= s.period.end_period, Errors.period_not_over);
+
     const period_time = params.end_period - params.start_period;
     const reward_per_sec_f = abs(params.amount * Constants.precision / period_time);
 
@@ -35,7 +29,8 @@ function add_reward(
       end_period = params.end_period;
       abr_per_sec_f = reward_per_sec_f
     ];
-    s.periods := Set.add(new_period, s.periods);
+
+    s.period := new_period;
 
     const operations = list[
       transfer_fa2(

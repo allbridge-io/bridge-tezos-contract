@@ -1,10 +1,10 @@
-[@view] function get_abr_supply(
+[@view] function get_xabr_supply(
   const _unit           : unit;
   const s               : storage_t)
                         : nat is
   s.total_supply
 
-[@view] function get_abr_balance(
+[@view] function get_xabr_balance(
   const address_        : address;
   const s               : storage_t)
                         : nat is

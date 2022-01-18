@@ -4,10 +4,11 @@ const { migrate } = require("../../scripts/helpers");
 const { confirmOperation } = require("../../scripts/confirmation");
 const { tzip16 } = require("@taquito/tzip16");
 const bridgeStorage = require("../storage/bridgeCore");
-
+const tokenStorage = require("../storage/wrappedToken");
 const FeeOracle = require("./feeOracleWrapper");
 const Validator = require("./validatorWrapper");
 const Staking = require("./stakingWrapper");
+const WrappedToken = require("./wrappedTokenWrapper");
 
 module.exports = class BridgeCore {
   address;
@@ -27,8 +28,10 @@ module.exports = class BridgeCore {
     this.contract = await Tezos.contract.at(deployedContract, tzip16);
     this.address = deployedContract;
     this.storage = await this.updateStorage();
+    tokenStorage.bridge = this.address;
+    this.wrappedToken = await new WrappedToken().init(this.address);
 
-    this.staking = await new Staking().init(params, this.address);
+    this.staking = await new Staking().init(params, this.wrappedToken.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
     await this.feeOracle.сhangeStaking(this.staking.address);
@@ -47,12 +50,6 @@ module.exports = class BridgeCore {
     await confirmOperation(Tezos, operation.hash);
   }
 
-  async updateClaimers(typeOperation, address) {
-    const operation = await this.contract.methods[typeOperation](
-      address,
-    ).send();
-    await confirmOperation(Tezos, operation.hash);
-  }
   async stopBridge() {
     const operation = await this.contract.methods.stop_bridge("unit").send();
     await confirmOperation(Tezos, operation.hash);
@@ -80,29 +77,31 @@ module.exports = class BridgeCore {
     switch (assetType) {
       case "fa12":
         operation = await this.contract.methods
-          .add_asset("fa12", params.tokenAddress, null)
+          .add_asset("fa12", params.tokenAddress, params.decimals)
           .send();
         break;
       case "fa2":
         operation = await this.contract.methods
-          .add_asset("fa2", params.tokenAddress, params.tokenId, null)
+          .add_asset(
+            "fa2",
+            params.tokenAddress,
+            params.tokenId,
+            params.decimals,
+          )
           .send();
         break;
       case "tez":
         operation = await this.contract.methods
-          .add_asset("tez", null, null)
+          .add_asset("tez", null, params.decimals)
           .send();
         break;
       case "wrapped":
         operation = await this.contract.methods
           .add_asset(
             "wrapped",
-            params.chainId,
             params.tokenAddress,
-            params.symbol,
-            params.name,
+            params.tokenId,
             params.decimals,
-            params.icon,
           )
           .send();
         break;
@@ -122,42 +121,14 @@ module.exports = class BridgeCore {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async getBalance(address, tokenId) {
-    await this.updateStorage();
-    const balance = await this.storage.ledger.get([
-      address,
-      tokenId.toString(),
-    ]);
-
-    try {
-      return balance.toNumber();
-    } catch (e) {
-      return 0;
-    }
-  }
-  async transfer(from, receiver, amount) {
+  async removeAsset(assetId, receiver) {
     const operation = await this.contract.methods
-      .transfer([
-        {
-          from_: from,
-          txs: [{ to_: receiver, token_id: 0, amount: amount }],
-        },
-      ])
+      .remove_asset(assetId, receiver)
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async updateOperator(action, owner, operator, tokenId) {
-    const operation = await this.contract.methods
-      .update_operators([
-        {
-          [action]: {
-            owner: owner,
-            operator: operator,
-            token_id: tokenId,
-          },
-        },
-      ])
-      .send();
+  async addPow(pow, value) {
+    const operation = await this.contract.methods.add_pow(pow, value).send();
     await confirmOperation(Tezos, operation.hash);
   }
 };

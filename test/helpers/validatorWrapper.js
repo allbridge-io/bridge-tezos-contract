@@ -101,8 +101,8 @@ module.exports = class Validator {
             receiver,
             amount,
             "wrapped",
-            tokenId,
             tokenAddress,
+            tokenId,
             destinationChainId,
           )
           .send();
@@ -171,8 +171,8 @@ module.exports = class Validator {
             amount,
             chainFromId,
             "wrapped",
-            tokenId,
             tokenAddress,
+            tokenId,
             signature,
           )
           .send();
