@@ -1,11 +1,12 @@
 const { Tezos, signerAlice, signerBob, signerSecp } = require("./utils/cli");
 const { rejects, strictEqual, deepStrictEqual } = require("assert");
-const { BigNumber } = require("bignumber.js");
+const { MichelsonMap } = require("@taquito/taquito");
 const { alice, bob } = require("../scripts/sandbox/accounts");
 const BridgeCore = require("./helpers/bridgeWrapper");
 const toBytes = require("../scripts/toBytesForSign");
 const accuracy = 10 ** 6;
 
+const lockIdToBytes = require("../scripts/lockIdToBytes");
 async function dtFormat(Tezos, sec, minus = false) {
   const ts = await Tezos.rpc.getBlockHeader();
   let currentTime = Date.parse(ts.timestamp) / 1000;
@@ -15,7 +16,6 @@ async function dtFormat(Tezos, sec, minus = false) {
     currentTime += sec;
   }
   return currentTime.toString();
-
 }
 function dayToSec(days) {
   return days * 86400;
@@ -41,67 +41,103 @@ describe("Staking tests", async function () {
     } catch (e) {
       console.log(e);
     }
+    await bridge.wrappedToken.createToken(
+      Buffer.from("56", "ascii").toString("hex"),
+      Buffer.from("bscAddress", "ascii").toString("hex"),
+      MichelsonMap.fromLiteral({
+        symbol: Buffer.from("wABR").toString("hex"),
+        name: Buffer.from("Wrapped ABR").toString("hex"),
+        decimals: Buffer.from("6").toString("hex"),
+        icon: Buffer.from("").toString("hex"),
+      }),
+    );
     const newAsset = {
       assetType: "wrapped",
-      chainId: abrChainId,
-      tokenAddress: Buffer.from("abrAddress", "ascii").toString("hex"),
-      symbol: Buffer.from("wABR").toString("hex"),
-      name: Buffer.from("Wrapped ABR").toString("hex"),
-      decimals: Buffer.from("6").toString("hex"),
-      icon: Buffer.from("").toString("hex"),
+      tokenId: 0,
+      tokenAddress: bridge.wrappedToken.address,
+      decimals: 6,
     };
     await bridge.addAsset(newAsset);
     await bridge.updateStorage();
 
     let keccakBytes = toBytes({
-      lockId: 0,
+      lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
       recipient: alice.pkh,
       amount: 60000,
       chainFromId: abrChainId,
       assetType: "wrapped",
-      chainId: abrChainId,
-      tokenAddress: Buffer.from("abrAddress", "ascii").toString("hex"),
+      tokenId: 0,
+      tokenAddress: bridge.wrappedToken.address,
     });
     let signature = await signerSecp.sign(keccakBytes);
-    await bridge.unlockAsset(abrChainId, 0, 0, 60000, alice.pkh, signature.sig);
+    await bridge.unlockAsset(
+      abrChainId,
+      lockIdToBytes("00ffffffffffffffffffffffffffff00"),
+      0,
+      60000,
+      alice.pkh,
+      signature.sig,
+    );
 
     await bridge.updateStorage();
-    await bridge.updateOperator("add_operator", alice.pkh, staking.address, 0);
+    await bridge.wrappedToken.updateOperator(
+      "add_operator",
+      alice.pkh,
+      staking.address,
+      0,
+    );
 
     keccakBytes = toBytes({
-      lockId: 1,
+      lockId: lockIdToBytes("00ffffffffffffffffffffffffffff01"),
       recipient: bob.pkh,
       amount: 10000,
       chainFromId: abrChainId,
       assetType: "wrapped",
-      chainId: abrChainId,
-      tokenAddress: Buffer.from("abrAddress", "ascii").toString("hex"),
-    });
-    signature = await signerSecp.sign(keccakBytes);
-    Tezos.setSignerProvider(signerBob);
-    await bridge.unlockAsset(abrChainId, 1, 0, 10000, bob.pkh, signature.sig);
-    await bridge.updateOperator("add_operator", bob.pkh, staking.address, 0);
-
-    keccakBytes = toBytes({
-      lockId: 2,
-      recipient: staking.address,
-      amount: 10000,
-      chainFromId: abrChainId,
-      assetType: "wrapped",
-      chainId: abrChainId,
-      tokenAddress: Buffer.from("abrAddress", "ascii").toString("hex"),
+      tokenId: 0,
+      tokenAddress: bridge.wrappedToken.address,
     });
     signature = await signerSecp.sign(keccakBytes);
     Tezos.setSignerProvider(signerBob);
     await bridge.unlockAsset(
       abrChainId,
-      2,
+      lockIdToBytes("00ffffffffffffffffffffffffffff01"),
+      0,
+      10000,
+      bob.pkh,
+      signature.sig,
+    );
+    await bridge.wrappedToken.updateOperator(
+      "add_operator",
+      bob.pkh,
+      staking.address,
+      0,
+    );
+
+    keccakBytes = toBytes({
+      lockId: lockIdToBytes("00ffffffffffffffffffffffffffff02"),
+      recipient: staking.address,
+      amount: 10000,
+      chainFromId: abrChainId,
+      assetType: "wrapped",
+      tokenId: 0,
+      tokenAddress: bridge.wrappedToken.address,
+    });
+    signature = await signerSecp.sign(keccakBytes);
+    Tezos.setSignerProvider(signerBob);
+    await bridge.unlockAsset(
+      abrChainId,
+      lockIdToBytes("00ffffffffffffffffffffffffffff02"),
       0,
       10000,
       staking.address,
       signature.sig,
     );
-    await bridge.updateOperator("add_operator", bob.pkh, staking.address, 0);
+    await bridge.wrappedToken.updateOperator(
+      "add_operator",
+      bob.pkh,
+      staking.address,
+      0,
+    );
   });
 
   describe("Testing entrypoint: Deposit", async function () {
@@ -116,7 +152,7 @@ describe("Staking tests", async function () {
       await staking.deposit(10000);
       await staking.updateStorage();
       const aliceBalance = await staking.getBalance(alice.pkh);
-      const burnBalance = await bridge.getBalance(
+      const burnBalance = await bridge.wrappedToken.getBalance(
         "tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg",
         0,
       );
@@ -130,8 +166,8 @@ describe("Staking tests", async function () {
     });
     it("Should allow deposit 10000 bob", async function () {
       await staking.addReward(
-        await dtFormat(Tezos, 5),
-        await dtFormat(Tezos, 60),
+        await dtFormat(Tezos, 10),
+        await dtFormat(Tezos, 600),
         50000,
       );
       Tezos.setSignerProvider(signerBob);

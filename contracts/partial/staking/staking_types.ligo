@@ -7,14 +7,12 @@ type reward_period_t    is [@layout:comb] record[
 type ledger_t           is big_map(address, nat)
 type allowances_t       is big_map(address, set(address))
 
-type period_set_t       is set(reward_period_t)
-
 type storage_t          is [@layout:comb] record[
   owner                   : address;
   deposit_token           : token_t;
   ledger                  : ledger_t;
   allowances              : allowances_t;
-  periods                 : period_set_t;
+  period                  : reward_period_t;
   total_supply            : nat;
   total_underlying_f      : nat;
   last_update_time        : timestamp;

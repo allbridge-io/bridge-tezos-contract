@@ -4,8 +4,7 @@ const envJs = require("../env");
 const network = envJs.network;
 const env = process.env;
 
-module.exports = async (tezos) => {
-  const sender = await tezos.signer.publicKeyHash();
+module.exports = async tezos => {
   const bridgeAddress = require("../builds/bridge_core.json").networks[network][
     "bridge_core"
   ];

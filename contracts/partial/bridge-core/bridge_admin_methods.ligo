@@ -39,7 +39,7 @@ function change_fee_oracle(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, Errors.not_owner);
+    check_permission(s.bridge_manager, Errors.not_manager);
     s.fee_oracle := new_address;
   } with s
 
@@ -48,26 +48,17 @@ function change_fee_collector(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.owner, Errors.not_owner);
+    check_permission(s.bridge_manager, Errors.not_manager);
     s.fee_collector := new_address;
   } with s
 
-function add_claimer(
+function change_claimer(
   const address_        : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.approved_claimers := Set.add(address_, s.approved_claimers)
-  } with s
-
-function remove_claimer(
-  const address_        : address;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.approved_claimers := Set.remove(address_, s.approved_claimers)
+    s.approved_claimer := address_;
   } with s
 
 (* Stop bridge protocol entrypoint *)
@@ -84,7 +75,7 @@ function start_bridge(
   var s                 : storage_t)
                         : storage_t is
   block {
-    check_permission(s.stop_manager, Errors.not_manager);
+    check_permission(s.owner, Errors.not_owner);
     s.enabled := True;
   } with s
 
@@ -126,30 +117,10 @@ function add_asset(
 
     var new_asset := record[
       asset_type = params.asset_type;
+      decimals = params.decimals;
       locked_amount = 0n;
       enabled = True;
     ];
-    case params.asset_type of
-    | Wrapped(info) -> {
-      (* Check if the asset exists *)
-      require_none(s.wrapped_token_ids[info], Errors.wrapped_exist);
-
-      s.wrapped_token_infos[s.wrapped_token_count] := info;
-      s.wrapped_token_ids[info] := s.wrapped_token_count;
-      const metadata_params = unwrap(params.metadata, Errors.not_metadata);
-      const token_info = map[
-        "symbol" -> metadata_params.symbol;
-        "name" -> metadata_params.name;
-        "decimals" -> metadata_params.decimals;
-        "icon" -> metadata_params.icon
-      ];
-      s.token_metadata[s.wrapped_token_count] := record[
-        token_id = s.wrapped_token_count;
-        token_info = token_info];
-      s.wrapped_token_count := s.wrapped_token_count + 1n;
-    }
-    | _ -> skip
-    end;
 
     (* Сheck that such an asset has not been added already *)
     require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
@@ -158,4 +129,35 @@ function add_asset(
     s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
+  } with s
+
+function remove_asset(
+  const params           : remove_asset_t;
+  var s                  : storage_t)
+                         : return_t is
+  block {
+    check_permission(s.bridge_manager, Errors.not_manager);
+
+    const asset = unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
+    remove asset.asset_type from map s.bridge_asset_ids;
+    remove params.asset_id from map s.bridge_assets;
+
+    const operations = case asset.asset_type of
+    | Wrapped(_) -> (nil: list(operation))
+    | _ -> list[wrap_transfer(
+        Tezos.self_address,
+        params.recipient,
+        asset.locked_amount,
+        asset.asset_type)
+      ]
+    end;
+  } with (operations, s)
+
+function add_pow(
+  const params          : new_pow_t;
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    check_permission(s.bridge_manager, Errors.not_manager);
+    s.pows[params.pow] := params.value;
   } with s

@@ -10,9 +10,11 @@ Tezos.setSignerProvider(signer);
 
 const { Parser, packDataBytes } = require("@taquito/michel-codec");
 const keccak256 = require("keccak256");
+
+const lockIdToBytes = require("../scripts/lockIdToBytes");
 const params = {
   assetType: "fa12",
-  lockId: 1,
+  lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
   recipient: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
   chainFromId: 3536,
   amount: 1000000,
@@ -21,42 +23,42 @@ const params = {
 
 async function sign() {
   const parser = new Parser();
-  const type = `(pair (nat %lock_id)
+  const type = `(pair (bytes %lock_id)
           (pair (address %recipient)
                 (pair (nat %amount)
                       (pair (bytes %chain_from_id)
                             (or %asset
                                (or (address %fa12_) (pair %fa2_ (address %address) (nat %id)))
-                               (or (unit %tez_) (pair %wrapped_ (bytes %chain_id) (bytes %native_token_address))))))))`;
+                               (or (unit %tez_) (pair %wrapped_ (address %address) (nat %id))))))))`;
   let data;
   switch (params.assetType) {
     case "fa12":
-      data = `(Pair ${params.lockId}
+      data = `(Pair 0x${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
       (Left (Left "${params.tokenAddress}")))`;
       break;
     case "fa2":
-      data = `(Pair ${params.lockId}
+      data = `(Pair 0x${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
       (Left (Right (Pair "${params.tokenAddress}" ${params.tokenId}))))`;
       break;
     case "tez":
-      data = `(Pair ${params.lockId}
+      data = `(Pair 0x${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
       (Right (Left Unit)))`;
       break;
     case "wrapped":
-      data = `(Pair ${params.lockId}
+      data = `(Pair 0x${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
-      (Right (Right (Pair 0x${params.chainId} 0x${params.tokenAddress}))))`;
+      (Right (Right (Pair "${params.tokenAddress}" ${params.tokenId}))))`;
       break;
   }
   const dataJSON = parser.parseMichelineExpression(data);

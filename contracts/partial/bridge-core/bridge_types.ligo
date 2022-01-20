@@ -17,6 +17,7 @@ type asset_id_t         is nat;
 
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
+  decimals                : nat;
   locked_amount           : nat;
   enabled                 : bool;
 ]
@@ -24,73 +25,58 @@ type asset_t            is [@layout:comb] record[
 type asset_map_t        is big_map(asset_id_t, asset_t)
 type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
 
-type wrapped_token_map_t is big_map(token_id_t, wrapped_token_t)
-type wrapped_token_ids_map_t is big_map(wrapped_token_t, token_id_t)
-
-type claimer_set_t      is set(address);
-
-type balance_map_t      is map(token_id_t, nat);
-
-type account_t          is [@layout:comb] record [
-  balances                : balance_map_t;
-  allowances              : set(address);
-]
-
-type ledger_key_t       is (address * nat)
-
-type ledger_t           is big_map(ledger_key_t, nat)
-type allowances_t       is big_map(ledger_key_t, set(address))
+type pow_map_t          is big_map(nat, nat)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
   bridge_manager          : address;
   stop_manager            : address;
   validator               : address;
-  approved_claimers       : claimer_set_t;
+  approved_claimer        : address;
   fee_oracle              : address;
   fee_collector           : address;
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   bridge_asset_ids        : asset_map_ids_t;
-  wrapped_token_count     : nat;
-  wrapped_token_infos     : wrapped_token_map_t;
-  wrapped_token_ids       : wrapped_token_ids_map_t;
-  ledger                  : ledger_t;
-  allowances              : allowances_t;
+  pows                    : pow_map_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
-  token_metadata          : big_map(token_id_t, token_metadata_t)
 ]
 
 type return_t           is list (operation) * storage_t
 
-type token_metadata_params_t is [@layout:comb] record[
-  symbol                       : bytes;
-  name                         : bytes;
-  decimals                     : bytes;
-  icon                         : bytes;
-]
-
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
-  metadata                : option(token_metadata_params_t)
+  decimals                : nat;
 ]
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
-  lock_id                 : nat;
+  lock_id                 : lock_id_t;
   asset_id                : asset_id_t;
   amount                  : nat;
-  receiver                : bytes;
+  recipient               : bytes;
+]
+
+type remove_asset_t     is [@layout:comb] record[
+  asset_id                : asset_id_t;
+  recipient               : address;
 ]
 
 type unlock_asset_t     is [@layout:comb] record[
   chain_id                : chain_id_t;
-  lock_id                 : nat;
+  lock_id                 : lock_id_t;
   asset_id                : asset_id_t;
   amount                  : nat;
-  receiver                : address;
+  recipient               : address;
   signature               : signature;
 ]
 
 type response_fee_t     is nat;
+
+type wabr_balance_t     is (address * nat)
+
+type new_pow_t          is [@layout:comb] record[
+  pow                     : nat;
+  value                   : nat;
+]

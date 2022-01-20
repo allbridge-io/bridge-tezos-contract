@@ -18,6 +18,7 @@ function get_lock_contract(
   | None -> failwith(Errors.not_validator_lock)
   end;
 
+// TODO::Replace with unwrap
 function get_unlock_contract(
   const validator       : address)
                         : contract(validate_unlock_t) is
@@ -52,5 +53,32 @@ function wrap_transfer(
         unit,
         amount_ * 1mutez,
         (get_contract(receiver) : contract(unit)))
-    | _ -> failwith(Errors.non_transferable_asset)
+    | Wrapped(token_) -> transfer_fa2(
+        sender_,
+        receiver,
+        amount_,
+        token_.id,
+        token_.address)
     end;
+
+function to_precision(
+  const value           : nat;
+  const precision       : nat;
+  const pows            : pow_map_t)
+                        : nat is
+  if precision > Constants.power
+  then value / unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
+  else if precision < Constants.power
+    then value * unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
+    else value
+
+function from_precision(
+  const value           : nat;
+  const precision       : nat;
+  const pows            : pow_map_t)
+                        : nat is
+  if precision > Constants.power
+  then value * unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
+  else if precision < Constants.power
+    then value / unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
+    else value

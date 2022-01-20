@@ -7,7 +7,12 @@ module.exports = {
   deposit_token: { address: alice.pkh, id: 0 },
   ledger: MichelsonMap.fromLiteral({}),
   allowances: MichelsonMap.fromLiteral({}),
-  periods: [],
+  period: {
+    start_period: "2021-01-01T00:00:00Z",
+
+    end_period: "2021-01-02T00:00:00Z",
+    abr_per_sec_f: 1,
+  },
   total_supply: 0,
   total_underlying_f: 0,
   last_update_time: "2021-01-01T00:00:00Z",
@@ -28,7 +33,7 @@ module.exports = {
         interfaces: ["TZIP-012"],
         errors: [],
       }),
-      "ascii"
+      "ascii",
     ).toString("hex"),
   }),
   token_metadata: MichelsonMap.fromLiteral({
