@@ -93,7 +93,7 @@ function lock_asset(
       lock_id = params.lock_id;
       sender = Tezos.sender;
       recipient = params.recipient;
-      amount = to_precision(locked_amount, asset.decimals, s.pows);
+      amount = to_precision(locked_amount, asset.decimals);
       asset = asset.asset_type;
       destination_chain_id = params.chain_id
     ];
@@ -188,7 +188,7 @@ function unlock_asset(
     end;
     s.bridge_assets[params.asset_id] := asset;
 
-    const amount_ = from_precision(params.amount, asset.decimals, s.pows);
+    const amount_ = from_precision(params.amount, asset.decimals);
     var validate_unlock := record[
       lock_id = params.lock_id;
       recipient = params.recipient;

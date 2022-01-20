@@ -9,6 +9,8 @@ const { alice, eve, secpSigner, bob } = require("../scripts/sandbox/accounts");
 const toBytes = require("../scripts/toBytesForSign");
 const lockIdToBytes = require("../scripts/lockIdToBytes");
 
+const precision = 10 ** 6;
+
 function calculateFee(amount, abrSupply, abrBalance) {
   const bp = 10000;
   const feemultiplier = 1000;
@@ -39,6 +41,7 @@ describe("BridgeCore Exchange tests", async function () {
   let wrappedAssetId = 3;
   const bscChainId = Buffer.from("56", "ascii").toString("hex");
   const bscAddress = Buffer.from("bscAddress", "ascii").toString("hex");
+
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     const operation = await Tezos.contract.transfer({
@@ -66,23 +69,23 @@ describe("BridgeCore Exchange tests", async function () {
       const fa12Asset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
-        decimals: 6,
+        decimals: precision,
       };
       const fa2Asset = {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
-        decimals: 6,
+        decimals: precision,
       };
       const tezAsset = {
         assetType: "tez",
-        decimals: 6,
+        decimals: precision,
       };
       const wrappedAsset = {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
-        decimals: 6,
+        decimals: precision,
       };
 
       await bridge.addAsset(fa12Asset);
