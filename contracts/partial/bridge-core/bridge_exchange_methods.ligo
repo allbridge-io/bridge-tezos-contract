@@ -134,14 +134,12 @@ function unlock_asset(
     | Wrapped(token_) -> {
       asset.total_locked := asset.total_locked + params.amount;
 
-      const mint_params_1 : mint_params_t = list[
+      const mint_params : mint_params_t = list[
         record[
           token_id = token_.id;
           recipient = params.recipient;
           amount = unlocked_amount
-        ]
-      ];
-      const mint_params_2 : mint_params_t = list[
+        ];
         record[
           token_id = token_.id;
           recipient = s.fee_collector;
@@ -150,21 +148,13 @@ function unlock_asset(
       ];
       operations := list[
         Tezos.transaction(
-          mint_params_1,
+          mint_params,
           0mutez,
           unwrap(
             (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
             Errors.mint_etp_404
           )
-        );
-        Tezos.transaction(
-          mint_params_2,
-          0mutez,
-          unwrap(
-            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
-            Errors.mint_etp_404
-          )
-        );
+        )
       ]
      }
     | _ -> {
