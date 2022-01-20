@@ -25,15 +25,15 @@ class BridgeTest(TestCase):
         storage["fee_collector"] = fee_collector
         storage["enabled"] = True
         storage["fee_oracle"] = oracle
+        storage["pows"] = { 6 : 1_000_000 }
         cls.storage = storage
 
     def test_lock_unlock(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(
-            {"fa12": token_a_address}, None), sender=admin)
+        chain.execute(self.ct.add_asset({"fa12": token_a_address}, 6), sender=admin)
 
         res = chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 2)
         self.assertEqual(trxs[0]["amount"], 1000)
@@ -45,7 +45,7 @@ class BridgeTest(TestCase):
         self.assertEqual(trxs[1]["source"], me)
 
         res = chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 100_000, me, dummy_sig))
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig))
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 1)
         self.assertEqual(trxs[0]["amount"], 100_000)
@@ -54,28 +54,27 @@ class BridgeTest(TestCase):
 
     def test_wrapped_unlock_lock(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(wrapped_asset_a, dummy_metadata), sender=admin)
+        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
 
         chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 100_000, me, dummy_sig))
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig))
 
         with self.assertRaises(MichelsonRuntimeError):
-            chain.execute(self.ct.lock_asset(SOLANA_CHAIN_ID, 0, 0, 100_000 + 1, SOLANA_RECEIVER), view_results=vr)
+            chain.execute(self.ct.lock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000 + 1, SOLANA_RECEIVER), view_results=vr)
 
         chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 100_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, SOLANA_RECEIVER), view_results=vr)
 
     def test_claimers_fee(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(
-            {"fa12": token_a_address}, None), sender=admin)
-        chain.execute(self.ct.add_claimer(carol), sender=admin)
+        chain.execute(self.ct.add_asset({"fa12": token_a_address}, 6), sender=admin)
+        chain.execute(self.ct.change_claimer(carol), sender=admin)
 
         res = chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
 
         res = chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, 0, 0, 100_000, me, dummy_sig), view_results=vr, sender=carol)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig), view_results=vr, sender=carol)
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 2)
         self.assertEqual(trxs[0]["amount"], 1000)

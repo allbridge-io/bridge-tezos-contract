@@ -3,6 +3,8 @@ PRECISION = 1_000_000
 SOLANA_CHAIN_ID = "7263566b706157554e657458645170"
 SOLANA_RECEIVER = "1234567890"
 
+DUMMY_LOCK_0="00aa"
+
 token_a_address = "KT18amZmM5W7qDWVt2pH6uj7sCEd3kbzLrHT"
 token_b_address = "KT1AxaBxkFLCUi3f8rdDAAxBKHfzY8LfKDRA"
 token_c_address = "KT1XXAavg3tTj12W1ADvd3EEnm1pu6XTmiEF"
@@ -22,8 +24,8 @@ vr = {
 
 wrapped_asset_a = {
     "wrapped": {
-        "chain_id": SOLANA_CHAIN_ID,
-        "native_token_address": "0xdeadbeef"
+        "address": "KT1LTqpmGJ11EebMVWAzJ7DWd9msgExvHM94",
+        "id": 0,
     }
 }
 

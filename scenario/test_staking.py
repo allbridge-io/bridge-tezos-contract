@@ -3,6 +3,7 @@ import json
 from re import template
 
 from unittest import TestCase
+import unittest
 
 from helpers import *
 from constants import *
@@ -120,34 +121,6 @@ class StakingTest(TestCase):
         bob_withdrawn = trxs[0]["amount"]
         self.assertAlmostEqual(bob_withdrawn, alice_withdrawn, delta=1)
 
-    def test_multiple_periods(self):
-        chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.deposit(100_000))
-        chain.execute(self.ct.add_reward(0, 300, 1_000), sender=admin)
-        chain.execute(self.ct.add_reward(301, 600, 3_000), sender=admin)
-
-        chain.advance_blocks(20)
-
-        res = chain.execute(self.ct.withdraw(100_000))
-        trxs = parse_transfers(res)
-        self.assertAlmostEqual(trxs[0]["amount"], 104_000, delta=1)
-
-        # chain.advance_blocks(100)
-
-    def test_uneven_periods(self):
-        chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.deposit(100_000))
-        chain.execute(self.ct.add_reward(0, 45, 1_000), sender=admin)
-        chain.execute(self.ct.add_reward(46, 60, 1_000), sender=admin)
-
-        chain.advance_blocks(2)
-
-        res = chain.execute(self.ct.withdraw(100_000))
-        trxs = parse_transfers(res)
-        self.assertAlmostEqual(trxs[0]["amount"], 102_000, delta=1)
-
     def test_periods_intersections(self):
         chain = LocalChain(storage=self.storage)
         chain.execute(self.ct.add_reward(0, 300, 1_000), sender=admin)
@@ -160,19 +133,6 @@ class StakingTest(TestCase):
 
         with self.assertRaises(MichelsonRuntimeError):
             chain.execute(self.ct.add_reward(90, 120, 1), sender=admin)
-
-    def test_periods_gap(self):
-        chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.deposit(100_000))
-        chain.execute(self.ct.add_reward(0, 60, 10_000), sender=admin)
-        chain.execute(self.ct.add_reward(120, 300, 30_000), sender=admin)
-
-        chain.advance_blocks(10)
-
-        res = chain.execute(self.ct.withdraw(100_000))
-        trxs = parse_transfers(res)
-        self.assertAlmostEqual(trxs[0]["amount"], 140_000, delta=1)
 
     def test_partial_withdraw(self):
         chain = LocalChain(storage=self.storage)
@@ -275,28 +235,6 @@ class StakingTest(TestCase):
         self.assertEqual(trxs[0]["source"], contract_self_address)
         self.assertEqual(trxs[0]["amount"], 1)
 
-    def test_multiple_rewards_in_block(self):
-        chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.deposit(1))
-        chain.execute(self.ct.add_reward(5, 8, 100), sender=admin)
-        chain.execute(self.ct.add_reward(9, 13, 100), sender=admin)
-        chain.execute(self.ct.add_reward(14, 21, 100), sender=admin)
-        chain.execute(self.ct.add_reward(34, 55, 100), sender=admin)
-        
-        chain.advance_blocks(1)
-
-        res = chain.interpret(self.ct.withdraw(1))
-        trxs = parse_transfers(res)
-        self.assertEqual(len(trxs), 1)
-        self.assertEqual(trxs[0]["amount"], 300)
-
-        chain.advance_blocks(1)
-        res = chain.interpret(self.ct.withdraw(1))
-        trxs = parse_transfers(res)
-        self.assertEqual(len(trxs), 1)
-        self.assertEqual(trxs[0]["amount"], 400)
-
     def test_many_users(self):
         chain = LocalChain(storage=self.storage)
 
@@ -334,27 +272,19 @@ class StakingTest(TestCase):
         chain = LocalChain(storage=self.storage)
 
         chain.execute(self.ct.deposit(1_000_000))
-        res = chain.execute(self.ct.add_reward(0, 1, int(0.1 * PRECISION)), sender=admin)
+        res = chain.execute(self.ct.add_reward(0, 3, int(10 * PRECISION)), sender=admin)
 
         chain.advance_blocks(1)
         
-        total_withdrawn = 0
         shares_to_withdraw = 100
+        total_withdrawn = 0
         for i in range(shares_to_withdraw):
             res = chain.execute(self.ct.withdraw(1))
-            print("one share transfer\n")
             transfers = parse_transfers(res)
-            pprint(transfers)
             total_withdrawn += transfers[0]["amount"]
             
         res = chain.execute(self.ct.withdraw(shares_to_withdraw))
-        print("one share transfer\n")
         transfers = parse_transfers(res)
-        pprint(transfers)
 
-        self.assertEqual(transfers[0]["amount"], total_withdrawn)
+        self.assertAlmostEqual(transfers[0]["amount"], total_withdrawn, delta=1)
 
-        all_shares = chain.storage["ledger"][me]
-        res = chain.execute(self.ct.withdraw(all_shares))
-        transfers = parse_transfers(res)
-        pprint(transfers)

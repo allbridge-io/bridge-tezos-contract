@@ -14,8 +14,8 @@ staking = "KT1LzyPS8rN375tC31WPAVHaQ4HyBvTSLwBu"
 
 
 vr = {
-    f"{staking}%get_abr_balance": int(0.01 * FEE_PRECISION),
-    f"{staking}%get_abr_supply": int(0.01 * FEE_PRECISION),
+    f"{staking}%get_xabr_balance": int(0.01 * FEE_PRECISION),
+    f"{staking}%get_xabr_supply": int(0.01 * FEE_PRECISION),
 }
 
 class OracleFeeTest(TestCase):
