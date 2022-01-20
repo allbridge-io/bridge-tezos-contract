@@ -9,22 +9,22 @@ function lock_asset(
     require(asset.enabled, Errors.asset_disabled);
     require(s.enabled, Errors.bridge_disabled);
 
-    const lock_amount = case asset.asset_type of
+    const locked_without_fee = case asset.asset_type of
     | Tez -> Tezos.amount / 1mutez
     | _ -> params.amount
     end;
 
-    require(lock_amount > 0n, Errors.zero_transfer);
+    require(locked_without_fee > 0n, Errors.zero_transfer);
 
     const fee = get_oracle_fee(
       record[
-        amount = lock_amount;
+        amount = locked_without_fee;
         token = asset.asset_type;
         account = Tezos.sender
       ],
       s.fee_oracle);
 
-    const locked_amount = get_nat_or_fail(lock_amount - fee, Errors.not_nat);
+    const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.not_nat);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
@@ -34,7 +34,7 @@ function lock_asset(
       const burn_params : burn_params_t = record[
         token_id = token_.id;
         account = Tezos.sender;
-        amount = lock_amount
+        amount = locked_without_fee
       ];
       const mint_params : mint_params_t = list[
         record[
