@@ -29,7 +29,7 @@ function lock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount, Errors.not_nat);
+      asset.total_locked := get_nat_or_fail(asset.total_locked - locked_amount, Errors.not_nat);
 
       const burn_params : burn_params_t = record[
         token_id = token_.id;
@@ -68,7 +68,7 @@ function lock_asset(
         fee,
         asset.asset_type
       ) # operations;
-      asset.locked_amount := asset.locked_amount + locked_amount;
+      asset.total_locked := asset.total_locked + locked_amount;
     }
     | _ -> {
       operations := wrap_transfer(
@@ -84,7 +84,7 @@ function lock_asset(
         asset.asset_type
       ) # operations;
 
-      asset.locked_amount := asset.locked_amount + locked_amount;
+      asset.total_locked := asset.total_locked + locked_amount;
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
@@ -132,7 +132,7 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.locked_amount := asset.locked_amount + params.amount;
+      asset.total_locked := asset.total_locked + params.amount;
 
       const mint_params_1 : mint_params_t = list[
         record[
@@ -183,7 +183,7 @@ function unlock_asset(
           asset.asset_type
         ) # operations}
       else skip;
-      asset.locked_amount := get_nat_or_fail(asset.locked_amount - params.amount, Errors.not_nat);
+      asset.total_locked := get_nat_or_fail(asset.total_locked - params.amount, Errors.not_nat);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;

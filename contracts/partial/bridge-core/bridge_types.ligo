@@ -18,7 +18,7 @@ type asset_id_t         is nat;
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
   decimals                : nat;
-  locked_amount           : nat;
+  total_locked            : nat;
   enabled                 : bool;
 ]
 

@@ -118,7 +118,7 @@ function add_asset(
     var new_asset := record[
       asset_type = params.asset_type;
       decimals = params.decimals;
-      locked_amount = 0n;
+      total_locked = 0n;
       enabled = True;
     ];
 
@@ -147,7 +147,7 @@ function remove_asset(
     | _ -> list[wrap_transfer(
         Tezos.self_address,
         params.recipient,
-        asset.locked_amount,
+        asset.total_locked,
         asset.asset_type)
       ]
     end;
