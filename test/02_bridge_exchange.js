@@ -199,8 +199,8 @@ describe("BridgeCore Exchange tests", async function () {
         bridge.storage.fee_collector,
       );
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() + lockAmount - fee,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() + lockAmount - fee,
       );
       strictEqual(bridgeBalance, prevBridgeBalance + lockAmount - fee);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
@@ -229,8 +229,8 @@ describe("BridgeCore Exchange tests", async function () {
         bridge.storage.fee_collector,
       );
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() + lockAmount - fee,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() + lockAmount - fee,
       );
       strictEqual(bridgeBalance, prevBridgeBalance + lockAmount - fee);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
@@ -268,8 +268,8 @@ describe("BridgeCore Exchange tests", async function () {
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() + lockAmount * 10 ** 6 - fee,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() + lockAmount * 10 ** 6 - fee,
       );
       strictEqual(
         bridgeBalance,
@@ -329,8 +329,8 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(aliceBalance, prevAliceBalance - lockAmount);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - (lockAmount - fee),
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - (lockAmount - fee),
       );
     });
     it("Shouldn't lock wrapped asset if low balance", async function () {
@@ -396,8 +396,8 @@ describe("BridgeCore Exchange tests", async function () {
         bridge.storage.fee_collector,
       );
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount - fee);
@@ -442,8 +442,8 @@ describe("BridgeCore Exchange tests", async function () {
         bridge.storage.fee_collector,
       );
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount - fee);
@@ -488,8 +488,8 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(eveBalance, prevEveBalance + unlockAmount - fee);
 
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
     });
     it("Should unlock wrapped asset with fee", async function () {
@@ -536,8 +536,8 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount - fee);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() + unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() + unlockAmount,
       );
     });
     it("Should unlock fa12 asset without fee", async function () {
@@ -572,8 +572,8 @@ describe("BridgeCore Exchange tests", async function () {
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
 
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount);
@@ -611,8 +611,8 @@ describe("BridgeCore Exchange tests", async function () {
       const bridgeBalance = await fa2Token.getBalance(bridge.address);
 
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount);
@@ -652,8 +652,8 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(eveBalance, prevEveBalance + unlockAmount);
 
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() - unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() - unlockAmount,
       );
     });
     it("Should unlock wrapped asset without fee", async function () {
@@ -691,8 +691,8 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount);
 
       strictEqual(
-        asset.locked_amount.toNumber(),
-        prevAsset.locked_amount.toNumber() + unlockAmount,
+        asset.total_locked.toNumber(),
+        prevAsset.total_locked.toNumber() + unlockAmount,
       );
     });
   });
