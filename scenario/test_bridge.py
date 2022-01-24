@@ -25,7 +25,6 @@ class BridgeTest(TestCase):
         storage["fee_collector"] = fee_collector
         storage["enabled"] = True
         storage["fee_oracle"] = oracle
-        storage["pows"] = { 6 : 1_000_000 }
         cls.storage = storage
 
     def test_lock_unlock(self):
@@ -56,14 +55,27 @@ class BridgeTest(TestCase):
         chain = LocalChain(storage=self.storage)
         chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
 
-        chain.execute(self.ct.unlock_asset(
+        res = chain.execute(self.ct.unlock_asset(
             SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig))
+        mints = parse_mints(res)
+        self.assertEqual(len(mints), 2)
+        self.assertEqual(mints[0]["amount"], 100_000)
+        self.assertEqual(mints[0]["destination"], me)
+        self.assertEqual(mints[0]["token_address"], wrapped_token_address)
 
-        with self.assertRaises(MichelsonRuntimeError):
-            chain.execute(self.ct.lock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000 + 1, SOLANA_RECEIVER), view_results=vr)
-
-        chain.execute(self.ct.lock_asset(
+        res = chain.execute(self.ct.lock_asset(
             SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, SOLANA_RECEIVER), view_results=vr)
+        mints = parse_mints(res)
+        self.assertEqual(len(mints), 1)
+        self.assertEqual(mints[0]["amount"], 1000)
+        self.assertEqual(mints[0]["destination"], fee_collector)
+        self.assertEqual(mints[0]["token_address"], wrapped_token_address)
+
+        burns = parse_burns(res)
+        self.assertEqual(len(burns), 1)
+        self.assertEqual(burns[0]["amount"], 100_000)
+        self.assertEqual(burns[0]["destination"], me)
+        self.assertEqual(burns[0]["token_address"], wrapped_token_address)
 
     def test_claimers_fee(self):
         chain = LocalChain(storage=self.storage)

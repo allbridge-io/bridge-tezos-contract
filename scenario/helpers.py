@@ -41,10 +41,29 @@ def parse_mints(res):
     mints = []
     for op in res.operations:
         if op["kind"] == "transaction":
-            if op["parameters"]["entrypoint"] == "mint_tokens":
+            if op["parameters"]["entrypoint"] == "mint":
                 mint = parse_mint_list(op)
                 mints += mint
     return mints
+
+def parse_burns(res):
+    burns = []
+    for op in res.operations:
+        if op["kind"] == "transaction":
+            if op["parameters"]["entrypoint"] == "burn":
+                value = op["parameters"]["value"]
+                args = value["args"]
+                token_id = args[0]["int"]
+                dest = args[1]["string"]
+                amount = int(args[2]["int"])
+                burns.append({
+                    "type": "burn",
+                    "amount": amount,
+                    "destination": dest,
+                    "token_address": op["destination"],
+                    "token_id": token_id
+                })
+    return burns
 
 def parse_tez_transfer(op):
     dest = op["destination"]
@@ -118,13 +137,15 @@ def parse_mint_list(op):
     values = op["parameters"]["value"]
     for value in values:
         args = value["args"]
-        dest = args[0]["string"]
-        amount = int(args[1]["int"])
+        token_id = args[0]["int"]
+        dest = args[1]["string"]
+        amount = int(args[2]["int"])
         list.append({
             "type": "mint",
             "amount": amount,
             "destination": dest,
-            "token_address": "fa12_dummy",
+            "token_address": op["destination"],
+            "token_id": token_id
         })
     return list
 

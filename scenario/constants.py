@@ -22,9 +22,11 @@ vr = {
     f"{oracle}%calculate_fee": int(0.01 * FEE_PRECISION)
 }
 
+wrapped_token_address = "KT1LTqpmGJ11EebMVWAzJ7DWd9msgExvHM94"
+
 wrapped_asset_a = {
     "wrapped": {
-        "address": "KT1LTqpmGJ11EebMVWAzJ7DWd9msgExvHM94",
+        "address": wrapped_token_address,
         "id": 0,
     }
 }
