@@ -63,22 +63,20 @@ function wrap_transfer(
 
 function to_precision(
   const value           : nat;
-  const precision       : nat;
-  const pows            : pow_map_t)
+  const precision       : nat)
                         : nat is
-  if precision > Constants.power
-  then value / unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
-  else if precision < Constants.power
-    then value * unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
+  if precision > Constants.precision
+  then value / get_nat_or_fail(precision - Constants.precision, Errors.not_nat)
+  else if precision < Constants.precision
+    then value * get_nat_or_fail(Constants.precision - precision, Errors.not_nat)
     else value
 
 function from_precision(
   const value           : nat;
-  const precision       : nat;
-  const pows            : pow_map_t)
+  const precision       : nat)
                         : nat is
-  if precision > Constants.power
-  then value * unwrap(pows[get_nat_or_fail(precision - Constants.power, Errors.not_nat)], Errors.not_pow)
-  else if precision < Constants.power
-    then value / unwrap(pows[get_nat_or_fail(Constants.power - precision, Errors.not_nat)], Errors.not_pow)
+  if precision > Constants.precision
+  then value * get_nat_or_fail(precision - Constants.precision, Errors.not_nat)
+  else if precision < Constants.precision
+    then value / get_nat_or_fail(Constants.precision - precision, Errors.not_nat)
     else value

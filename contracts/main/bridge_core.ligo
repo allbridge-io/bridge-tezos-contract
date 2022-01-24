@@ -23,7 +23,6 @@ type parameter_t        is
   | Start_asset           of asset_id_t
   | Remove_asset          of remove_asset_t
   | Add_asset             of new_asset_t
-  | Add_pow               of new_pow_t
 
   | Lock_asset            of lock_asset_t
   | Unlock_asset          of unlock_asset_t
@@ -47,7 +46,6 @@ function main(
   | Start_asset(params)    -> (Constants.no_operations, start_asset(params, s))
   | Remove_asset(params)   -> remove_asset(params, s)
   | Add_asset(params)      -> (Constants.no_operations, add_asset(params, s))
-  | Add_pow(params)        -> (Constants.no_operations, add_pow(params, s))
 
   (* Common methods *)
   | Lock_asset(params)     -> lock_asset(params, s)
