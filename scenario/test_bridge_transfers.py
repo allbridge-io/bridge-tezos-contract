@@ -168,3 +168,41 @@ class WrappedTransfers(TestCase):
         self.assertEqual(res.storage["ledger"][(bob, 0)], 20_000)
         self.assertEqual(res.storage["ledger"][(carol, 0)], 30_000)
 
+    def test_transfer_after_burn(self):
+        chain = LocalChain(storage=self.storage)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100)]), sender=bridge)
+        chain.execute(self.ct.burn(dict(token_id=0, account=alice, amount=50)), sender=bridge)
+
+        with self.assertRaises(MichelsonRuntimeError):
+            transfer = self.ct.transfer(
+                [
+                    {
+                        "from_": alice,
+                            "txs": [{
+                                "amount": 51,
+                                "to_": bob,
+                                "token_id": 0
+                            }]
+                    },
+                ])
+            res = chain.execute(transfer, sender=alice)
+
+        transfer = self.ct.transfer(
+            [
+                {
+                    "from_": alice,
+                        "txs": [{
+                            "amount": 50,
+                            "to_": bob,
+                            "token_id": 0
+                        }]
+                },
+            ])
+        res = chain.execute(transfer, sender=alice)
+
+        self.assertEqual(res.storage["ledger"][(alice, 0)], 0)
+        self.assertEqual(res.storage["ledger"][(bob, 0)], 50)
+
+
+
