@@ -7,30 +7,28 @@ from helpers import *
 from constants import *
 from pytezos import ContractInterface, MichelsonRuntimeError
 
-@skip
+foreign_token_a = {
+    "chain_id" : "deafbeef",
+    "native_token_address": "cafebabe"
+}
+
 class WrappedTransfers(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.maxDiff = None
 
-        code = json.load(open("./builds/bridge_core.json"))
+        code = json.load(open("./builds/wrapped_token.json"))
         cls.ct = ContractInterface.from_micheline(code["michelson"])
 
         storage = cls.ct.storage.dummy()
         storage["owner"] = admin
-        storage["bridge_manager"] = admin
-        storage["validator"] = admin
-        storage["fee_collector"] = fee_collector
-        storage["enabled"] = True
-        storage["fee_oracle"] = oracle
+        storage["bridge"] = bridge
         cls.storage = storage
 
     def test_transfer_wrong_token_id(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(
-            wrapped_asset_a, 6), sender=admin)
-
-        chain.execute(self.ct.unlock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, alice, dummy_sig), sender=alice)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100_000)]), sender=bridge)
 
         with self.assertRaises(MichelsonRuntimeError):
             transfer = self.ct.transfer(
@@ -61,10 +59,8 @@ class WrappedTransfers(TestCase):
 
     def test_transfer_self(self):
         chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
-
-        chain.execute(self.ct.unlock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, alice, dummy_sig), sender=alice)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100_000)]), sender=bridge)
 
         transfer = self.ct.transfer(
             [{"from_": alice,
@@ -89,9 +85,8 @@ class WrappedTransfers(TestCase):
     
     def test_cant_double_transfer(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
-
-        chain.execute(self.ct.unlock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, alice, dummy_sig), sender=alice)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100_000)]), sender=bridge)
         
         transfer = self.ct.transfer(
             [{ "from_" : alice,
@@ -114,10 +109,8 @@ class WrappedTransfers(TestCase):
 
     def test_transfer_zero(self):
         chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
-
-        chain.execute(self.ct.unlock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, alice, dummy_sig), sender=alice)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100_000)]), sender=bridge)
 
         transfer = self.ct.transfer(
             [{"from_": alice,
@@ -139,10 +132,8 @@ class WrappedTransfers(TestCase):
 
     def test_transfer_multiple_froms(self):
         chain = LocalChain(storage=self.storage)
-
-        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
-
-        chain.execute(self.ct.unlock_asset(SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, alice, dummy_sig), sender=alice)
+        chain.execute(self.ct.create_token(token=foreign_token_a, metadata={"":""}), sender=admin)
+        chain.execute(self.ct.mint([dict(token_id=0, recipient=alice, amount=100_000)]), sender=bridge)
 
         add_operator = self.ct.update_operators([{
                 "add_operator": {
