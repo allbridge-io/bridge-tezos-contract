@@ -44,7 +44,6 @@ function withdraw(
     s := updated_reward.1;
 
     const account_balance = unwrap_or(s.ledger[Tezos.sender], 0n);
-    require(account_balance >= shares, Errors.insufficient_balance);
 
     const out = shares * s.total_underlying_f / (s.total_supply * Constants.precision);
     s := s with record[
@@ -52,7 +51,7 @@ function withdraw(
       total_supply = get_nat_or_fail(s.total_supply - shares, Errors.not_nat);
       last_update_time = Tezos.now;
     ];
-    s.ledger[Tezos.sender] := get_nat_or_fail(account_balance - shares, Errors.not_nat);
+    s.ledger[Tezos.sender] := get_nat_or_fail(account_balance - shares, Errors.insufficient_balance);
 
     operations := transfer_fa2(
       Tezos.self_address,
