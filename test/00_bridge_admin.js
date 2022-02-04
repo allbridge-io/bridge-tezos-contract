@@ -465,7 +465,7 @@ describe("BridgeCore Admin tests", async function () {
         bscChainId,
         lockIdToBytes("00ffffffffffffffffffffffffffff03"),
         2,
-        0,
+        lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         lockAmount / 1e6,
       );

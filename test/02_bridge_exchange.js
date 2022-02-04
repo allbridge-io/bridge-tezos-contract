@@ -253,7 +253,7 @@ describe("BridgeCore Exchange tests", async function () {
         bscChainId,
         lockIdToBytes("00ffffffffffffffffffffffffffff02"),
         tezAssetId,
-        0,
+        10000,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         lockAmount,
       );
