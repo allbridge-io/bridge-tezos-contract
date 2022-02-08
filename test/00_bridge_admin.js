@@ -14,6 +14,7 @@ const { MichelsonMap } = require("@taquito/taquito");
 const lockIdToBytes = require("../scripts/lockIdToBytes");
 const toBytes = require("../scripts/toBytesForSign");
 
+const precision = 10 ** 6;
 describe("BridgeCore Admin tests", async function () {
   let bridge;
   let fa12Token;
@@ -171,7 +172,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          decimals: 6,
+          decimals: precision,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/not-manager");
@@ -184,7 +185,7 @@ describe("BridgeCore Admin tests", async function () {
       const newAsset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
-        decimals: 6,
+        decimals: 1000000,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -205,7 +206,7 @@ describe("BridgeCore Admin tests", async function () {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
-        decimals: 6,
+        decimals: 1000000,
       };
 
       const prevAssetCount = bridge.storage.asset_count.toNumber();
@@ -223,7 +224,7 @@ describe("BridgeCore Admin tests", async function () {
     it("Should allow add tez asset", async function () {
       const newAsset = {
         assetType: "tez",
-        decimals: 6,
+        decimals: 1000000,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -244,7 +245,7 @@ describe("BridgeCore Admin tests", async function () {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
-        decimals: 6,
+        decimals: 1000000,
       };
       await bridge.addAsset(newAssetParam);
       await bridge.updateStorage();
@@ -261,7 +262,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          decimals: 6,
+          decimals: 1000000,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-exist");
@@ -289,7 +290,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          decimals: 6,
+          decimals: 1000000,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-disabled");
@@ -464,7 +465,7 @@ describe("BridgeCore Admin tests", async function () {
         bscChainId,
         lockIdToBytes("00ffffffffffffffffffffffffffff03"),
         2,
-        0,
+        lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
         lockAmount / 1e6,
       );
@@ -540,23 +541,6 @@ describe("BridgeCore Admin tests", async function () {
 
       const asset = await bridge.storage.bridge_assets.get(3);
       strictEqual(asset, undefined);
-    });
-  });
-  describe("Testing entrypoint: Add_pow", async function () {
-    it("Shouldn't add pow if the user is not an bridge manager", async function () {
-      Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.addPow(5, 10 ** 5), err => {
-        strictEqual(err.message, "Bridge-core/not-manager");
-        return true;
-      });
-    });
-    it("Should allow add pow", async function () {
-      Tezos.setSignerProvider(signerBob);
-
-      await bridge.addPow(6, 10 ** 6);
-      await bridge.updateStorage();
-      const newPow = await bridge.storage.pows.get("6");
-      strictEqual(newPow.toNumber(), 10 ** 6);
     });
   });
 });

@@ -18,7 +18,7 @@ type asset_id_t         is nat;
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
   decimals                : nat;
-  locked_amount           : nat;
+  total_locked            : nat;
   enabled                 : bool;
 ]
 
@@ -38,7 +38,6 @@ type storage_t          is [@layout:comb] record[
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   bridge_asset_ids        : asset_map_ids_t;
-  pows                    : pow_map_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
 ]

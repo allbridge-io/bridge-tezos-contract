@@ -9,32 +9,32 @@ function lock_asset(
     require(asset.enabled, Errors.asset_disabled);
     require(s.enabled, Errors.bridge_disabled);
 
-    const lock_amount = case asset.asset_type of
+    const locked_without_fee = case asset.asset_type of
     | Tez -> Tezos.amount / 1mutez
     | _ -> params.amount
     end;
 
-    require(lock_amount > 0n, Errors.zero_transfer);
+    require(locked_without_fee > 0n, Errors.zero_transfer);
 
     const fee = get_oracle_fee(
       record[
-        amount = lock_amount;
+        amount = locked_without_fee;
         token = asset.asset_type;
         account = Tezos.sender
       ],
       s.fee_oracle);
 
-    const locked_amount = get_nat_or_fail(lock_amount - fee, Errors.not_nat);
+    const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.not_nat);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.locked_amount := get_nat_or_fail(asset.locked_amount - locked_amount, Errors.not_nat);
+      asset.total_locked := get_nat_or_fail(asset.total_locked - locked_amount, Errors.not_nat);
 
       const burn_params : burn_params_t = record[
         token_id = token_.id;
         account = Tezos.sender;
-        amount = lock_amount
+        amount = locked_without_fee
       ];
       const mint_params : mint_params_t = list[
         record[
@@ -62,13 +62,14 @@ function lock_asset(
       ]
      }
     | Tez -> {
+      require(locked_without_fee = params.amount, Errors.amounts_missmatch);
       operations := wrap_transfer(
         Tezos.self_address,
         s.fee_collector,
         fee,
         asset.asset_type
       ) # operations;
-      asset.locked_amount := asset.locked_amount + locked_amount;
+      asset.total_locked := asset.total_locked + locked_amount;
     }
     | _ -> {
       operations := wrap_transfer(
@@ -84,7 +85,7 @@ function lock_asset(
         asset.asset_type
       ) # operations;
 
-      asset.locked_amount := asset.locked_amount + locked_amount;
+      asset.total_locked := asset.total_locked + locked_amount;
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
@@ -93,7 +94,7 @@ function lock_asset(
       lock_id = params.lock_id;
       sender = Tezos.sender;
       recipient = params.recipient;
-      amount = to_precision(locked_amount, asset.decimals, s.pows);
+      amount = to_precision(locked_amount, asset.decimals);
       asset = asset.asset_type;
       destination_chain_id = params.chain_id
     ];
@@ -132,16 +133,14 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.locked_amount := asset.locked_amount + params.amount;
+      asset.total_locked := asset.total_locked + params.amount;
 
-      const mint_params_1 : mint_params_t = list[
+      const mint_params : mint_params_t = list[
         record[
           token_id = token_.id;
           recipient = params.recipient;
           amount = unlocked_amount
-        ]
-      ];
-      const mint_params_2 : mint_params_t = list[
+        ];
         record[
           token_id = token_.id;
           recipient = s.fee_collector;
@@ -150,21 +149,13 @@ function unlock_asset(
       ];
       operations := list[
         Tezos.transaction(
-          mint_params_1,
+          mint_params,
           0mutez,
           unwrap(
             (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
             Errors.mint_etp_404
           )
-        );
-        Tezos.transaction(
-          mint_params_2,
-          0mutez,
-          unwrap(
-            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
-            Errors.mint_etp_404
-          )
-        );
+        )
       ]
      }
     | _ -> {
@@ -183,12 +174,12 @@ function unlock_asset(
           asset.asset_type
         ) # operations}
       else skip;
-      asset.locked_amount := get_nat_or_fail(asset.locked_amount - params.amount, Errors.not_nat);
+      asset.total_locked := get_nat_or_fail(asset.total_locked - params.amount, Errors.not_nat);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
 
-    const amount_ = from_precision(params.amount, asset.decimals, s.pows);
+    const amount_ = from_precision(params.amount, asset.decimals);
     var validate_unlock := record[
       lock_id = params.lock_id;
       recipient = params.recipient;

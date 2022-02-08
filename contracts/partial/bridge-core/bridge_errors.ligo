@@ -30,5 +30,5 @@ module Errors is {
   (* Other *)
   const not_nat                : string = "Bridge-core/not-nat";
   const zero_transfer          : string = "Bridge-core/zero-transfer";
-  const not_pow                : string = "Bridge-core/not-pow-value";
+  const amounts_missmatch      : string = "Bridge-core/amounts-mismatch";
   }
