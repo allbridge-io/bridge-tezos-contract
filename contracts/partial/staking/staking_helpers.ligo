@@ -7,8 +7,8 @@
     if s.period.start_period <= Tezos.now and s.period.end_period > s.last_update_time
     then {
       const interval_start = if s.last_update_time > s.period.start_period
-      then s.last_update_time
-      else s.period.start_period;
+        then s.last_update_time
+        else s.period.start_period;
 
       const interval_end = if Tezos.now > s.period.end_period
         then s.period.end_period
