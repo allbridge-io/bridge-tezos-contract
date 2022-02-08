@@ -146,13 +146,14 @@ class StakingTransfers(TestCase):
         pprint(parse_transfers(res))
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 1)
-        # self.assertEqual(trxs[0]["amount"], 12_500)
+        self.assertAlmostEqual(trxs[0]["amount"], 133_333, delta=333)
 
         res = chain.execute(self.ct.withdraw(50_000), sender=bob)
         pprint(parse_transfers(res))
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 1)
-        # self.assertEqual(trxs[0]["amount"], 7_500)
+        self.assertAlmostEqual(trxs[0]["amount"], 66_666, delta=333)
+
 
     def test_transfer_multiple_froms(self):
         chain = LocalChain(storage=self.storage)
