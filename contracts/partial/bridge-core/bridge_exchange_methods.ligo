@@ -62,7 +62,7 @@ function lock_asset(
       ]
      }
     | Tez -> {
-      require(locked_without_fee = params.amount, Errors.amounts_missmatch);
+      require(locked_without_fee = params.amount, Errors.amounts_mismatch);
       operations := wrap_transfer(
         Tezos.self_address,
         s.fee_collector,
