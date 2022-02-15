@@ -64,7 +64,7 @@ describe("Wrapped token methods test", async function () {
           MichelsonMap.fromLiteral({
             symbol: Buffer.from("wABR").toString("hex"),
             name: Buffer.from("Wrapped ABR").toString("hex"),
-            decimals: Buffer.from("6").toString("hex"),
+            decimals: Buffer.from("9").toString("hex"),
             icon: Buffer.from("").toString("hex"),
           }),
         ),
