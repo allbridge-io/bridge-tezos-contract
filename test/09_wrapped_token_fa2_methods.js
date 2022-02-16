@@ -7,7 +7,7 @@ const { migrate } = require("../scripts/helpers");
 const { confirmOperation } = require("../scripts/confirmation");
 const toBytes = require("../scripts/toBytesForSign");
 
-const transferAmount = 1000;
+const transferAmount = 1000 * 10 ** 9;
 describe("Wrapped token FA2 methods test", async function () {
   let token;
   const bscChainId = Buffer.from("56", "ascii").toString("hex");
@@ -22,11 +22,11 @@ describe("Wrapped token FA2 methods test", async function () {
         MichelsonMap.fromLiteral({
           symbol: Buffer.from("wABR").toString("hex"),
           name: Buffer.from("Wrapped ABR").toString("hex"),
-          decimals: Buffer.from("6").toString("hex"),
+          decimals: Buffer.from("9").toString("hex"),
           icon: Buffer.from("").toString("hex"),
         }),
       );
-      await token.mint(10000, 0, alice.pkh);
+      await token.mint(10000 * 10 ** 9, 0, alice.pkh);
     } catch (e) {
       console.log(e);
     }
@@ -37,7 +37,7 @@ describe("Wrapped token FA2 methods test", async function () {
         Tezos.setSignerProvider(signerAlice);
 
         await rejects(
-          token.transfer(bob.pkh, alice.pkh, 1000),
+          token.transfer(bob.pkh, alice.pkh, 999999 * 10 ** 9),
 
           err => {
             strictEqual(err.message, "FA2_NOT_OPERATOR");
@@ -46,10 +46,13 @@ describe("Wrapped token FA2 methods test", async function () {
         );
       });
       it("Shouldn't Transfer with insufficient balance", async function () {
-        await rejects(token.transfer(alice.pkh, bob.pkh, 100000), err => {
-          strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
-          return true;
-        });
+        await rejects(
+          token.transfer(alice.pkh, bob.pkh, 100000 * 10 ** 9),
+          err => {
+            strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
+            return true;
+          },
+        );
       });
     });
     // Scenario 2

@@ -46,7 +46,8 @@ describe("Staking Admin tests", async function () {
       assetType: "wrapped",
       tokenId: 0,
       tokenAddress: bridge.wrappedToken.address,
-      decimals: 10 ** 6,
+      precision: 0,
+      pow_above: false,
     };
     await bridge.addAsset(newAsset);
     await bridge.updateStorage();

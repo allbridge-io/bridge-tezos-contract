@@ -34,7 +34,8 @@ describe("Staking FA2 methods test", async function () {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
-        decimals: 10 ** 6,
+        precision: 0,
+        pow_above: false,
       };
       await bridge.addAsset(wrappedAsset);
 

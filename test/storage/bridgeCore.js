@@ -1,6 +1,11 @@
 const { MichelsonMap } = require("@taquito/michelson-encoder");
 
-const { alice, bob, secpSigner } = require("../../scripts/sandbox/accounts");
+const {
+  alice,
+  bob,
+  eve,
+  secpSigner,
+} = require("../../scripts/sandbox/accounts");
 
 module.exports = {
   owner: alice.pkh,
@@ -9,7 +14,7 @@ module.exports = {
   validator: null,
   approved_claimer: secpSigner.pkh,
   fee_oracle: null,
-  fee_collector: bob.pkh,
+  fee_collector: eve.pkh,
   asset_count: 0,
   bridge_assets: MichelsonMap.fromLiteral({}),
   bridge_asset_ids: MichelsonMap.fromLiteral({}),

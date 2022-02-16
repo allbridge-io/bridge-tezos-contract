@@ -63,20 +63,22 @@ function wrap_transfer(
 
 function to_precision(
   const value           : nat;
-  const precision       : nat)
+  const precision       : nat;
+  const pow_above       : bool)
                         : nat is
-  if precision > Constants.precision
-  then value / get_nat_or_fail(precision - Constants.precision, Errors.not_nat)
-  else if precision < Constants.precision
-    then value * get_nat_or_fail(Constants.precision - precision, Errors.not_nat)
+  if pow_above
+  then value / precision
+  else if precision > 0n
+    then value * precision
     else value
 
 function from_precision(
   const value           : nat;
-  const precision       : nat)
+  const precision       : nat;
+  const pow_above       : bool)
                         : nat is
-  if precision > Constants.precision
-  then value * get_nat_or_fail(precision - Constants.precision, Errors.not_nat)
-  else if precision < Constants.precision
-    then value / get_nat_or_fail(Constants.precision - precision, Errors.not_nat)
+  if pow_above
+  then value * precision
+  else if precision > 0n
+    then value / precision
     else value

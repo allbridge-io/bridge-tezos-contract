@@ -94,7 +94,7 @@ function lock_asset(
       lock_id = params.lock_id;
       sender = Tezos.sender;
       recipient = params.recipient;
-      amount = to_precision(locked_amount, asset.decimals);
+      amount = to_precision(locked_amount, asset.precision, asset.pow_above);
       asset = asset.asset_type;
       destination_chain_id = params.chain_id
     ];
@@ -116,11 +116,11 @@ function unlock_asset(
 
     require(s.enabled, Errors.bridge_disabled);
     require(asset.enabled, Errors.asset_disabled);
-
+    const amount_ = from_precision(params.amount, asset.precision, asset.pow_above);
     const fee = if s.approved_claimer = Tezos.sender
       then get_oracle_fee(
         record[
-          amount = params.amount;
+          amount = amount_;
           token = asset.asset_type;
           account = Tezos.sender;
           ],
@@ -128,7 +128,7 @@ function unlock_asset(
         )
       else 0n;
 
-    const unlocked_amount = get_nat_or_fail(params.amount - fee, Errors.not_nat);
+    const unlocked_amount = get_nat_or_fail(amount_ - fee, Errors.not_nat);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
@@ -174,16 +174,15 @@ function unlock_asset(
           asset.asset_type
         ) # operations}
       else skip;
-      asset.total_locked := get_nat_or_fail(asset.total_locked - params.amount, Errors.not_nat);
+      asset.total_locked := get_nat_or_fail(asset.total_locked - amount_, Errors.not_nat);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
 
-    const amount_ = from_precision(params.amount, asset.decimals);
     var validate_unlock := record[
       lock_id = params.lock_id;
       recipient = params.recipient;
-      amount = amount_;
+      amount = params.amount;
       chain_from_id = params.chain_id;
       asset = asset.asset_type;
       signature = params.signature;

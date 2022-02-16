@@ -17,15 +17,14 @@ type asset_id_t         is nat;
 
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
-  decimals                : nat;
+  precision               : nat;
+  pow_above               : bool;
   total_locked            : nat;
   enabled                 : bool;
 ]
 
 type asset_map_t        is big_map(asset_id_t, asset_t)
 type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
-
-type pow_map_t          is big_map(nat, nat)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -46,7 +45,8 @@ type return_t           is list (operation) * storage_t
 
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
-  decimals                : nat;
+  precision               : nat;
+  pow_above               : bool;
 ]
 
 type lock_asset_t       is [@layout:comb] record[
@@ -74,8 +74,3 @@ type unlock_asset_t     is [@layout:comb] record[
 type response_fee_t     is nat;
 
 type wabr_balance_t     is (address * nat)
-
-type new_pow_t          is [@layout:comb] record[
-  pow                     : nat;
-  value                   : nat;
-]
