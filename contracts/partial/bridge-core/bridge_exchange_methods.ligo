@@ -133,7 +133,7 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.total_locked := asset.total_locked + params.amount;
+      asset.total_locked := asset.total_locked + amount_;
 
       const mint_params : mint_params_t = list[
         record[
