@@ -13,22 +13,16 @@ const precision = 10 ** 6;
 const fa2Precision = 10 ** 12;
 const wrappedPrecision = 10 ** 9;
 
-function calculateFee(amount, abrSupply, abrBalance) {
+function calculateFee(amount) {
   const bp = 10000;
-  const feemultiplier = 1000;
   const baseFee = 1000;
   const feePerToken = 1;
-  const userSharesBp = (abrBalance * feemultiplier * bp) / abrSupply;
-  const basicFee = (amount * bp) / (userSharesBp + (bp * bp) / baseFee);
+  const basicFee = amount * baseFee / bp;
   let fee;
-  if (abrSupply === 0) {
+  if (feePerToken > basicFee) {
     fee = feePerToken;
   } else {
-    if (feePerToken > basicFee) {
-      fee = feePerToken;
-    } else {
-      fee = basicFee;
-    }
+    fee = basicFee;
   }
 
   return Math.floor(fee);
@@ -167,14 +161,6 @@ describe("BridgeCore Exchange tests", async function () {
         secpSigner.pkh,
         signature2.sig,
       );
-      await bridge.wrappedToken.updateOperator(
-        "add_operator",
-        alice.pkh,
-        bridge.staking.address,
-        0,
-      );
-      await bridge.staking.deposit(10000);
-      await bridge.staking.updateStorage();
     } catch (e) {
       console.log(e);
     }
@@ -183,9 +169,7 @@ describe("BridgeCore Exchange tests", async function () {
   describe("Testing entrypoint: Lock_asset", async function () {
     it("Should lock fa12 asset", async function () {
       const lockAmount = 10000 * precision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(lockAmount, abrSupply, abrBalance);
+      const fee = calculateFee(lockAmount);
       const prevAsset = await bridge.storage.bridge_assets.get(fa12AssetId);
       const prevBridgeBalance = await fa12Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa12Token.getBalance(
@@ -216,9 +200,7 @@ describe("BridgeCore Exchange tests", async function () {
     });
     it("Should lock fa2 asset", async function () {
       const lockAmount = 1000 * fa2Precision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(lockAmount, abrSupply, abrBalance);
+      const fee = calculateFee(lockAmount);
       const prevAsset = await bridge.storage.bridge_assets.get(fa2AssetId);
       const prevBridgeBalance = await fa2Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa2Token.getBalance(
@@ -252,9 +234,7 @@ describe("BridgeCore Exchange tests", async function () {
     });
     it("Should lock tez asset", async function () {
       const lockAmount = 100000000 / 1e6;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(100000000, abrSupply, abrBalance);
+      const fee = calculateFee(100000000);
       const prevAsset = await bridge.storage.bridge_assets.get(tezAssetId);
       const prevBridgeBalance = await Tezos.tz
         .getBalance(bridge.address)
@@ -297,9 +277,7 @@ describe("BridgeCore Exchange tests", async function () {
     });
     it("Should lock wrapped asset", async function () {
       const lockAmount = 5000 * wrappedPrecision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(lockAmount, abrSupply, abrBalance);
+      const fee = calculateFee(lockAmount);
       const lockId = lockIdToBytes("00ffffffffffffffffffffffffffff03");
       // const keccakBytes = toBytes({
       //   lockId: lockIdToBytes("00ffffffffffffffffffffffffffff93"),
@@ -371,19 +349,9 @@ describe("BridgeCore Exchange tests", async function () {
   describe("Testing entrypoint: Unlock_asset", async function () {
     it("Should unlock fa12 asset with fee", async function () {
       Tezos.setSignerProvider(signerSecp);
-      await bridge.wrappedToken.updateOperator(
-        "add_operator",
-        secpSigner.pkh,
-        bridge.staking.address,
-        0,
-      );
-      await bridge.staking.deposit(10000);
-      await bridge.staking.updateStorage();
 
       const unlockAmount = 5000 * wrappedPrecision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(5000 * 10 ** 6, abrSupply, abrBalance);
+      const fee = calculateFee(5000 * 10 ** 6);
       const prevAsset = await bridge.storage.bridge_assets.get(fa12AssetId);
 
       const prevAliceBalance = await fa12Token.getBalance(alice.pkh);
@@ -432,9 +400,7 @@ describe("BridgeCore Exchange tests", async function () {
     });
     it("Should unlock fa2 asset with fee", async function () {
       const unlockAmount = 500 * wrappedPrecision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(500 * fa2Precision, abrSupply, abrBalance);
+      const fee = calculateFee(500 * fa2Precision);
       const prevAsset = await bridge.storage.bridge_assets.get(fa2AssetId);
       const prevAliceBalance = await fa2Token.getBalance(alice.pkh);
       const prevBridgeBalance = await fa2Token.getBalance(bridge.address);
@@ -485,9 +451,7 @@ describe("BridgeCore Exchange tests", async function () {
     it("Should unlock tez asset with fee", async function () {
       Tezos.setSignerProvider(signerSecp);
       const unlockAmount = 5 * wrappedPrecision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(5, abrSupply, abrBalance);
+      const fee = calculateFee(5);
       const lockId = lockIdToBytes("00ffffffffffffffffffffffffffff02");
       const keccakBytes = toBytes({
         lockId: lockId,
@@ -533,9 +497,7 @@ describe("BridgeCore Exchange tests", async function () {
     it("Should unlock wrapped asset with fee", async function () {
       Tezos.setSignerProvider(signerSecp);
       const unlockAmount = 3000 * wrappedPrecision;
-      const abrSupply = bridge.staking.storage.total_supply.toNumber();
-      const abrBalance = await bridge.staking.getBalance(alice.pkh);
-      const fee = calculateFee(unlockAmount, abrSupply, abrBalance);
+      const fee = calculateFee(unlockAmount);
       const lockId = lockIdToBytes("00ffffffffffffffffffffffffffff04");
       const keccakBytes = toBytes({
         lockId: lockId,

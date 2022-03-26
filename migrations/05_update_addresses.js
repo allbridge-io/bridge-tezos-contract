@@ -8,9 +8,6 @@ module.exports = async tezos => {
   const bridgeAddress = require("../builds/bridge_core.json").networks[network][
     "bridge_core"
   ];
-  const stakingAddress = require("../builds/staking.json").networks[network][
-    "staking"
-  ];
   const oracleAddress = require("../builds/oracle_fee.json").networks[network][
     "oracle_fee"
   ];
@@ -20,9 +17,6 @@ module.exports = async tezos => {
 
   const oracleContract = await tezos.contract.at(oracleAddress);
   const validatorContract = await tezos.contract.at(validatorAddress);
-  const operation_1 = await oracleContract.methods
-    .change_staking(stakingAddress)
-    .send();
   await confirmOperation(tezos, operation_1.hash);
   const operation_2 = await validatorContract.methods
     .change_bridge(bridgeAddress)

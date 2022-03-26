@@ -7,7 +7,6 @@ const bridgeStorage = require("../storage/bridgeCore");
 const tokenStorage = require("../storage/wrappedToken");
 const FeeOracle = require("./feeOracleWrapper");
 const Validator = require("./validatorWrapper");
-const Staking = require("./stakingWrapper");
 const WrappedToken = require("./wrappedTokenWrapper");
 
 module.exports = class BridgeCore {
@@ -16,7 +15,6 @@ module.exports = class BridgeCore {
   storage;
   feeOracle;
   validator;
-  staking;
 
   constructor() {}
   async init(params = false) {
@@ -31,10 +29,8 @@ module.exports = class BridgeCore {
     tokenStorage.bridge = this.address;
     this.wrappedToken = await new WrappedToken().init(this.address);
 
-    this.staking = await new Staking().init(params, this.wrappedToken.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
-    await this.feeOracle.сhangeStaking(this.staking.address);
 
     return this;
   }
