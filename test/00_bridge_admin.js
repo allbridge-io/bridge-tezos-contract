@@ -11,7 +11,6 @@ const Token = require("./helpers/tokenWrapper");
 
 const { alice, bob, secpSigner } = require("../scripts/sandbox/accounts");
 const { MichelsonMap } = require("@taquito/taquito");
-const lockIdToBytes = require("../scripts/lockIdToBytes");
 const toBytes = require("../scripts/toBytesForSign");
 
 const precision = 10 ** 6;
@@ -454,7 +453,7 @@ describe("BridgeCore Admin tests", async function () {
       );
       await bridge.lockAsset(
         bscChainId,
-        lockIdToBytes("00ffffffffffffffffffffffffffff01"),
+        "01ffffffffffffffffffffffffffff01",
         0,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -462,7 +461,7 @@ describe("BridgeCore Admin tests", async function () {
 
       await bridge.lockAsset(
         bscChainId,
-        lockIdToBytes("00ffffffffffffffffffffffffffff02"),
+        "01ffffffffffffffffffffffffffff02",
         1,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -470,7 +469,7 @@ describe("BridgeCore Admin tests", async function () {
 
       await bridge.lockAsset(
         bscChainId,
-        lockIdToBytes("00ffffffffffffffffffffffffffff03"),
+        "01ffffffffffffffffffffffffffff03",
         2,
         lockAmount,
         Buffer.from(alice.pkh, "ascii").toString("hex"),
@@ -479,7 +478,7 @@ describe("BridgeCore Admin tests", async function () {
 
       Tezos.setSignerProvider(signerAlice);
 
-      const lockId = lockIdToBytes("00ffffffffffffffffffffffffffff00");
+      const lockId = "01ffffffffffffffffffffffffffff00";
 
       const keccakBytes = toBytes({
         lockId: lockId,

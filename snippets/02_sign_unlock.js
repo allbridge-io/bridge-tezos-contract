@@ -11,10 +11,9 @@ Tezos.setSignerProvider(signer);
 const { Parser, packDataBytes } = require("@taquito/michel-codec");
 const keccak256 = require("keccak256");
 
-const lockIdToBytes = require("../scripts/lockIdToBytes");
 const params = {
   assetType: "fa12",
-  lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
+  lockId: "01ffffffffffffffffffffffffffff00",
   recipient: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
   chainFromId: 3536,
   amount: 1000000,

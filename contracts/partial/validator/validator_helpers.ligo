@@ -2,6 +2,6 @@
   const lock_id         : bytes)
                         : unit is
   block {
-    const unpacked_lock_id = unwrap((Bytes.unpack(lock_id) : option(nat)), Errors.wrong_lock_id);
-    require(unpacked_lock_id / Constants.lock_id_base = Constants.lock_version, Errors.wrong_lock_version);
+    require(Bytes.length(lock_id) = 16n, Errors.wrong_lock_id_length);
+    require(Bytes.sub(0n, 1n, lock_id) = Constants.lock_version, Errors.wrong_lock_version);
   } with unit

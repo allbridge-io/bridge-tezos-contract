@@ -6,6 +6,5 @@ module Constants is {
   const fee_accuracy      : nat = 10000n;
   const precision         : nat = 1_000_000n;
   const zero_address      : address = ("tz1ZZZZZZZZZZZZZZZZZZZZZZZZZZZZNkiRg" : address);
-  const lock_version      : nat = 0n;
-  const lock_id_base      : nat = 1_329_227_995_784_915_872_903_807_060_280_344_576n;
+  const lock_version      : bytes = 0x01;
 }

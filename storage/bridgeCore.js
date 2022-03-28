@@ -33,7 +33,7 @@ module.exports = {
               prim: "pair",
               args: [
                 {
-                  prim: "nat",
+                  prim: "bytes",
                   annots: ["%lock_id"],
                 },
                 {
