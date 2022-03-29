@@ -18,7 +18,6 @@ type asset_id_t         is nat;
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  pow_above               : bool;
   total_locked            : nat;
   enabled                 : bool;
 ]
@@ -46,7 +45,6 @@ type return_t           is list (operation) * storage_t
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  pow_above               : bool;
 ]
 
 type lock_asset_t       is [@layout:comb] record[

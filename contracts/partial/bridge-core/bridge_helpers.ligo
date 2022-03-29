@@ -61,24 +61,33 @@ function wrap_transfer(
         token_.address)
     end;
 
-function to_precision(
-  const value           : nat;
-  const precision       : nat;
-  const pow_above       : bool)
+function pow10(
+  const value           : nat)
                         : nat is
-  if pow_above
-  then value / precision
-  else if precision > 0n
-    then value * precision
-    else value
+       if value = 0n then 1n
+  else if value = 1n then 10n
+  else if value = 2n then 100n
+  else if value = 3n then 1000n
+  else if value = 4n then 10000n
+  else if value = 5n then 100000n
+  else if value = 6n then 1000000n
+  else if value = 7n then 10000000n
+  else if value = 8n then 100000000n
+  else if value = 9n then 1000000000n
+  else failwith(Errors.wrong_precision)
 
-function from_precision(
+function to_system_precision(
   const value           : nat;
-  const precision       : nat;
-  const pow_above       : bool)
+  const precision       : nat)
                         : nat is
-  if pow_above
-  then value * precision
-  else if precision > 0n
-    then value / precision
-    else value
+  if precision > Constants.system_precision
+  then value / pow10(abs(precision - Constants.system_precision))
+  else value * pow10(abs(Constants.system_precision - precision))
+
+function from_system_precision(
+  const value           : nat;
+  const precision       : nat)
+                        : nat is
+  if precision > Constants.system_precision
+  then value * pow10(abs(precision - Constants.system_precision))
+  else value / pow10(abs(Constants.system_precision - precision))

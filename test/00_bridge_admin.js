@@ -13,7 +13,6 @@ const { alice, bob, secpSigner } = require("../scripts/sandbox/accounts");
 const { MichelsonMap } = require("@taquito/taquito");
 const toBytes = require("../scripts/toBytesForSign");
 
-const precision = 10 ** 6;
 describe("BridgeCore Admin tests", async function () {
   let bridge;
   let fa12Token;
@@ -171,8 +170,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          precision: 1000,
-          pow_above: false,
+          precision: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/not-manager");
@@ -185,8 +183,7 @@ describe("BridgeCore Admin tests", async function () {
       const newAsset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
-        precision: 1000,
-        pow_above: false,
+        precision: 6,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -207,8 +204,7 @@ describe("BridgeCore Admin tests", async function () {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
-        precision: 0,
-        pow_above: false,
+        precision: 6,
       };
 
       const prevAssetCount = bridge.storage.asset_count.toNumber();
@@ -226,8 +222,7 @@ describe("BridgeCore Admin tests", async function () {
     it("Should allow add tez asset", async function () {
       const newAsset = {
         assetType: "tez",
-        precision: 0,
-        pow_above: false,
+        precision: 6,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -248,8 +243,7 @@ describe("BridgeCore Admin tests", async function () {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
-        precision: 0,
-        pow_above: false,
+        precision: 6,
       };
       await bridge.addAsset(newAssetParam);
       await bridge.updateStorage();
@@ -266,8 +260,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          precision: 0,
-          pow_above: false,
+          precision: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-exist");
@@ -295,8 +288,7 @@ describe("BridgeCore Admin tests", async function () {
         bridge.addAsset({
           assetType: "fa12",
           tokenAddress: fa12Token.address,
-          precision: 0,
-          pow_above: false,
+          precision: 6,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-disabled");

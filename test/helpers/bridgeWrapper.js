@@ -77,7 +77,6 @@ module.exports = class BridgeCore {
             "fa12",
             params.tokenAddress,
             params.precision,
-            params.pow_above,
           )
           .send();
         break;
@@ -88,13 +87,12 @@ module.exports = class BridgeCore {
             params.tokenAddress,
             params.tokenId,
             params.precision,
-            params.pow_above,
           )
           .send();
         break;
       case "tez":
         operation = await this.contract.methods
-          .add_asset("tez", null, params.precision, params.pow_above)
+          .add_asset("tez", null, params.precision)
           .send();
         break;
       case "wrapped":
@@ -104,7 +102,6 @@ module.exports = class BridgeCore {
             params.tokenAddress,
             params.tokenId,
             params.precision,
-            params.pow_above,
           )
           .send();
         break;

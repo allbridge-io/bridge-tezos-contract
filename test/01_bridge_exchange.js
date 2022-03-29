@@ -64,27 +64,23 @@ describe("BridgeCore Exchange tests", async function () {
       const fa12Asset = {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
-        precision: 1000,
-        pow_above: false,
+        precision: 6,
       };
       const fa2Asset = {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
-        precision: 1000,
-        pow_above: true,
+        precision: 12,
       };
       const tezAsset = {
         assetType: "tez",
-        precision: 1000,
-        pow_above: false,
+        precision: 6,
       };
       const wrappedAsset = {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
-        precision: 0,
-        pow_above: false,
+        precision: 9,
       };
 
       await bridge.addAsset(fa12Asset);

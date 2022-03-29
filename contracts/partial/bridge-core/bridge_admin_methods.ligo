@@ -118,7 +118,6 @@ function add_asset(
     var new_asset := record[
       asset_type = params.asset_type;
       precision = params.precision;
-      pow_above = params.pow_above;
       total_locked = 0n;
       enabled = True;
     ];

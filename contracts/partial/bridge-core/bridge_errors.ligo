@@ -31,4 +31,5 @@ module Errors is {
   const not_nat                : string = "Bridge-core/not-nat";
   const zero_transfer          : string = "Bridge-core/zero-transfer";
   const amounts_mismatch       : string = "Bridge-core/amounts-mismatch";
+  const wrong_precision        : string = "Bridge-core/wrong-precision";
   }

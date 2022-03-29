@@ -94,7 +94,7 @@ function lock_asset(
       lock_id = params.lock_id;
       sender = Tezos.sender;
       recipient = params.recipient;
-      amount = to_precision(locked_amount, asset.precision, asset.pow_above);
+      amount = to_system_precision(locked_amount, asset.precision);
       asset = asset.asset_type;
       destination_chain_id = params.chain_id
     ];
@@ -116,7 +116,7 @@ function unlock_asset(
 
     require(s.enabled, Errors.bridge_disabled);
     require(asset.enabled, Errors.asset_disabled);
-    const amount_ = from_precision(params.amount, asset.precision, asset.pow_above);
+    const amount_ = from_system_precision(params.amount, asset.precision);
     const fee = if s.approved_claimer = Tezos.sender
       then get_oracle_fee(
         record[
