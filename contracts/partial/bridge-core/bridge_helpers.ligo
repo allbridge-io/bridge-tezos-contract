@@ -8,6 +8,15 @@ function get_oracle_fee(
     Errors.oracle_not_found
   )
 
+function get_min_fee(
+  const token          : asset_standard_t;
+  const oracle_address : address)
+                       : response_fee_t is
+  unwrap(
+    (Tezos.call_view("min_fee", token, oracle_address) : option(response_fee_t)),
+    Errors.oracle_not_found
+  )
+
 function get_lock_contract(
   const validator       : address)
                         : contract(validate_lock_t) is

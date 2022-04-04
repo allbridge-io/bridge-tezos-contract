@@ -14,3 +14,9 @@
         else basic_fee;
 
   } with fee
+
+[@view] function min_fee(
+  const token           : asset_standard_t;
+  const s               : storage_t)
+                        : response_fee_t is
+  unwrap(s.fee_per_tokens[token], Errors.token_not_exist)

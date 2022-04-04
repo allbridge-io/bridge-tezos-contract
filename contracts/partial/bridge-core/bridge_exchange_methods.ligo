@@ -24,7 +24,7 @@ function lock_asset(
       ],
       s.fee_oracle);
 
-    const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.not_nat);
+    const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.amount_too_low);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
@@ -118,17 +118,10 @@ function unlock_asset(
     require(asset.enabled, Errors.asset_disabled);
     const amount_ = from_system_precision(params.amount, asset.precision);
     const fee = if s.approved_claimer = Tezos.sender
-      then get_oracle_fee(
-        record[
-          amount = amount_;
-          token = asset.asset_type;
-          account = Tezos.sender;
-          ],
-        s.fee_oracle
-        )
+      then get_min_fee(asset.asset_type, s.fee_oracle)
       else 0n;
 
-    const unlocked_amount = get_nat_or_fail(amount_ - fee, Errors.not_nat);
+    const unlocked_amount = get_nat_or_fail(amount_ - fee, Errors.amount_too_low);
 
     var operations := Constants.no_operations;
     case asset.asset_type of
