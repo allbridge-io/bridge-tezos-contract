@@ -29,8 +29,6 @@ function lock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.total_locked := get_nat_or_fail(asset.total_locked - locked_amount, Errors.not_nat);
-
       const burn_params : burn_params_t = record[
         token_id = token_.id;
         account = Tezos.sender;
@@ -69,7 +67,6 @@ function lock_asset(
         fee,
         asset.asset_type
       ) # operations;
-      asset.total_locked := asset.total_locked + locked_amount;
     }
     | _ -> {
       operations := wrap_transfer(
@@ -84,8 +81,6 @@ function lock_asset(
         fee,
         asset.asset_type
       ) # operations;
-
-      asset.total_locked := asset.total_locked + locked_amount;
     }
     end;
     s.bridge_assets[params.asset_id] := asset;
@@ -126,8 +121,6 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of
     | Wrapped(token_) -> {
-      asset.total_locked := asset.total_locked + amount_;
-
       const mint_params : mint_params_t = list[
         record[
           token_id = token_.id;
@@ -167,7 +160,6 @@ function unlock_asset(
           asset.asset_type
         ) # operations}
       else skip;
-      asset.total_locked := get_nat_or_fail(asset.total_locked - amount_, Errors.not_nat);
     }
     end;
     s.bridge_assets[params.asset_id] := asset;

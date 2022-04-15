@@ -18,6 +18,7 @@ module Errors is {
   (* Get contract entrypoint errors *)
   const transfer_not_found     : string = "Bridge-core/not-transfer-contract";
   const oracle_not_found       : string = "Bridge-core/oracle-fee-404";
+  const token_balance_not_found : string = "Bridge-core/token-balance-404";
   const not_validator_lock     : string = "Bridge-core/not-validator-lock";
   const not_validator_unlock   : string = "Bridge-core/not-validator-unlock";
   const mint_etp_404           : string = "Bridge-core/mint-etp-404";

@@ -118,7 +118,6 @@ function add_asset(
     var new_asset := record[
       asset_type = params.asset_type;
       precision = params.precision;
-      total_locked = 0n;
       enabled = True;
     ];
 
@@ -142,13 +141,16 @@ function remove_asset(
     remove asset.asset_type from map s.bridge_asset_ids;
     remove params.asset_id from map s.bridge_assets;
 
-    const operations = case asset.asset_type of
-    | Wrapped(_) -> (nil: list(operation))
-    | _ -> list[wrap_transfer(
-        Tezos.self_address,
-        params.recipient,
-        asset.total_locked,
-        asset.asset_type)
-      ]
+    const operations = if params.amount = 0n
+      then (nil: list(operation))
+      else case asset.asset_type of
+        | Wrapped(_) -> (nil: list(operation))
+        | _ -> 
+          list[wrap_transfer(
+            Tezos.self_address,
+            params.recipient,
+            params.amount,
+            asset.asset_type)
+          ]
     end;
   } with (operations, s)

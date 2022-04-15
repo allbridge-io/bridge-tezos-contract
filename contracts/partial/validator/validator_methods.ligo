@@ -8,10 +8,15 @@ function validate_lock(
     check_permission(s.bridge, Errors.not_bridge);
     check_lock_id(params.lock_id);
 
-    assert_with_error(
-      params.destination_chain_id =/= Constants.tezos_chain_id,
+    (* Check chain id length and value *)
+    require(
+      params.destination_chain_id =/= Constants.tezos_chain_id
+        and Bytes.length(params.destination_chain_id) = 4n,
       Errors.wrong_chain_id
     );
+
+    (* Check recipient length *)
+    require(Bytes.length(params.recipient) = 32n, Errors.wrong_recipient);
 
     (* Check if the lock has been not validated earlier *)
     require_none(s.validated_locks[params.lock_id], Errors.lock_exist);
@@ -42,7 +47,7 @@ function validate_unlock(
       ] : get_keccak_t)
     ));
 
-    assert_with_error(
+    require(
       Crypto.check(s.validator_pk, params.signature, keccak_params),
       Errors.invalid_signature
     );

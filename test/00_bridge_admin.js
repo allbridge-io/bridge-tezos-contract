@@ -17,7 +17,8 @@ describe("BridgeCore Admin tests", async function () {
   let bridge;
   let fa12Token;
   let fa2Token;
-  const bscChainId = Buffer.from("56", "ascii").toString("hex");
+  const bscChainId = "11223344";
+  const bscAddress = "1122334455667788990011223344556677889900112233445566778899001122";
 
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
@@ -448,7 +449,7 @@ describe("BridgeCore Admin tests", async function () {
         "01ffffffffffffffffffffffffffff01",
         0,
         lockAmount,
-        Buffer.from(alice.pkh, "ascii").toString("hex"),
+        bscAddress,
       );
 
       await bridge.lockAsset(
@@ -456,7 +457,7 @@ describe("BridgeCore Admin tests", async function () {
         "01ffffffffffffffffffffffffffff02",
         1,
         lockAmount,
-        Buffer.from(alice.pkh, "ascii").toString("hex"),
+        bscAddress,
       );
 
       await bridge.lockAsset(
@@ -464,7 +465,7 @@ describe("BridgeCore Admin tests", async function () {
         "01ffffffffffffffffffffffffffff03",
         2,
         lockAmount,
-        Buffer.from(alice.pkh, "ascii").toString("hex"),
+        bscAddress,
         lockAmount / 1e6,
       );
 
@@ -493,7 +494,7 @@ describe("BridgeCore Admin tests", async function () {
     });
     it("Shouldn't remove asset if the user is not bridge manager", async function () {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.removeAsset(0, alice.pkh), err => {
+      await rejects(bridge.removeAsset(0, 0, alice.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-manager");
         return true;
       });
@@ -503,7 +504,7 @@ describe("BridgeCore Admin tests", async function () {
       const prevBalance = await fa12Token.getBalance(bridge.address);
       const prevAsset = await bridge.storage.bridge_assets.get(0);
 
-      await bridge.removeAsset(0, dev.pkh);
+      await bridge.removeAsset(0, prevBalance, dev.pkh);
       await bridge.updateStorage();
       const devBalance = await fa12Token.getBalance(dev.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
@@ -516,7 +517,7 @@ describe("BridgeCore Admin tests", async function () {
     it("Should allow remove fa2 asset", async function () {
       Tezos.setSignerProvider(signerBob);
       const prevBalance = await fa2Token.getBalance(bridge.address);
-      await bridge.removeAsset(1, dev.pkh);
+      await bridge.removeAsset(1, prevBalance, dev.pkh);
       await bridge.updateStorage();
       const devBalance = await fa12Token.getBalance(dev.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
@@ -527,14 +528,30 @@ describe("BridgeCore Admin tests", async function () {
     });
     it("Should allow remove Tez asset", async function () {
       Tezos.setSignerProvider(signerBob);
-      await bridge.removeAsset(2, alice.pkh);
+      const prevDevBalance = await Tezos.tz.getBalance(dev.pkh)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+      const prevBalance = await Tezos.tz.getBalance(bridge.address)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+      await bridge.removeAsset(2, prevBalance, dev.pkh);
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(2);
       strictEqual(asset, undefined);
+
+      const devBalance = await Tezos.tz.getBalance(dev.pkh)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+      const bridgeBalance = await Tezos.tz.getBalance(bridge.address)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+
+      strictEqual(devBalance, prevDevBalance + prevBalance);
+      strictEqual(bridgeBalance, 0);
     });
     it("Should allow remove wrapped asset", async function () {
       Tezos.setSignerProvider(signerBob);
-      await bridge.removeAsset(3, dev.pkh);
+      await bridge.removeAsset(3, 0, dev.pkh);
       await bridge.updateStorage();
 
       const asset = await bridge.storage.bridge_assets.get(3);

@@ -7,4 +7,5 @@ module Errors is {
   const wrong_chain_id     : string = "Validator-bridge/wrong-destination-chain-id";
   const wrong_lock_version : string = "Validator-bridge/wrong-lock-version";
   const wrong_lock_id_length : string = "Validator-bridge/wrong-lock-id-length";
+  const wrong_recipient    : string = "Validator-bridge/wrong-recipient";
 }

@@ -121,9 +121,9 @@ module.exports = class BridgeCore {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async removeAsset(assetId, receiver) {
+  async removeAsset(assetId, amount, receiver) {
     const operation = await this.contract.methods
-      .remove_asset(assetId, receiver)
+      .remove_asset(assetId, amount, receiver)
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

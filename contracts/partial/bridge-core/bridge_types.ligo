@@ -18,7 +18,6 @@ type asset_id_t         is nat;
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  total_locked            : nat;
   enabled                 : bool;
 ]
 
@@ -57,6 +56,7 @@ type lock_asset_t       is [@layout:comb] record[
 
 type remove_asset_t     is [@layout:comb] record[
   asset_id                : asset_id_t;
+  amount                  : nat;
   recipient               : address;
 ]
 
