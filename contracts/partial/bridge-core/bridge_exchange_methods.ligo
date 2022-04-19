@@ -83,7 +83,6 @@ function lock_asset(
       ) # operations;
     }
     end;
-    s.bridge_assets[params.asset_id] := asset;
 
     var validate_lock := record[
       lock_id = params.lock_id;
@@ -162,7 +161,6 @@ function unlock_asset(
       else skip;
     }
     end;
-    s.bridge_assets[params.asset_id] := asset;
 
     var validate_unlock := record[
       lock_id = params.lock_id;
