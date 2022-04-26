@@ -19,10 +19,10 @@ function main(
   const action          : parameter_t;
   const s               : storage_t)
                         : return_t is
-  case action of
+  case action of [
   | Change_owner(params)        -> (Constants.no_operations, change_owner(params, s))
   | Change_bridge(params)       -> (Constants.no_operations, change_bridge(params, s))
   | Change_validator_pk(params) -> (Constants.no_operations, change_validator_pk(params, s))
   | Validate_lock(params)       -> (Constants.no_operations, validate_lock(params, s))
   | Validate_unlock(params)     -> (Constants.no_operations, validate_unlock(params, s))
-  end
+  ]

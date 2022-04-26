@@ -38,10 +38,10 @@ function iterate_update_operators(
   const params          : update_operator_param_t)
                         : storage_t is
   block {
-    const (param, should_add) = case params of
+    const (param, should_add) = case params of [
     | Add_operator(param)    -> (param, True)
     | Remove_operator(param) -> (param, False)
-    end;
+    ];
 
     require(param.token_id < s.token_count, Errors.fa2_token_undefined);
     require(Tezos.sender = param.owner, Errors.fa2_not_owner);

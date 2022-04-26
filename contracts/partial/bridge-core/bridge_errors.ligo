@@ -30,4 +30,5 @@ module Errors is {
   const amounts_mismatch        : string = "Bridge-core/amounts-mismatch";
   const wrong_precision         : string = "Bridge-core/wrong-precision";
   const amount_too_low          : string = "Bridge-core/amount-too-low";
+  const not_contract            : string = "Bridge-core/not-implict-account";
   }

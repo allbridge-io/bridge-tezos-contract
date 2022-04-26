@@ -115,7 +115,7 @@ function add_asset(
     (* Check bridge status *)
     require(s.enabled, Errors.bridge_disabled);
 
-    var new_asset := record[
+    const new_asset = record[
       asset_type = params.asset_type;
       precision = params.precision;
       enabled = True;
@@ -128,14 +128,14 @@ function add_asset(
     s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
-    case params.asset_type of
+    case params.asset_type of [
     | Wrapped(_) ->
-      case params.wrapped_token of
+      case params.wrapped_token of [
       | Some(wrapped_token) -> s.wrapped_infos[wrapped_token] := params.asset_type
       | None -> failwith(Errors.non_wrapped_infos)
-      end
+      ]
     | _ -> skip
-    end;
+    ]
   } with s
 
 function remove_asset(
@@ -151,7 +151,7 @@ function remove_asset(
 
     const operations = if params.amount = 0n
       then (nil: list(operation))
-      else case asset.asset_type of
+      else case asset.asset_type of [
         | Wrapped(_) -> (nil: list(operation))
         | _ ->
           list[wrap_transfer(
@@ -160,13 +160,13 @@ function remove_asset(
             params.amount,
             asset.asset_type)
           ]
-        end;
-    case asset.asset_type of
+        ];
+    case asset.asset_type of [
     | Wrapped(_) ->
-        case params.wrapped_token of
+        case params.wrapped_token of [
         | Some(wrapped_token) -> remove wrapped_token from map s.wrapped_infos
         | None -> failwith(Errors.non_wrapped_infos)
-        end
+        ]
     | _ -> skip
-    end
+    ]
   } with (operations, s)

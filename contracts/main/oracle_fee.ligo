@@ -16,8 +16,8 @@ function main(
   const action          : parameter_t;
   const s               : storage_t)
                         : return_t is
-  case action of
+  case action of [
   | Change_owner(params)        -> (Constants.no_operations, change_owner(params, s))
   | Change_token_fee(params)    -> (Constants.no_operations, change_token_fee(params.token, params.new_fee, s))
   | Change_base_fee(params)     -> (Constants.no_operations, change_base_fee(params, s))
-  end
+  ]

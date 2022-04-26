@@ -4,15 +4,15 @@ function lock_asset(
   var s                : storage_t)
                        : return_t is
   block {
-    var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
+    const asset = unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
 
     require(asset.enabled, Errors.asset_disabled);
     require(s.enabled, Errors.bridge_disabled);
 
-    const locked_without_fee = case asset.asset_type of
+    const locked_without_fee = case asset.asset_type of [
     | Tez -> Tezos.amount / 1mutez
     | _ -> params.amount
-    end;
+    ];
 
     require(locked_without_fee > 0n, Errors.zero_transfer);
 
@@ -27,7 +27,7 @@ function lock_asset(
     const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.amount_too_low);
 
     var operations := Constants.no_operations;
-    case asset.asset_type of
+    case asset.asset_type of [
     | Wrapped(token_) -> {
       const burn_params : burn_params_t = record[
         token_id = token_.id;
@@ -82,7 +82,7 @@ function lock_asset(
         asset.asset_type
       ) # operations;
     }
-    end;
+    ];
 
     var validate_lock := record[
       lock_id = params.lock_id;
@@ -118,7 +118,7 @@ function unlock_asset(
     const unlocked_amount = get_nat_or_fail(amount_ - fee, Errors.amount_too_low);
 
     var operations := Constants.no_operations;
-    case asset.asset_type of
+    case asset.asset_type of [
     | Wrapped(token_) -> {
       const mint_params : mint_params_t = list[
         record[
@@ -160,7 +160,7 @@ function unlock_asset(
         ) # operations}
       else skip;
     }
-    end;
+    ];
 
     var validate_unlock := record[
       lock_id = params.lock_id;

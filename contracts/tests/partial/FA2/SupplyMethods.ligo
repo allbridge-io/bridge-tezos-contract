@@ -20,7 +20,7 @@ function mint (
         else failwith("FA2_TOKEN_UNDEFINED");
 
         if param.token_id = 0n
-        then failwith("MINT_FORBIDDEN");
+        then failwith("MINT_FORBIDDEN")
         else skip;
 
         (* Get receiver account *)
@@ -64,8 +64,8 @@ function mint_token(
 
         if token.total_supply < max_supply then
           if token.total_supply + result > max_supply then
-            result := abs(max_supply - token.total_supply);
-          else skip;
+            result := abs(max_supply - token.total_supply)
+          else skip
         else failwith ("Mint limit is exceeded");
 
         var dst_account : account := get_account(mt.minter, s);

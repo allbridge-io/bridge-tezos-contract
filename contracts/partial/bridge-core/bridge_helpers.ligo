@@ -22,21 +22,20 @@ function get_lock_contract(
                         : contract(validate_lock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_lock",
-    validator)          : option(contract(validate_lock_t))) of
+    validator)          : option(contract(validate_lock_t))) of [
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_lock)
-  end;
+  ]
 
-// TODO::Replace with unwrap
 function get_unlock_contract(
   const validator       : address)
                         : contract(validate_unlock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_unlock",
-    validator)          : option(contract(validate_unlock_t))) of
+    validator)          : option(contract(validate_unlock_t))) of [
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_unlock)
-  end;
+  ]
 
 function wrap_transfer(
   const sender_          : address;
@@ -44,7 +43,7 @@ function wrap_transfer(
   const amount_          : nat;
   const token            : asset_standard_t)
                          : operation is
-    case token of
+    case token of [
     | Fa12(address_) -> Tezos.transaction(
         (sender_,
         (receiver, amount_)),
@@ -61,14 +60,14 @@ function wrap_transfer(
     | Tez -> Tezos.transaction(
         unit,
         amount_ * 1mutez,
-        (get_contract(receiver) : contract(unit)))
+        (Tezos.get_contract_with_error(receiver, Errors.not_contract) : contract(unit)))
     | Wrapped(token_) -> transfer_fa2(
         sender_,
         receiver,
         amount_,
         token_.id,
         token_.address)
-    end;
+    ]
 
 function pow10(
   const value           : nat)
