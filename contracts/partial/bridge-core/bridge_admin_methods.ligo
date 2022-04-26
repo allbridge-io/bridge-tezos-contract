@@ -128,6 +128,14 @@ function add_asset(
     s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
+    case params.asset_type of
+    | Wrapped(_) ->
+      case params.wrapped_token of
+      | Some(wrapped_token) -> s.wrapped_infos[wrapped_token] := params.asset_type
+      | None -> failwith(Errors.non_wrapped_infos)
+      end
+    | _ -> skip
+    end;
   } with s
 
 function remove_asset(
@@ -145,12 +153,20 @@ function remove_asset(
       then (nil: list(operation))
       else case asset.asset_type of
         | Wrapped(_) -> (nil: list(operation))
-        | _ -> 
+        | _ ->
           list[wrap_transfer(
             Tezos.self_address,
             params.recipient,
             params.amount,
             asset.asset_type)
           ]
-    end;
+        end;
+    case asset.asset_type of
+    | Wrapped(_) ->
+        case params.wrapped_token of
+        | Some(wrapped_token) -> remove wrapped_token from map s.wrapped_infos
+        | None -> failwith(Errors.non_wrapped_infos)
+        end
+    | _ -> skip
+    end
   } with (operations, s)
