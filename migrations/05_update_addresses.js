@@ -1,27 +1,20 @@
-const { migrate } = require("../scripts/helpers");
 const { confirmOperation } = require("../scripts/confirmation");
 const envJs = require("../env");
 const network = envJs.network;
-const env = process.env;
 
 module.exports = async tezos => {
   const bridgeAddress = require("../builds/bridge_core.json").networks[network][
     "bridge_core"
   ];
-  const oracleAddress = require("../builds/oracle_fee.json").networks[network][
-    "oracle_fee"
-  ];
   const validatorAddress = require("../builds/validator.json").networks[
     network
   ]["validator"];
 
-  const oracleContract = await tezos.contract.at(oracleAddress);
   const validatorContract = await tezos.contract.at(validatorAddress);
-  await confirmOperation(tezos, operation_1.hash);
-  const operation_2 = await validatorContract.methods
+  const operation = await validatorContract.methods
     .change_bridge(bridgeAddress)
     .send();
-  await confirmOperation(tezos, operation_2.hash);
+  await confirmOperation(tezos, operation.hash);
 
   console.log("Storage addresses was updated!");
 };
