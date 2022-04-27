@@ -10,7 +10,7 @@ module Errors is {
   const bridge_exist            : string = "Bridge-core/bridge-exist";
   const token_not_supported     : string = "Bridge-core/token-isn't-supported";
   const non_transferable_asset  : string = "Bridge-core/non-transferable-asset";
-  const non_wrapped_infos       : string = "Bridge-core/wrapped-infos-not-passed"
+  const non_source_to_native       : string = "Bridge-core/wrapped-infos-not-passed"
   (* Account errors *)
   const account_not_exist       : string = "Bridge-core/account-doesn't-exist";
   const insufficient_balance    : string = "Bridge-core/insufficient-balance";

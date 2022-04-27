@@ -129,11 +129,10 @@ function add_asset(
     s.asset_count := s.asset_count + 1n;
 
     case params.asset_type of [
-    | Wrapped(_) ->
-      case params.wrapped_token of [
-      | Some(wrapped_token) -> s.wrapped_infos[wrapped_token] := params.asset_type
-      | None -> failwith(Errors.non_wrapped_infos)
-      ]
+    | Wrapped(_) -> {
+        const wrapped_token = unwrap(params.wrapped_token, Errors.non_source_to_native);
+        s.source_to_native[wrapped_token] := params.asset_type;
+      }
     | _ -> skip
     ]
   } with s
@@ -162,11 +161,10 @@ function remove_asset(
           ]
         ];
     case asset.asset_type of [
-    | Wrapped(_) ->
-        case params.wrapped_token of [
-        | Some(wrapped_token) -> remove wrapped_token from map s.wrapped_infos
-        | None -> failwith(Errors.non_wrapped_infos)
-        ]
+    | Wrapped(_) -> {
+        const wrapped_token = unwrap(params.wrapped_token, Errors.non_source_to_native);
+        remove wrapped_token from map s.source_to_native;
+      }
     | _ -> skip
     ]
   } with (operations, s)
