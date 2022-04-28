@@ -127,15 +127,7 @@ function add_asset(
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
-
-    case params.asset_type of [
-    | Wrapped(_) ->
-      case params.wrapped_token of [
-      | Some(wrapped_token) -> s.wrapped_infos[wrapped_token] := params.asset_type
-      | None -> failwith(Errors.non_wrapped_infos)
-      ]
-    | _ -> skip
-    ]
+    s.asset_sources[params.token_source] := params.asset_type;
   } with s
 
 function remove_asset(
@@ -161,12 +153,5 @@ function remove_asset(
             asset.asset_type)
           ]
         ];
-    case asset.asset_type of [
-    | Wrapped(_) ->
-        case params.wrapped_token of [
-        | Some(wrapped_token) -> remove wrapped_token from map s.wrapped_infos
-        | None -> failwith(Errors.non_wrapped_infos)
-        ]
-    | _ -> skip
-    ]
+    remove params.token_source from map s.asset_sources;
   } with (operations, s)

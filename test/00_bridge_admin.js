@@ -21,8 +21,10 @@ describe("BridgeCore Admin tests", async function() {
   const bscAddress =
     "1122334455667788990011223344556677889900112233445566778899001122";
 
-  const wrappedInfo = { chain_id: "1111", native_token_address: "999999" };
-
+  const fa12Source = { chain_id: "1111", native_address: "449999" };
+  const fa2Source = { chain_id: "1111", native_address: "559999" };
+  const tezSource = { chain_id: "1111", native_address: "000000" };
+  const wrappedSource = { chain_id: "2222", native_address: "11223344" };
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     try {
@@ -175,6 +177,8 @@ describe("BridgeCore Admin tests", async function() {
           assetType: "fa12",
           tokenAddress: fa12Token.address,
           precision: 6,
+          chainId: fa12Source.chain_id,
+          nativeAddress: fa12Source.native_address,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/not-manager");
@@ -188,6 +192,8 @@ describe("BridgeCore Admin tests", async function() {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
         precision: 6,
+        chainId: fa12Source.chain_id,
+        nativeAddress: fa12Source.native_address,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
@@ -195,9 +201,11 @@ describe("BridgeCore Admin tests", async function() {
       const addedAsset = await bridge.storage.bridge_assets.get(
         bridge.storage.asset_count.toNumber() - 1,
       );
+      const addedInfo = await bridge.storage.asset_sources.get(fa12Source);
+
       strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
-
+      notStrictEqual(addedInfo, undefined);
       notStrictEqual(
         await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
         undefined,
@@ -209,15 +217,20 @@ describe("BridgeCore Admin tests", async function() {
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
         precision: 6,
+        chainId: fa2Source.chain_id,
+        nativeAddress: fa2Source.native_address,
       };
 
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
+
+      const addedInfo = await bridge.storage.asset_sources.get(fa2Source);
+
       strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
-
+      notStrictEqual(addedInfo, undefined);
       notStrictEqual(
         await bridge.storage.bridge_asset_ids.get(addedAsset.asset_type),
         undefined,
@@ -227,11 +240,16 @@ describe("BridgeCore Admin tests", async function() {
       const newAsset = {
         assetType: "tez",
         precision: 6,
+        chainId: tezSource.chain_id,
+        nativeAddress: tezSource.native_address,
       };
       const prevAssetCount = bridge.storage.asset_count.toNumber();
       await bridge.addAsset(newAsset);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
+      const addedInfo = await bridge.storage.asset_sources.get(tezSource);
+
+      notStrictEqual(addedInfo, undefined);
       strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
 
@@ -248,13 +266,13 @@ describe("BridgeCore Admin tests", async function() {
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
         precision: 6,
-        chainId: wrappedInfo.chain_id,
-        nativeAddress: wrappedInfo.native_token_address,
+        chainId: wrappedSource.chain_id,
+        nativeAddress: wrappedSource.native_address,
       };
       await bridge.addAsset(newAssetParam);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
-      const addedInfo = await bridge.storage.wrapped_infos.get(wrappedInfo);
+      const addedInfo = await bridge.storage.asset_sources.get(wrappedSource);
       strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
       notStrictEqual(addedInfo, undefined);
@@ -269,6 +287,8 @@ describe("BridgeCore Admin tests", async function() {
           assetType: "fa12",
           tokenAddress: fa12Token.address,
           precision: 6,
+          chainId: fa12Source.chain_id,
+          nativeAddress: fa12Source.native_address,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-exist");
@@ -297,6 +317,8 @@ describe("BridgeCore Admin tests", async function() {
           assetType: "fa12",
           tokenAddress: fa12Token.address,
           precision: 6,
+          chainId: fa12Source.chain_id,
+          nativeAddress: fa12Source.native_address,
         }),
         err => {
           strictEqual(err.message, "Bridge-core/bridge-disabled");
@@ -501,22 +523,38 @@ describe("BridgeCore Admin tests", async function() {
     });
     it("Shouldn't remove asset if the user is not bridge manager", async function() {
       Tezos.setSignerProvider(signerAlice);
-      await rejects(bridge.removeAsset(0, 0, alice.pkh), err => {
-        strictEqual(err.message, "Bridge-core/not-manager");
-        return true;
-      });
+      await rejects(
+        bridge.removeAsset(
+          0,
+          0,
+          alice.pkh,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/not-manager");
+          return true;
+        },
+      );
     });
     it("Should allow remove fa12 asset", async function() {
       Tezos.setSignerProvider(signerBob);
       const prevBalance = await fa12Token.getBalance(bridge.address);
-      const prevAsset = await bridge.storage.bridge_assets.get(0);
 
-      await bridge.removeAsset(0, prevBalance, dev.pkh);
+      await bridge.removeAsset(
+        0,
+        prevBalance,
+        dev.pkh,
+        fa12Source.chain_id,
+        fa12Source.native_address,
+      );
       await bridge.updateStorage();
       const devBalance = await fa12Token.getBalance(dev.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
       const asset = await bridge.storage.bridge_assets.get(0);
+      const removedInfo = await bridge.storage.asset_sources.get(fa12Source);
 
+      strictEqual(removedInfo, undefined);
       strictEqual(asset, undefined);
       strictEqual(devBalance, prevBalance);
       strictEqual(bridgeBalance, 0);
@@ -524,11 +562,20 @@ describe("BridgeCore Admin tests", async function() {
     it("Should allow remove fa2 asset", async function() {
       Tezos.setSignerProvider(signerBob);
       const prevBalance = await fa2Token.getBalance(bridge.address);
-      await bridge.removeAsset(1, prevBalance, dev.pkh);
+      await bridge.removeAsset(
+        1,
+        prevBalance,
+        dev.pkh,
+        fa2Source.chain_id,
+        fa2Source.native_address,
+      );
       await bridge.updateStorage();
       const devBalance = await fa12Token.getBalance(dev.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
       const asset = await bridge.storage.bridge_assets.get(1);
+      const removedInfo = await bridge.storage.asset_sources.get(fa2Source);
+
+      strictEqual(removedInfo, undefined);
       strictEqual(asset, undefined);
       strictEqual(devBalance, prevBalance);
       strictEqual(bridgeBalance, 0);
@@ -543,7 +590,13 @@ describe("BridgeCore Admin tests", async function() {
         .getBalance(bridge.address)
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
-      await bridge.removeAsset(2, prevBalance, dev.pkh);
+      await bridge.removeAsset(
+        2,
+        prevBalance,
+        dev.pkh,
+        tezSource.chain_id,
+        tezSource.native_address,
+      );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(2);
       strictEqual(asset, undefined);
@@ -556,7 +609,9 @@ describe("BridgeCore Admin tests", async function() {
         .getBalance(bridge.address)
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
+      const removedInfo = await bridge.storage.asset_sources.get(tezSource);
 
+      strictEqual(removedInfo, undefined);
       strictEqual(devBalance, prevDevBalance + prevBalance);
       strictEqual(bridgeBalance, 0);
     });
@@ -566,15 +621,15 @@ describe("BridgeCore Admin tests", async function() {
         3,
         0,
         dev.pkh,
-        wrappedInfo.chain_id,
-        wrappedInfo.native_token_address,
+        wrappedSource.chain_id,
+        wrappedSource.native_address,
       );
       await bridge.updateStorage();
 
       const asset = await bridge.storage.bridge_assets.get(3);
-      const addedInfo = await bridge.storage.wrapped_infos.get(wrappedInfo);
+      const removedInfo = await bridge.storage.asset_sources.get(wrappedSource);
       strictEqual(asset, undefined);
-      strictEqual(addedInfo, undefined);
+      strictEqual(removedInfo, undefined);
     });
   });
 });

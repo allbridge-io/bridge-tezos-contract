@@ -24,7 +24,12 @@ type asset_t            is [@layout:comb] record[
 type asset_map_t        is big_map(asset_id_t, asset_t)
 type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
 
-type wrapped_infos_t    is big_map(wrapped_token_t, asset_standard_t)
+type source_token_t     is [@layout:comb] record[
+  chain_id                : bytes;
+  native_address          : bytes;
+]
+
+type asset_sources_t    is big_map(source_token_t, asset_standard_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -37,7 +42,7 @@ type storage_t          is [@layout:comb] record[
   asset_count             : nat;
   bridge_assets           : asset_map_t;
   bridge_asset_ids        : asset_map_ids_t;
-  wrapped_infos           : wrapped_infos_t;
+  asset_sources           : asset_sources_t;
   enabled                 : bool;
   metadata                : big_map(string, bytes);
 ]
@@ -47,7 +52,7 @@ type return_t           is list (operation) * storage_t
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  wrapped_token           : option(wrapped_token_t);
+  token_source            : source_token_t;
 ]
 
 type lock_asset_t       is [@layout:comb] record[
@@ -62,7 +67,7 @@ type remove_asset_t     is [@layout:comb] record[
   asset_id                : asset_id_t;
   amount                  : nat;
   recipient               : address;
-  wrapped_token           : option(wrapped_token_t);
+  token_source            : source_token_t;
 ]
 
 type unlock_asset_t     is [@layout:comb] record[

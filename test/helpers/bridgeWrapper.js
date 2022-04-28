@@ -73,7 +73,13 @@ module.exports = class BridgeCore {
     switch (assetType) {
       case "fa12":
         operation = await this.contract.methods
-          .add_asset("fa12", params.tokenAddress, params.precision, null)
+          .add_asset(
+            "fa12",
+            params.tokenAddress,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
+          )
           .send();
         break;
       case "fa2":
@@ -83,13 +89,20 @@ module.exports = class BridgeCore {
             params.tokenAddress,
             params.tokenId,
             params.precision,
-            null,
+            params.chainId,
+            params.nativeAddress,
           )
           .send();
         break;
       case "tez":
         operation = await this.contract.methods
-          .add_asset("tez", null, params.precision, null)
+          .add_asset(
+            "tez",
+            null,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
+          )
           .send();
         break;
       case "wrapped":
@@ -120,13 +133,7 @@ module.exports = class BridgeCore {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async removeAsset(
-    assetId,
-    amount,
-    receiver,
-    chainId = null,
-    nativeAddress = null,
-  ) {
+  async removeAsset(assetId, amount, receiver, chainId, nativeAddress) {
     const operation = await this.contract.methods
       .remove_asset(assetId, amount, receiver, chainId, nativeAddress)
       .send();

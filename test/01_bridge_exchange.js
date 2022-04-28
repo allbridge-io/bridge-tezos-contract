@@ -66,23 +66,29 @@ describe("BridgeCore Exchange tests", async function() {
         assetType: "fa12",
         tokenAddress: fa12Token.address,
         precision: 6,
+        chainId: "1111",
+        nativeAddress: "112233",
       };
       const fa2Asset = {
         assetType: "fa2",
         tokenAddress: fa2Token.address,
         tokenId: fa2Token.tokenId,
         precision: 12,
+        chainId: "1111",
+        nativeAddress: "119801",
       };
       const tezAsset = {
         assetType: "tez",
         precision: 6,
+        chainId: "1111",
+        nativeAddress: "000000",
       };
       const wrappedAsset = {
         assetType: "wrapped",
         tokenId: 0,
         tokenAddress: bridge.wrappedToken.address,
         precision: 9,
-        chainId: "1111",
+        chainId: "2222",
         nativeAddress: "1111",
       };
 
