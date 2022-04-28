@@ -127,7 +127,9 @@ function add_asset(
     s.bridge_assets[s.asset_count] := new_asset;
     s.bridge_asset_ids[params.asset_type] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
+
     s.asset_sources[params.token_source] := params.asset_type;
+
   } with s
 
 function remove_asset(
@@ -154,4 +156,5 @@ function remove_asset(
           ]
         ];
     remove params.token_source from map s.asset_sources;
+
   } with (operations, s)

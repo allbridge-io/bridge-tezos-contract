@@ -31,6 +31,7 @@ type source_token_t     is [@layout:comb] record[
 
 type asset_sources_t    is big_map(source_token_t, asset_standard_t)
 
+
 type storage_t          is [@layout:comb] record[
   owner                   : address;
   bridge_manager          : address;

@@ -272,7 +272,9 @@ describe("BridgeCore Admin tests", async function() {
       await bridge.addAsset(newAssetParam);
       await bridge.updateStorage();
       const addedAsset = await bridge.storage.bridge_assets.get(prevAssetCount);
+
       const addedInfo = await bridge.storage.asset_sources.get(wrappedSource);
+
       strictEqual(bridge.storage.asset_count.toNumber(), prevAssetCount + 1);
       notStrictEqual(addedAsset, undefined);
       notStrictEqual(addedInfo, undefined);
@@ -588,6 +590,7 @@ describe("BridgeCore Admin tests", async function() {
         .catch(error => console.log(JSON.stringify(error)));
       const prevBalance = await Tezos.tz
         .getBalance(bridge.address)
+
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
       await bridge.removeAsset(
@@ -597,6 +600,7 @@ describe("BridgeCore Admin tests", async function() {
         tezSource.chain_id,
         tezSource.native_address,
       );
+
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(2);
       strictEqual(asset, undefined);
@@ -607,6 +611,7 @@ describe("BridgeCore Admin tests", async function() {
         .catch(error => console.log(JSON.stringify(error)));
       const bridgeBalance = await Tezos.tz
         .getBalance(bridge.address)
+
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
       const removedInfo = await bridge.storage.asset_sources.get(tezSource);
@@ -621,13 +626,16 @@ describe("BridgeCore Admin tests", async function() {
         3,
         0,
         dev.pkh,
+
         wrappedSource.chain_id,
         wrappedSource.native_address,
       );
       await bridge.updateStorage();
 
       const asset = await bridge.storage.bridge_assets.get(3);
+
       const removedInfo = await bridge.storage.asset_sources.get(wrappedSource);
+
       strictEqual(asset, undefined);
       strictEqual(removedInfo, undefined);
     });
