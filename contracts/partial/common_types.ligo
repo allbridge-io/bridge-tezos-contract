@@ -45,6 +45,7 @@ type get_keccak_t       is [@layout:comb] record[
   chain_from_id           : chain_id_t;
   token_source            : bytes;
   token_source_address    : bytes;
+  type_operation          : string;
 ]
 
 type calculate_fee_t    is [@layout:comb] record[

@@ -45,6 +45,7 @@ function validate_unlock(
         chain_from_id = params.chain_from_id;
         token_source  = params.token_source;
         token_source_address = params.token_source_address;
+        type_operation = "unlock";
       ] : get_keccak_t)
     ));
 
