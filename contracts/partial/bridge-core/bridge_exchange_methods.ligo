@@ -106,7 +106,12 @@ function unlock_asset(
   var s                 : storage_t)
                         : return_t is
   block {
-    var asset := unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
+    const token_source : source_token_t = record[
+      chain_id = params.token_source;
+      native_address = params.token_source_address;
+    ];
+    const asset_id = unwrap(s.bridge_asset_ids[token_source], Errors.asset_not_exist);
+    var asset := unwrap(s.bridge_assets[asset_id], Errors.asset_not_exist);
 
     require(s.enabled, Errors.bridge_disabled);
     require(asset.enabled, Errors.asset_disabled);
@@ -166,8 +171,9 @@ function unlock_asset(
       lock_id = params.lock_id;
       recipient = params.recipient;
       amount = params.amount;
-      chain_from_id = params.chain_id;
-      asset = asset.asset_type;
+      chain_from_id = params.chain_from_id;
+      token_source = params.token_source;
+      token_source_address = params.token_source_address;
       signature = params.signature;
     ];
 

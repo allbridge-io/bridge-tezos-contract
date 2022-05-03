@@ -70,7 +70,9 @@ type remove_asset_t     is [@layout:comb] record[
 type unlock_asset_t     is [@layout:comb] record[
   chain_id                : chain_id_t;
   lock_id                 : lock_id_t;
-  asset_id                : asset_id_t;
+  chain_from_id           : chain_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   amount                  : nat;
   recipient               : address;
   signature               : signature;

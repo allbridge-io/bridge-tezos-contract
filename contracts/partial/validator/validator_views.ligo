@@ -9,7 +9,8 @@
         recipient     = params.recipient;
         amount        = params.amount;
         chain_from_id = params.chain_from_id;
-        asset         = params.asset;
+        token_source  = params.token_source;
+        token_source_address = params.token_source_address;
       ] : get_keccak_t)
     ));
 
