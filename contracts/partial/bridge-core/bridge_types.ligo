@@ -68,6 +68,7 @@ type remove_asset_t     is [@layout:comb] record[
 ]
 
 type unlock_asset_t     is [@layout:comb] record[
+  blockchain_id           : bytes;
   lock_id                 : lock_id_t;
   chain_from_id           : chain_id_t;
   token_source            : bytes;

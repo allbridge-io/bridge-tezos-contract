@@ -168,6 +168,7 @@ function unlock_asset(
     ];
 
     var validate_unlock := record[
+      blockchain_id = params.blockchain_id;
       lock_id = params.lock_id;
       recipient = params.recipient;
       amount = params.amount;

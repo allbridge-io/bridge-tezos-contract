@@ -39,6 +39,7 @@ function validate_unlock(
 
     const keccak_params : bytes = Crypto.keccak(Bytes.pack(
       (record[
+        blockchain_id = params.blockchain_id;
         lock_id       = params.lock_id;
         recipient     = params.recipient;
         amount        = params.amount;
