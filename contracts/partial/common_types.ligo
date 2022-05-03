@@ -29,24 +29,24 @@ type validate_lock_t    is [@layout:comb] record[
 ]
 
 type validate_unlock_t  is [@layout:comb] record[
-  blockchain_id           : bytes;
   lock_id                 : lock_id_t;
   recipient               : address;
   amount                  : nat;
   chain_from_id           : chain_id_t;
   token_source            : bytes;
   token_source_address    : bytes;
+  blockchain_id           : bytes;
   signature               : signature;
 ]
 
 type get_keccak_t       is [@layout:comb] record[
-  blockchain_id           : bytes;
   lock_id                 : lock_id_t;
   recipient               : address;
   amount                  : nat;
   chain_from_id           : chain_id_t;
   token_source            : bytes;
   token_source_address    : bytes;
+  blockchain_id           : bytes;
   type_operation          : string;
 ]
 
