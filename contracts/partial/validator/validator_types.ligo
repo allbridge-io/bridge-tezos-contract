@@ -6,6 +6,7 @@ type storage_t          is [@layout:comb] record[
   bridge                  : address;
   validator_pk            : key;
   validated_locks         : lock_map_t;
+  chain_id                : bytes;
   validated_unlocks       : unlock_map_t;
 ]
 

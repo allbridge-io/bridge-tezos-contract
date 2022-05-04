@@ -11,7 +11,7 @@
         chain_from_id = params.chain_from_id;
         token_source  = params.token_source;
         token_source_address = params.token_source_address;
-        blockchain_id = params.blockchain_id;
+        blockchain_id = s.chain_id;
         type_operation = "unlock";
       ] : get_keccak_t)
     ));

@@ -74,7 +74,6 @@ type unlock_asset_t     is [@layout:comb] record[
   token_source_address    : bytes;
   amount                  : nat;
   recipient               : address;
-  blockchain_id           : bytes;
   signature               : signature;
 ]
 
