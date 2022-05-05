@@ -24,7 +24,8 @@ type validate_lock_t    is [@layout:comb] record[
   sender                  : address;
   recipient               : bytes;
   amount                  : nat;
-  asset                   : asset_standard_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   destination_chain_id    : chain_id_t;
 ]
 
