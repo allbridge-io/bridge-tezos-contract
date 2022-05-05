@@ -30,6 +30,7 @@ function lock_asset(
       s.fee_oracle);
 
     const locked_amount = get_nat_or_fail(locked_without_fee - fee, Errors.amount_too_low);
+    require(locked_amount > 0n, Errors.zero_transfer);
 
     var operations := Constants.no_operations;
     case asset.asset_type of [
@@ -131,18 +132,20 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of [
     | Wrapped(token_) -> {
-      const mint_params : mint_params_t = list[
+      var mint_params : mint_params_t := list[
         record[
           token_id = token_.id;
           recipient = params.recipient;
           amount = unlocked_amount
         ];
-        record[
-          token_id = token_.id;
-          recipient = s.fee_collector;
-          amount = fee
-        ]
       ];
+      if fee > 0n
+      then mint_params := record[
+            token_id = token_.id;
+            recipient = s.fee_collector;
+            amount = fee
+        ] # mint_params
+      else skip;
       operations := list[
         Tezos.transaction(
           mint_params,
