@@ -36,7 +36,6 @@ type validate_unlock_t  is [@layout:comb] record[
   chain_from_id           : chain_id_t;
   token_source            : bytes;
   token_source_address    : bytes;
-  blockchain_id           : bytes;
   signature               : signature;
 ]
 
