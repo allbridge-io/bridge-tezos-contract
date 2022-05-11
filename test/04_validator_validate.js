@@ -18,6 +18,14 @@ describe("BridgeValidator Validate tests", async function() {
     "1122334455667788990011223344556677889900112233445566778899001122";
   const tezosChainId = Buffer.from("NetXdQprcVkpaWU", "ascii").toString("hex");
   const tokenAddress = alice.pkh;
+
+  const fa12Source = { chain_id: "1111", native_address: "449999" };
+  const fa2Source = { chain_id: "1111", native_address: "559999" };
+  const tezSource = { chain_id: "1111", native_address: "000000" };
+  const wrappedSource = {
+    chain_id: "2222",
+    native_address: "33223344",
+  };
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     try {
@@ -34,11 +42,11 @@ describe("BridgeValidator Validate tests", async function() {
         validator.validateLock(
           "01ffffffffffffffffffffffffffff00",
           alice.pkh,
+          recipient,
           10000,
-          Buffer.from(alice.pkh, "ascii").toString("hex"),
-          tezosChainId,
-          "fa12",
-          tokenAddress,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          bscChainId,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/not-bridge");
@@ -52,11 +60,11 @@ describe("BridgeValidator Validate tests", async function() {
         validator.validateLock(
           "01ffffffffffffffffffffffffffff00",
           alice.pkh,
+          recipient,
           10000,
-          Buffer.from(alice.pkh, "ascii").toString("hex"),
+          fa12Source.chain_id,
+          fa12Source.native_address,
           tezosChainId,
-          "fa12",
-          tokenAddress,
         ),
         err => {
           strictEqual(
@@ -73,11 +81,11 @@ describe("BridgeValidator Validate tests", async function() {
         validator.validateLock(
           "01ffffffffffffffffffffffffffff00",
           alice.pkh,
-          10000,
           Buffer.from(alice.pkh, "ascii").toString("hex"),
+          10000,
+          fa12Source.chain_id,
+          fa12Source.native_address,
           bscChainId,
-          "fa12",
-          tokenAddress,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/wrong-recipient");
@@ -91,11 +99,11 @@ describe("BridgeValidator Validate tests", async function() {
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff00",
         bob.pkh,
-        lockAmount,
         recipient,
+        lockAmount,
+        fa12Source.chain_id,
+        fa12Source.native_address,
         bscChainId,
-        "fa12",
-        tokenAddress,
       );
       await validator.updateStorage();
       const newLock = await validator.storage.validated_locks.get(
@@ -109,12 +117,11 @@ describe("BridgeValidator Validate tests", async function() {
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff01",
         bob.pkh,
-        lockAmount,
         recipient,
+        lockAmount,
+        fa2Source.chain_id,
+        fa2Source.native_address,
         bscChainId,
-        "fa2",
-        tokenAddress,
-        0,
       );
       await validator.updateStorage();
       const newLock = await validator.storage.validated_locks.get(
@@ -127,10 +134,11 @@ describe("BridgeValidator Validate tests", async function() {
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff02",
         bob.pkh,
-        lockAmount,
         recipient,
+        lockAmount,
+        fa2Source.chain_id,
+        fa2Source.native_address,
         bscChainId,
-        "tez",
       );
       await validator.updateStorage();
       const newLock = await validator.storage.validated_locks.get(
@@ -143,12 +151,11 @@ describe("BridgeValidator Validate tests", async function() {
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff03",
         bob.pkh,
-        lockAmount,
         recipient,
+        lockAmount,
+        tezSource.chain_id,
+        tezSource.native_address,
         bscChainId,
-        "wrapped",
-        alice.pkh,
-        0,
       );
       await validator.updateStorage();
       const newLock = await validator.storage.validated_locks.get(
@@ -161,11 +168,11 @@ describe("BridgeValidator Validate tests", async function() {
         validator.validateLock(
           "01ffffffffffffffffffffffffffff00",
           bob.pkh,
-          10000,
           recipient,
+          10000,
+          wrappedSource.chain_id,
+          wrappedSource.native_address,
           bscChainId,
-          "fa12",
-          tokenAddress,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/lock-already-exists");
@@ -186,9 +193,10 @@ describe("BridgeValidator Validate tests", async function() {
           alice.pkh,
           1111111,
           tezosChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          "0001",
           signature.sig,
-          "fa12",
-          tokenAddress,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/not-bridge");
@@ -207,9 +215,10 @@ describe("BridgeValidator Validate tests", async function() {
           alice.pkh,
           1111111,
           tezosChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          "0001",
           signature.sig,
-          "fa12",
-          tokenAddress,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/signature-not-validated");
@@ -225,9 +234,9 @@ describe("BridgeValidator Validate tests", async function() {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa12",
-        chainId: bscChainId,
-        tokenAddress: tokenAddress,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: "0101",
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -236,9 +245,10 @@ describe("BridgeValidator Validate tests", async function() {
         alice.pkh,
         unlockAmount,
         bscChainId,
+        fa12Source.chain_id,
+        fa12Source.native_address,
+        "0101",
         signature.sig,
-        "fa12",
-        tokenAddress,
       );
       await validator.updateStorage();
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -253,10 +263,9 @@ describe("BridgeValidator Validate tests", async function() {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "fa2",
-        chainId: bscChainId,
-        tokenAddress: tokenAddress,
-        tokenId: 0,
+        tokenSource: fa2Source.chain_id,
+        tokenSourceAddress: fa2Source.native_address,
+        blockchainId: "0101",
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -265,10 +274,10 @@ describe("BridgeValidator Validate tests", async function() {
         alice.pkh,
         unlockAmount,
         bscChainId,
+        fa2Source.chain_id,
+        fa2Source.native_address,
+        "0101",
         signature.sig,
-        "fa2",
-        tokenAddress,
-        0,
       );
       await validator.updateStorage();
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -283,7 +292,9 @@ describe("BridgeValidator Validate tests", async function() {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "tez",
+        tokenSource: tezSource.chain_id,
+        tokenSourceAddress: tezSource.native_address,
+        blockchainId: "0101",
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -292,8 +303,10 @@ describe("BridgeValidator Validate tests", async function() {
         alice.pkh,
         unlockAmount,
         bscChainId,
+        tezSource.chain_id,
+        tezSource.native_address,
+        "0101",
         signature.sig,
-        "tez",
       );
       await validator.updateStorage();
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -308,10 +321,9 @@ describe("BridgeValidator Validate tests", async function() {
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
-        assetType: "wrapped",
-        chainId: bscChainId,
-        tokenAddress: alice.pkh,
-        tokenId: 0,
+        tokenSource: wrappedSource.chain_id,
+        tokenSourceAddress: wrappedSource.native_address,
+        blockchainId: "0101",
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -320,10 +332,10 @@ describe("BridgeValidator Validate tests", async function() {
         alice.pkh,
         unlockAmount,
         bscChainId,
+        wrappedSource.chain_id,
+        wrappedSource.native_address,
+        "0101",
         signature.sig,
-        "wrapped",
-        alice.pkh,
-        0,
       );
       await validator.updateStorage();
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -341,10 +353,10 @@ describe("BridgeValidator Validate tests", async function() {
           alice.pkh,
           10000,
           bscChainId,
+          wrappedSource.chain_id,
+          wrappedSource.native_address,
+          "0001",
           signature.sig,
-          "wrapped",
-          alice.pkh,
-          0,
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/unlock-already-exists");

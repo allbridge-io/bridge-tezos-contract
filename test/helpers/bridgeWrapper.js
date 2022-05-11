@@ -120,16 +120,49 @@ module.exports = class BridgeCore {
     }
     await confirmOperation(Tezos, operation.hash);
   }
-  async lockAsset(chainId, lockId, assetId, amount, receiver, tezAmount = 0) {
+  async lockAsset(
+    chainId,
+    lockId,
+    tokenSource,
+    tokenSourceAddress,
+    amount,
+    recipient,
+    tezAmount = 0,
+  ) {
     const operation = await this.contract.methods
-      .lock_asset(chainId, lockId, assetId, amount, receiver)
+      .lock_asset(
+        chainId,
+        lockId,
+        tokenSource,
+        tokenSourceAddress,
+        amount,
+        recipient,
+      )
       .send({ amount: tezAmount });
 
     await confirmOperation(Tezos, operation.hash);
   }
-  async unlockAsset(chainId, lockId, assetId, amount, receiver, signature) {
+  async unlockAsset(
+    lockId,
+    chainFromId,
+    tokenSource,
+    tokenSourceAddress,
+    amount,
+    recipient,
+    blockchainId,
+    signature,
+  ) {
     const operation = await this.contract.methods
-      .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .unlock_asset(
+        lockId,
+        recipient,
+        amount,
+        chainFromId,
+        tokenSource,
+        tokenSourceAddress,
+        blockchainId,
+        signature,
+      )
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

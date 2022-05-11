@@ -4,7 +4,7 @@ const FeeOracle = require("./helpers/feeOracleWrapper");
 
 const { alice, bob } = require("../scripts/sandbox/accounts");
 
-describe("FeeOracle Admin tests", async function () {
+describe("FeeOracle Admin tests", async function() {
   let oracle;
 
   before(async () => {
@@ -16,15 +16,15 @@ describe("FeeOracle Admin tests", async function () {
     }
   });
 
-  describe("Testing entrypoint: Change_owner", async function () {
-    it("Shouldn't changing owner if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_owner", async function() {
+    it("Shouldn't changing owner if the user is not an owner", async function() {
       Tezos.setSignerProvider(signerBob);
       await rejects(oracle.сhangeOwner(bob.pkh), err => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });
     });
-    it("Should allow change owner", async function () {
+    it("Should allow change owner", async function() {
       Tezos.setSignerProvider(signerAlice);
 
       await oracle.сhangeOwner(bob.pkh);
@@ -32,8 +32,8 @@ describe("FeeOracle Admin tests", async function () {
       strictEqual(oracle.storage.owner, bob.pkh);
     });
   });
-  describe("Testing entrypoint: Change_token_fee", async function () {
-    it("Shouldn't changing fee per token if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_token_fee", async function() {
+    it("Shouldn't changing fee per token if the user is not an owner", async function() {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         oracle.сhangeFee("change_token_fee", {
@@ -47,7 +47,7 @@ describe("FeeOracle Admin tests", async function () {
         },
       );
     });
-    it("Should allow change token fee", async function () {
+    it("Should allow change token fee", async function() {
       Tezos.setSignerProvider(signerBob);
       await oracle.сhangeFee("change_token_fee", {
         tokenType: "fa12",
@@ -61,15 +61,15 @@ describe("FeeOracle Admin tests", async function () {
       strictEqual(tokenFee.toNumber(), 1000);
     });
   });
-  describe("Testing entrypoint: Change_base_fee", async function () {
-    it("Shouldn't changing base fee if the user is not an owner", async function () {
+  describe("Testing entrypoint: Change_base_fee", async function() {
+    it("Shouldn't changing base fee if the user is not an owner", async function() {
       Tezos.setSignerProvider(signerAlice);
       await rejects(oracle.сhangeFee("change_base_fee", 1000), err => {
         strictEqual(err.message, "Oracle-fee/not-owner");
         return true;
       });
     });
-    it("Should allow change base fee", async function () {
+    it("Should allow change base fee", async function() {
       Tezos.setSignerProvider(signerBob);
       await oracle.сhangeFee("change_base_fee", 1000);
       await oracle.updateStorage();
