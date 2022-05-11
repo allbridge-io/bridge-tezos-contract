@@ -149,7 +149,6 @@ module.exports = class BridgeCore {
     tokenSourceAddress,
     amount,
     recipient,
-    blockchainId,
     signature,
   ) {
     const operation = await this.contract.methods
@@ -160,7 +159,6 @@ module.exports = class BridgeCore {
         chainFromId,
         tokenSource,
         tokenSourceAddress,
-        blockchainId,
         signature,
       )
       .send();

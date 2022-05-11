@@ -16,7 +16,7 @@ describe("BridgeValidator Validate tests", async function() {
   const bscChainId = "11223344";
   const recipient =
     "1122334455667788990011223344556677889900112233445566778899001122";
-  const tezosChainId = Buffer.from("NetXdQprcVkpaWU", "ascii").toString("hex");
+  const tezosChainId = "54455A00";
   const tokenAddress = alice.pkh;
 
   const fa12Source = { chain_id: "1111", native_address: "449999" };
@@ -195,7 +195,6 @@ describe("BridgeValidator Validate tests", async function() {
           tezosChainId,
           fa12Source.chain_id,
           fa12Source.native_address,
-          "0001",
           signature.sig,
         ),
         err => {
@@ -217,7 +216,6 @@ describe("BridgeValidator Validate tests", async function() {
           tezosChainId,
           fa12Source.chain_id,
           fa12Source.native_address,
-          "0001",
           signature.sig,
         ),
         err => {
@@ -236,7 +234,7 @@ describe("BridgeValidator Validate tests", async function() {
         chainFromId: bscChainId,
         tokenSource: fa12Source.chain_id,
         tokenSourceAddress: fa12Source.native_address,
-        blockchainId: "0101",
+        blockchainId: tezosChainId,
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -247,7 +245,6 @@ describe("BridgeValidator Validate tests", async function() {
         bscChainId,
         fa12Source.chain_id,
         fa12Source.native_address,
-        "0101",
         signature.sig,
       );
       await validator.updateStorage();
@@ -258,14 +255,14 @@ describe("BridgeValidator Validate tests", async function() {
     });
     it("Should validate unlock fa2 asset", async function() {
       const unlockAmount = 10000;
-      const keccakBytes = await toBytes({
+      const keccakBytes = toBytes({
         lockId: "01ffffffffffffffffffffffffffff01",
         recipient: alice.pkh,
         amount: unlockAmount,
         chainFromId: bscChainId,
         tokenSource: fa2Source.chain_id,
         tokenSourceAddress: fa2Source.native_address,
-        blockchainId: "0101",
+        blockchainId: tezosChainId,
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -276,7 +273,6 @@ describe("BridgeValidator Validate tests", async function() {
         bscChainId,
         fa2Source.chain_id,
         fa2Source.native_address,
-        "0101",
         signature.sig,
       );
       await validator.updateStorage();
@@ -294,7 +290,7 @@ describe("BridgeValidator Validate tests", async function() {
         chainFromId: bscChainId,
         tokenSource: tezSource.chain_id,
         tokenSourceAddress: tezSource.native_address,
-        blockchainId: "0101",
+        blockchainId: tezosChainId,
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -305,7 +301,6 @@ describe("BridgeValidator Validate tests", async function() {
         bscChainId,
         tezSource.chain_id,
         tezSource.native_address,
-        "0101",
         signature.sig,
       );
       await validator.updateStorage();
@@ -323,7 +318,7 @@ describe("BridgeValidator Validate tests", async function() {
         chainFromId: bscChainId,
         tokenSource: wrappedSource.chain_id,
         tokenSourceAddress: wrappedSource.native_address,
-        blockchainId: "0101",
+        blockchainId: tezosChainId,
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -334,7 +329,6 @@ describe("BridgeValidator Validate tests", async function() {
         bscChainId,
         wrappedSource.chain_id,
         wrappedSource.native_address,
-        "0101",
         signature.sig,
       );
       await validator.updateStorage();
@@ -355,7 +349,6 @@ describe("BridgeValidator Validate tests", async function() {
           bscChainId,
           wrappedSource.chain_id,
           wrappedSource.native_address,
-          "0001",
           signature.sig,
         ),
         err => {

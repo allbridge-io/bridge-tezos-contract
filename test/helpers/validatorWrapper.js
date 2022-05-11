@@ -71,7 +71,6 @@ module.exports = class Validator {
     chainFromId,
     tokenSource,
     tokenSourceAddress,
-    blockchainId,
     signature,
   ) {
     const operation = await this.contract.methods
@@ -82,7 +81,6 @@ module.exports = class Validator {
         chainFromId,
         tokenSource,
         tokenSourceAddress,
-        blockchainId,
         signature,
       )
       .send();

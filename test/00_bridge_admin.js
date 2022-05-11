@@ -337,6 +337,7 @@ describe("BridgeCore Admin tests", async function() {
     });
     it("Shouldn't unlock asset if bridge is disabled", async function() {
       const signature = await Tezos.signer.sign(bscChainId);
+      console.log(signature);
       await rejects(
         bridge.unlockAsset(
           bscChainId,
@@ -345,7 +346,6 @@ describe("BridgeCore Admin tests", async function() {
           fa12Source.native_address,
           1000,
           alice.pkh,
-          "0101",
           signature.sig,
         ),
         err => {
@@ -411,7 +411,6 @@ describe("BridgeCore Admin tests", async function() {
           fa12Source.native_address,
           1000,
           alice.pkh,
-          "0101",
           signature.sig,
         ),
         err => {
@@ -511,7 +510,7 @@ describe("BridgeCore Admin tests", async function() {
         chainFromId: bscChainId,
         tokenSource: wrappedSource.chain_id,
         tokenSourceAddress: wrappedSource.native_address,
-        blockchainId: "0101",
+        blockchainId: "54455A00",
       });
 
       const signature = await signerSecp.sign(keccakBytes);
@@ -522,7 +521,6 @@ describe("BridgeCore Admin tests", async function() {
         wrappedSource.native_address,
         10000,
         bob.pkh,
-        "0101",
         signature.sig,
       );
     });
