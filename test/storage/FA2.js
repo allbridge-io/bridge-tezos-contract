@@ -1,7 +1,7 @@
 const { MichelsonMap } = require("@taquito/michelson-encoder");
 
 const { alice, bob } = require("../utils/cli");
-let totalSupply = 100000000 * 10 ** 6;
+let totalSupply = 100000000 * 10 ** 12;
 const metadata = MichelsonMap.fromLiteral({
   "": Buffer.from("tezos-storage:test", "ascii").toString("hex"),
   test: Buffer.from(

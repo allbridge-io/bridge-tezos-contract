@@ -9,9 +9,7 @@ So, the bridge is the main gateway for user to interact with the protocol.
 
 **Validator** is responsible for registering the transfers and their validation.
 
-**Fee-Oracle** is responsible for fee calculation based on the tokens, transferred amount and user's staked shares balance in **Staking**.
-
-**Staking** is smart contract that will allow to stake wABR and earn more wABR.
+**Fee-Oracle** is responsible for fee calculation based on the tokens and transferred amount.
 
 # Requirements
 

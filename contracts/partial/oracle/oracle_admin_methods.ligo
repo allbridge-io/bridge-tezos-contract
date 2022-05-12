@@ -8,15 +8,6 @@ function change_owner(
     s.owner := new_owner;
   } with s
 
-function change_staking(
-  const new_address     : address;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.staking_address := new_address;
-  } with s
-
 function change_token_fee(
   const token           : asset_standard_t;
   const new_fee         : nat;
@@ -34,13 +25,4 @@ function change_base_fee(
   block {
     check_permission(s.owner, Errors.not_owner);
     s.base_fee_f := new_fee_f
-  } with s
-
-function change_fee_multiplier(
-  const new_fee_f       : nat;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.fee_multiplier_f := new_fee_f
   } with s

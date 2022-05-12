@@ -63,7 +63,7 @@ const compile = async (contract, format) => {
     let michelson;
     try {
       michelson = execSync(
-        `${ligo} compile contract $PWD/${env.contractsDir}/${contract}.ligo -s pascaligo --michelson-format ${format} --protocol hangzhou`,
+        `${ligo} compile contract $PWD/${env.contractsDir}/${contract}.ligo -s pascaligo --michelson-format ${format} --protocol ithaca`,
         { maxBuffer: 1024 * 4000 },
       ).toString();
     } catch (e) {
@@ -97,7 +97,7 @@ const compileTest = async (contract, format) => {
     let michelson;
     try {
       michelson = execSync(
-        `${ligo} compile contract $PWD/${env.contractsTestDir}/${contract}.ligo -s pascaligo --michelson-format ${format} --protocol hangzhou`,
+        `${ligo} compile contract $PWD/${env.contractsTestDir}/${contract}.ligo -s pascaligo --michelson-format ${format} --protocol ithaca`,
         { maxBuffer: 1024 * 2000 },
       ).toString();
     } catch (e) {

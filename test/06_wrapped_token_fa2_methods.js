@@ -2,68 +2,31 @@ const { Tezos, signerAlice, alice, bob, signerSecp } = require("./utils/cli");
 
 const { rejects, strictEqual } = require("assert");
 const { MichelsonMap } = require("@taquito/taquito");
-const Bridge = require("./helpers/bridgeWrapper");
+const WrappedToken = require("./helpers/wrappedTokenWrapper");
 const { migrate } = require("../scripts/helpers");
 const { confirmOperation } = require("../scripts/confirmation");
 const toBytes = require("../scripts/toBytesForSign");
 
-const lockIdToBytes = require("../scripts/lockIdToBytes");
-
-const transferAmount = 1000;
-describe("Staking FA2 methods test", async function () {
-  let bridge;
-  let staking;
+const transferAmount = 1000 * 10 ** 9;
+describe("Wrapped token FA2 methods test", async function () {
+  let token;
   const bscChainId = Buffer.from("56", "ascii").toString("hex");
   before(async () => {
     Tezos.setSignerProvider(signerAlice);
     try {
-      bridge = await new Bridge().init();
-      staking = bridge.staking;
+      token = await new WrappedToken().init(alice.pkh);
 
-      await bridge.wrappedToken.createToken(
+      await token.createToken(
         bscChainId,
         Buffer.from("bscAddress", "ascii").toString("hex"),
         MichelsonMap.fromLiteral({
           symbol: Buffer.from("wABR").toString("hex"),
           name: Buffer.from("Wrapped ABR").toString("hex"),
-          decimals: Buffer.from("6").toString("hex"),
+          decimals: Buffer.from("9").toString("hex"),
           icon: Buffer.from("").toString("hex"),
         }),
       );
-      const wrappedAsset = {
-        assetType: "wrapped",
-        tokenId: 0,
-        tokenAddress: bridge.wrappedToken.address,
-        decimals: 10 ** 6,
-      };
-      await bridge.addAsset(wrappedAsset);
-
-      const keccakBytes = await toBytes({
-        lockId: lockIdToBytes("00ffffffffffffffffffffffffffff00"),
-        recipient: alice.pkh,
-        amount: 10000,
-        chainFromId: bscChainId,
-        assetType: "wrapped",
-        tokenId: 0,
-        tokenAddress: bridge.wrappedToken.address,
-      });
-      const signature = await signerSecp.sign(keccakBytes);
-
-      await bridge.unlockAsset(
-        bscChainId,
-        lockIdToBytes("00ffffffffffffffffffffffffffff00"),
-        0,
-        10000,
-        alice.pkh,
-        signature.sig,
-      );
-      await bridge.wrappedToken.updateOperator(
-        "add_operator",
-        alice.pkh,
-        staking.address,
-        0,
-      );
-      await staking.deposit(5000);
+      await token.mint(10000 * 10 ** 9, 0, alice.pkh);
     } catch (e) {
       console.log(e);
     }
@@ -74,7 +37,7 @@ describe("Staking FA2 methods test", async function () {
         Tezos.setSignerProvider(signerAlice);
 
         await rejects(
-          staking.transfer(bob.pkh, alice.pkh, 1000),
+          token.transfer(bob.pkh, alice.pkh, 999999 * 10 ** 9),
 
           err => {
             strictEqual(err.message, "FA2_NOT_OPERATOR");
@@ -83,22 +46,25 @@ describe("Staking FA2 methods test", async function () {
         );
       });
       it("Shouldn't Transfer with insufficient balance", async function () {
-        await rejects(staking.transfer(alice.pkh, bob.pkh, 10000), err => {
-          strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
-          return true;
-        });
+        await rejects(
+          token.transfer(alice.pkh, bob.pkh, 100000 * 10 ** 9),
+          err => {
+            strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
+            return true;
+          },
+        );
       });
     });
     // Scenario 2
     describe("Scenario 2: Should cases Transfer", async function () {
       it("Should allow Transfer", async function () {
-        const prevAliceBalance = await staking.getBalance(alice.pkh, 0);
-        const prevBobBalance = await staking.getBalance(bob.pkh, 0);
-        await staking.transfer(alice.pkh, bob.pkh, transferAmount);
-        await staking.updateStorage();
+        const prevAliceBalance = await token.getBalance(alice.pkh, 0);
+        const prevBobBalance = await token.getBalance(bob.pkh, 0);
+        await token.transfer(alice.pkh, bob.pkh, transferAmount);
+        await token.updateStorage();
 
-        const aliceBalance = await staking.getBalance(alice.pkh, 0);
-        const bobBalance = await staking.getBalance(bob.pkh, 0);
+        const aliceBalance = await token.getBalance(alice.pkh, 0);
+        const bobBalance = await token.getBalance(bob.pkh, 0);
 
         strictEqual(bobBalance, prevBobBalance + transferAmount);
         strictEqual(aliceBalance, prevAliceBalance - transferAmount);
@@ -109,7 +75,7 @@ describe("Staking FA2 methods test", async function () {
     describe("Scenario 1: Shouldn't Update_operators cases", async function () {
       it("Shouldn't Add_operator if the user is not an owner", async function () {
         await rejects(
-          staking.updateOperator("add_operator", bob.pkh, alice.pkh),
+          token.updateOperator("add_operator", bob.pkh, alice.pkh, 0),
           err => {
             strictEqual(err.message, "FA2_NOT_OWNER");
             return true;
@@ -118,7 +84,7 @@ describe("Staking FA2 methods test", async function () {
       });
       it("Shouldn't Remove_operator if the user is not an owner", async function () {
         await rejects(
-          staking.updateOperator("remove_operator", bob.pkh, alice.pkh),
+          token.updateOperator("remove_operator", bob.pkh, alice.pkh, 0),
           err => {
             strictEqual(err.message, "FA2_NOT_OWNER");
             return true;
@@ -128,16 +94,22 @@ describe("Staking FA2 methods test", async function () {
     });
     describe("Scenario 2: Should Update_operators cases", async function () {
       it("Should allow add operator", async function () {
-        await staking.updateOperator("add_operator", alice.pkh, bob.pkh);
-        await staking.updateStorage();
-        const aliceAllowances = await staking.storage.allowances.get(alice.pkh);
+        await token.updateOperator("add_operator", alice.pkh, bob.pkh, 0);
+        await token.updateStorage();
+        const aliceAllowances = await token.storage.allowances.get([
+          alice.pkh,
+          0,
+        ]);
         strictEqual(aliceAllowances[0], bob.pkh);
       });
 
       it("Should allow remove_operator", async function () {
-        await staking.updateOperator("remove_operator", alice.pkh, bob.pkh);
-        await staking.updateStorage();
-        const aliceAllowances = await staking.storage.allowances.get(alice.pkh);
+        await token.updateOperator("remove_operator", alice.pkh, bob.pkh, 0);
+        await token.updateStorage();
+        const aliceAllowances = await token.storage.allowances.get([
+          alice.pkh,
+          0,
+        ]);
         strictEqual(aliceAllowances[0], undefined);
       });
     });
@@ -148,7 +120,7 @@ describe("Staking FA2 methods test", async function () {
     before(async () => {
       deployedGb = await migrate(Tezos, "get_balance", {
         response: 0,
-        bridge_address: staking.address,
+        bridge_address: token.address,
       });
       gbContract = await Tezos.contract.at(deployedGb);
     });

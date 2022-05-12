@@ -7,7 +7,7 @@ module.exports = {
   migrationsDir: "migrations",
   contractsDir: "contracts/main",
   contractsTestDir: "contracts/tests/main",
-  ligoVersion: "0.29.0",
+  ligoVersion: "0.40.0",
   network: "development",
   networks: {
     development: {
@@ -15,8 +15,8 @@ module.exports = {
       network_id: "*",
       secretKey: alice.sk,
     },
-    hangzhounet: {
-      rpc: "https://hangzhounet.api.tez.ie/",
+    ithaca: {
+      rpc: "https://ithacanet.ecadinfra.com/",
       port: 443,
       network_id: "*",
       secretKey: dev.sk,

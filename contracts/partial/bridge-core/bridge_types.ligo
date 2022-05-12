@@ -17,15 +17,17 @@ type asset_id_t         is nat;
 
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
-  decimals                : nat;
-  total_locked            : nat;
+  precision               : nat;
   enabled                 : bool;
 ]
 
-type asset_map_t        is big_map(asset_id_t, asset_t)
-type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
+type source_token_t     is [@layout:comb] record[
+  chain_id                : bytes;
+  native_address          : bytes;
+]
 
-type pow_map_t          is big_map(nat, nat)
+type asset_map_t        is big_map(asset_id_t, asset_t)
+type asset_map_ids_t    is big_map(source_token_t, asset_id_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -46,36 +48,34 @@ type return_t           is list (operation) * storage_t
 
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
-  decimals                : nat;
+  precision               : nat;
+  token_source            : source_token_t;
 ]
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
   lock_id                 : lock_id_t;
-  asset_id                : asset_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   amount                  : nat;
   recipient               : bytes;
 ]
 
 type remove_asset_t     is [@layout:comb] record[
   asset_id                : asset_id_t;
+  amount                  : nat;
   recipient               : address;
+  token_source            : source_token_t;
 ]
 
 type unlock_asset_t     is [@layout:comb] record[
-  chain_id                : chain_id_t;
   lock_id                 : lock_id_t;
-  asset_id                : asset_id_t;
+  chain_from_id           : chain_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   amount                  : nat;
   recipient               : address;
   signature               : signature;
 ]
 
 type response_fee_t     is nat;
-
-type wabr_balance_t     is (address * nat)
-
-type new_pow_t          is [@layout:comb] record[
-  pow                     : nat;
-  value                   : nat;
-]

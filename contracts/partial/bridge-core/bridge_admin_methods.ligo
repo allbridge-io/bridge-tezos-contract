@@ -115,18 +115,17 @@ function add_asset(
     (* Check bridge status *)
     require(s.enabled, Errors.bridge_disabled);
 
-    var new_asset := record[
+    const new_asset = record[
       asset_type = params.asset_type;
-      decimals = params.decimals;
-      total_locked = 0n;
+      precision = params.precision;
       enabled = True;
     ];
 
     (* Сheck that such an asset has not been added already *)
-    require_none(s.bridge_asset_ids[params.asset_type], Errors.bridge_exist);
+    require_none(s.bridge_asset_ids[params.token_source], Errors.bridge_exist);
 
     s.bridge_assets[s.asset_count] := new_asset;
-    s.bridge_asset_ids[params.asset_type] := s.asset_count;
+    s.bridge_asset_ids[params.token_source] := s.asset_count;
     s.asset_count := s.asset_count + 1n;
 
   } with s
@@ -139,16 +138,22 @@ function remove_asset(
     check_permission(s.bridge_manager, Errors.not_manager);
 
     const asset = unwrap(s.bridge_assets[params.asset_id], Errors.asset_not_exist);
-    remove asset.asset_type from map s.bridge_asset_ids;
-    remove params.asset_id from map s.bridge_assets;
 
-    const operations = case asset.asset_type of
-    | Wrapped(_) -> (nil: list(operation))
-    | _ -> list[wrap_transfer(
-        Tezos.self_address,
-        params.recipient,
-        asset.total_locked,
-        asset.asset_type)
-      ]
-    end;
+    remove params.asset_id from map s.bridge_assets;
+    remove params.token_source from map s.bridge_asset_ids;
+
+    const operations = if params.amount = 0n
+      then (nil: list(operation))
+      else case asset.asset_type of [
+        | Wrapped(_) -> (nil: list(operation))
+        | _ ->
+          list[wrap_transfer(
+            Tezos.self_address,
+            params.recipient,
+            params.amount,
+            asset.asset_type)
+          ]
+        ];
+
+
   } with (operations, s)

@@ -7,7 +7,6 @@ const bridgeStorage = require("../storage/bridgeCore");
 const tokenStorage = require("../storage/wrappedToken");
 const FeeOracle = require("./feeOracleWrapper");
 const Validator = require("./validatorWrapper");
-const Staking = require("./stakingWrapper");
 const WrappedToken = require("./wrappedTokenWrapper");
 
 module.exports = class BridgeCore {
@@ -16,7 +15,6 @@ module.exports = class BridgeCore {
   storage;
   feeOracle;
   validator;
-  staking;
 
   constructor() {}
   async init(params = false) {
@@ -31,10 +29,8 @@ module.exports = class BridgeCore {
     tokenStorage.bridge = this.address;
     this.wrappedToken = await new WrappedToken().init(this.address);
 
-    this.staking = await new Staking().init(params, this.wrappedToken.address);
     await this.validator.сhangeAddress("change_bridge", this.address);
     await this.validator.updateStorage();
-    await this.feeOracle.сhangeStaking(this.staking.address);
 
     return this;
   }
@@ -77,7 +73,13 @@ module.exports = class BridgeCore {
     switch (assetType) {
       case "fa12":
         operation = await this.contract.methods
-          .add_asset("fa12", params.tokenAddress, params.decimals)
+          .add_asset(
+            "fa12",
+            params.tokenAddress,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
+          )
           .send();
         break;
       case "fa2":
@@ -86,13 +88,21 @@ module.exports = class BridgeCore {
             "fa2",
             params.tokenAddress,
             params.tokenId,
-            params.decimals,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
           )
           .send();
         break;
       case "tez":
         operation = await this.contract.methods
-          .add_asset("tez", null, params.decimals)
+          .add_asset(
+            "tez",
+            null,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
+          )
           .send();
         break;
       case "wrapped":
@@ -101,34 +111,63 @@ module.exports = class BridgeCore {
             "wrapped",
             params.tokenAddress,
             params.tokenId,
-            params.decimals,
+            params.precision,
+            params.chainId,
+            params.nativeAddress,
           )
           .send();
         break;
     }
     await confirmOperation(Tezos, operation.hash);
   }
-  async lockAsset(chainId, lockId, assetId, amount, receiver, tezAmount = 0) {
+  async lockAsset(
+    chainId,
+    lockId,
+    tokenSource,
+    tokenSourceAddress,
+    amount,
+    recipient,
+    tezAmount = 0,
+  ) {
     const operation = await this.contract.methods
-      .lock_asset(chainId, lockId, assetId, amount, receiver)
+      .lock_asset(
+        chainId,
+        lockId,
+        tokenSource,
+        tokenSourceAddress,
+        amount,
+        recipient,
+      )
       .send({ amount: tezAmount });
 
     await confirmOperation(Tezos, operation.hash);
   }
-  async unlockAsset(chainId, lockId, assetId, amount, receiver, signature) {
+  async unlockAsset(
+    lockId,
+    chainFromId,
+    tokenSource,
+    tokenSourceAddress,
+    amount,
+    recipient,
+    signature,
+  ) {
     const operation = await this.contract.methods
-      .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .unlock_asset(
+        lockId,
+        recipient,
+        amount,
+        chainFromId,
+        tokenSource,
+        tokenSourceAddress,
+        signature,
+      )
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async removeAsset(assetId, receiver) {
+  async removeAsset(assetId, amount, receiver, chainId, nativeAddress) {
     const operation = await this.contract.methods
-      .remove_asset(assetId, receiver)
+      .remove_asset(assetId, amount, receiver, chainId, nativeAddress)
       .send();
-    await confirmOperation(Tezos, operation.hash);
-  }
-  async addPow(pow, value) {
-    const operation = await this.contract.methods.add_pow(pow, value).send();
     await confirmOperation(Tezos, operation.hash);
   }
 };
