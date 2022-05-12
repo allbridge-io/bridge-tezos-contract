@@ -370,8 +370,12 @@ describe("BridgeCore Exchange tests", async function() {
       const feeCollectorBalance = await fa12Token.getBalance(
         bridge.storage.fee_collector,
       );
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       const fromPrecUnlockAmount = Math.ceil(unlockAmount / 1000);
       strictEqual(unlock.amount.toNumber(), unlockAmount);
@@ -414,8 +418,12 @@ describe("BridgeCore Exchange tests", async function() {
       const feeCollectorBalance = await fa2Token.getBalance(
         bridge.storage.fee_collector,
       );
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       const fromPrecUnlockAmount = unlockAmount * 1000;
       strictEqual(unlock.amount.toNumber(), unlockAmount);
@@ -458,8 +466,12 @@ describe("BridgeCore Exchange tests", async function() {
         .getBalance(eve.pkh)
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(eveBalance, prevEveBalance + Math.ceil(unlockAmount / 1000));
@@ -502,8 +514,12 @@ describe("BridgeCore Exchange tests", async function() {
         bridge.storage.fee_collector,
         0,
       );
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount - fee);
@@ -539,8 +555,12 @@ describe("BridgeCore Exchange tests", async function() {
       await bridge.updateStorage();
       const aliceBalance = await fa12Token.getBalance(alice.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(
@@ -582,8 +602,12 @@ describe("BridgeCore Exchange tests", async function() {
       await bridge.updateStorage();
       const aliceBalance = await fa2Token.getBalance(alice.pkh);
       const bridgeBalance = await fa2Token.getBalance(bridge.address);
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount * 1000);
@@ -621,8 +645,12 @@ describe("BridgeCore Exchange tests", async function() {
         .getBalance(eve.pkh)
         .then(balance => Math.floor(balance.toNumber()))
         .catch(error => console.log(JSON.stringify(error)));
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(eveBalance, prevEveBalance + Math.ceil(unlockAmount / 1000));
@@ -657,8 +685,12 @@ describe("BridgeCore Exchange tests", async function() {
       );
       await bridge.updateStorage();
       const aliceBalance = await bridge.wrappedToken.getBalance(alice.pkh, 0);
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: lockId,
+      };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        lockId,
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount);

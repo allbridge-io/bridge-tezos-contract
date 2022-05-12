@@ -74,3 +74,8 @@ type burn_params_t      is [@layout:comb] record [
   account                 : address;
   amount                  : nat;
 ]
+
+type unlock_key_t       is [@layout:comb] record [
+  chain                   : bytes;
+  lock_id                 : lock_id_t;
+]

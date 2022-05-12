@@ -34,8 +34,12 @@ function validate_unlock(
     check_permission(s.bridge, Errors.not_bridge);
     check_lock_id(params.lock_id);
 
+    const unlock_key = record[
+      chain = Constants.tezos_chain_id;
+      lock_id = params.lock_id;
+    ];
     (* Check if the unlock has been not validated earlier *)
-    require_none(s.validated_unlocks[params.lock_id], Errors.unlock_exist);
+    require_none(s.validated_unlocks[unlock_key], Errors.unlock_exist);
 
     const keccak_params : bytes = Crypto.keccak(Bytes.pack(
       (record[
@@ -55,6 +59,6 @@ function validate_unlock(
       Errors.invalid_signature
     );
 
-    s.validated_unlocks[params.lock_id] := params;
+    s.validated_unlocks[unlock_key] := params;
 
   } with s

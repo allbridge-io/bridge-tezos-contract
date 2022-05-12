@@ -248,8 +248,12 @@ describe("BridgeValidator Validate tests", async function() {
         signature.sig,
       );
       await validator.updateStorage();
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: "01ffffffffffffffffffffffffffff00",
+      };
       const newUnlock = await validator.storage.validated_unlocks.get(
-        "01ffffffffffffffffffffffffffff00",
+        unlockKey,
       );
       notStrictEqual(newUnlock, undefined);
     });
@@ -276,8 +280,12 @@ describe("BridgeValidator Validate tests", async function() {
         signature.sig,
       );
       await validator.updateStorage();
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: "01ffffffffffffffffffffffffffff01",
+      };
       const newUnlock = await validator.storage.validated_unlocks.get(
-        "01ffffffffffffffffffffffffffff01",
+        unlockKey,
       );
       notStrictEqual(newUnlock, undefined);
     });
@@ -304,8 +312,12 @@ describe("BridgeValidator Validate tests", async function() {
         signature.sig,
       );
       await validator.updateStorage();
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: "01ffffffffffffffffffffffffffff02",
+      };
       const newUnlock = await validator.storage.validated_unlocks.get(
-        "01ffffffffffffffffffffffffffff02",
+        unlockKey,
       );
       notStrictEqual(newUnlock, undefined);
     });
@@ -332,8 +344,12 @@ describe("BridgeValidator Validate tests", async function() {
         signature.sig,
       );
       await validator.updateStorage();
+      const unlockKey = {
+        chain: tezosChainId,
+        lock_id: "01ffffffffffffffffffffffffffff03",
+      };
       const newUnlock = await validator.storage.validated_unlocks.get(
-        "01ffffffffffffffffffffffffffff03",
+        unlockKey,
       );
       notStrictEqual(newUnlock, undefined);
     });
