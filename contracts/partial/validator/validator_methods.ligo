@@ -35,7 +35,7 @@ function validate_unlock(
     check_lock_id(params.lock_id);
 
     const unlock_key = record[
-      chain = Constants.tezos_chain_id;
+      chain = params.chain_from_id;
       lock_id = params.lock_id;
     ];
     (* Check if the unlock has been not validated earlier *)

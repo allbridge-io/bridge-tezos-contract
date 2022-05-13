@@ -249,7 +249,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       await validator.updateStorage();
       const unlockKey = {
-        chain: tezosChainId,
+        chain: bscChainId,
         lock_id: "01ffffffffffffffffffffffffffff00",
       };
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -281,7 +281,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       await validator.updateStorage();
       const unlockKey = {
-        chain: tezosChainId,
+        chain: bscChainId,
         lock_id: "01ffffffffffffffffffffffffffff01",
       };
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -313,7 +313,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       await validator.updateStorage();
       const unlockKey = {
-        chain: tezosChainId,
+        chain: bscChainId,
         lock_id: "01ffffffffffffffffffffffffffff02",
       };
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -345,7 +345,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       await validator.updateStorage();
       const unlockKey = {
-        chain: tezosChainId,
+        chain: bscChainId,
         lock_id: "01ffffffffffffffffffffffffffff03",
       };
       const newUnlock = await validator.storage.validated_unlocks.get(
@@ -353,6 +353,40 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newUnlock, undefined);
     });
+    it("Should validate unlock if the lock ID is repeated, but the original blockchain is different", async function() {
+      const unlockAmount = 10000;
+      const ethChainId = "11001122";
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff03",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: ethChainId,
+        tokenSource: wrappedSource.chain_id,
+        tokenSourceAddress: wrappedSource.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      await validator.validateUnlock(
+        "01ffffffffffffffffffffffffffff03",
+        alice.pkh,
+        unlockAmount,
+        ethChainId,
+        wrappedSource.chain_id,
+        wrappedSource.native_address,
+        signature.sig,
+      );
+      await validator.updateStorage();
+      const unlockKey = {
+        chain: ethChainId,
+        lock_id: "01ffffffffffffffffffffffffffff03",
+      };
+      const newUnlock = await validator.storage.validated_unlocks.get(
+        unlockKey,
+      );
+      notStrictEqual(newUnlock, undefined);
+    });
+
     it("Shouldn't validate if unlock is validated", async function() {
       const signature = await signerSecp.sign(
         Buffer.from("dasdsa", "ascii").toString("hex"),
