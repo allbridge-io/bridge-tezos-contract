@@ -224,6 +224,34 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
+    it("Shouldn't validate if signer is unknown", async function() {
+      Tezos.setSignerProvider(signerAlice);
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: 1000,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerBob.sign(keccakBytes);
+      await rejects(
+        validator.validateUnlock(
+          "01ffffffffffffffffffffffffffff00",
+          alice.pkh,
+          1000,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/signature-not-validated");
+          return true;
+        },
+      );
+    });
     it("Should validate unlock fa12 asset", async function() {
       Tezos.setSignerProvider(signerAlice);
       const unlockAmount = 10000;
