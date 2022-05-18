@@ -1,22 +1,13 @@
-import copy
 import json
-from re import template
 
 from unittest import TestCase
 
 from helpers import *
 from constants import *
-from pprint import pprint
 
-from pytezos import ContractInterface, pytezos, MichelsonRuntimeError
+from pytezos import ContractInterface
 
 staking = "KT1LzyPS8rN375tC31WPAVHaQ4HyBvTSLwBu"
-
-
-vr = {
-    f"{staking}%get_xabr_balance": int(0.01 * FEE_PRECISION),
-    f"{staking}%get_xabr_supply": int(0.01 * FEE_PRECISION),
-}
 
 class OracleFeeTest(TestCase):
 
@@ -29,8 +20,6 @@ class OracleFeeTest(TestCase):
 
         storage = cls.ct.storage.dummy()
         storage["owner"] = admin
-        storage["staking_address"] = staking
-        storage["fee_multiplier_f"] = 1000
         storage["base_fee_f"] = 1000
         cls.storage = storage
 
@@ -49,4 +38,4 @@ class OracleFeeTest(TestCase):
             amount=10_000_000,
             token=wrapped_asset_a,
             account=alice), view_results=vr)
-        self.assertEqual(fee, 9900)
+        self.assertEqual(fee, int(10_000_000 * 0.1))

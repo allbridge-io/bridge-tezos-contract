@@ -1,9 +1,9 @@
-import copy
 import json
 
 from unittest import TestCase
 
 from helpers import *
+from constants import *
 from constants import *
 from pprint import pprint
 
@@ -29,10 +29,10 @@ class BridgeTest(TestCase):
 
     def test_lock_unlock(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset({"fa12": token_a_address}, 6), sender=admin)
+        chain.execute(self.ct.add_asset({"fa12": token_a_address}, 6, token_source), sender=admin)
 
         res = chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, "01", "02", 101_000, SOLANA_RECEIVER), view_results=vr)
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 2)
         self.assertEqual(trxs[0]["amount"], 1000)
@@ -44,7 +44,13 @@ class BridgeTest(TestCase):
         self.assertEqual(trxs[1]["source"], me)
 
         res = chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig))
+            lock_id=DUMMY_LOCK_0, 
+            chain_from_id=SOLANA_CHAIN_ID,
+            token_source="01", 
+            token_source_address="02",
+            amount=100_000_000,
+            recipient=me,
+            signature=dummy_sig))
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 1)
         self.assertEqual(trxs[0]["amount"], 100_000)
@@ -53,18 +59,28 @@ class BridgeTest(TestCase):
 
     def test_wrapped_unlock_lock(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset(wrapped_asset_a, 6), sender=admin)
+        chain.execute(self.ct.add_asset({
+            "asset_type": wrapped_asset_a,
+            "precision": 6,
+            "token_source": token_source
+        }), sender=admin)
 
         res = chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig))
+            lock_id=DUMMY_LOCK_0, 
+            chain_from_id=SOLANA_CHAIN_ID,
+            token_source="01", 
+            token_source_address="02",
+            amount=100_000_000,
+            recipient=me,
+            signature=dummy_sig))
         mints = parse_mints(res)
-        self.assertEqual(len(mints), 2)
+        self.assertEqual(len(mints), 1)
         self.assertEqual(mints[0]["amount"], 100_000)
         self.assertEqual(mints[0]["destination"], me)
         self.assertEqual(mints[0]["token_address"], wrapped_token_address)
 
         res = chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, "01", "02", 100_000, SOLANA_RECEIVER), view_results=vr)
         mints = parse_mints(res)
         self.assertEqual(len(mints), 1)
         self.assertEqual(mints[0]["amount"], 1000)
@@ -79,14 +95,25 @@ class BridgeTest(TestCase):
 
     def test_claimers_fee(self):
         chain = LocalChain(storage=self.storage)
-        chain.execute(self.ct.add_asset({"fa12": token_a_address}, 6), sender=admin)
+        chain.execute(self.ct.add_asset({
+            "asset_type": fa12_token_a,
+            "precision": 6,
+            "token_source": token_source
+        }), sender=admin)
+
         chain.execute(self.ct.change_claimer(carol), sender=admin)
 
         res = chain.execute(self.ct.lock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 101_000, SOLANA_RECEIVER), view_results=vr)
+            SOLANA_CHAIN_ID, DUMMY_LOCK_0, "01", "02", 101_000, SOLANA_RECEIVER), view_results=vr)
 
         res = chain.execute(self.ct.unlock_asset(
-            SOLANA_CHAIN_ID, DUMMY_LOCK_0, 0, 100_000, me, dummy_sig), view_results=vr, sender=carol)
+            lock_id=DUMMY_LOCK_0, 
+            chain_from_id=SOLANA_CHAIN_ID,
+            token_source="01", 
+            token_source_address="02",
+            amount=100_000_000,
+            recipient=me,
+            signature=dummy_sig), view_results=vr, sender=carol)
         trxs = parse_transfers(res)
         self.assertEqual(len(trxs), 2)
         self.assertEqual(trxs[0]["amount"], 1000)
