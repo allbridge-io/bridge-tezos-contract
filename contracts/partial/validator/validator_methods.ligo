@@ -50,7 +50,7 @@ function validate_unlock(
         token_source  = params.token_source;
         token_source_address = params.token_source_address;
         blockchain_id = Constants.tezos_chain_id;
-        type_operation = "unlock";
+        operation_type = "unlock";
       ] : get_keccak_t)
     ));
 

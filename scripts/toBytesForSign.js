@@ -10,7 +10,7 @@ function paramToBytes(params) {
           (bytes %token_source)
           (bytes %token_source_address)
           (bytes %blockchain_id)
-          (string %type_operation)
+          (string %operation_type)
         )`;
   let data = `
     (Pair 0x${params.lockId}
