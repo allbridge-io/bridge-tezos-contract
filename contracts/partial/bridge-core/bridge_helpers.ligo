@@ -88,14 +88,18 @@ function to_system_precision(
   const value           : nat;
   const precision       : nat)
                         : nat is
-  if precision > Constants.system_precision
-  then value / pow10(abs(precision - Constants.system_precision))
-  else value * pow10(abs(Constants.system_precision - precision))
+  block {
+    const delta = abs(precision - Constants.system_precision)
+  } with if precision > Constants.system_precision
+      then value / pow10(delta)
+      else value * pow10(delta)
 
 function from_system_precision(
   const value           : nat;
   const precision       : nat)
                         : nat is
-  if precision > Constants.system_precision
-  then value * pow10(abs(precision - Constants.system_precision))
-  else value / pow10(abs(Constants.system_precision - precision))
+  block {
+    const delta = abs(precision - Constants.system_precision)
+  } with if precision > Constants.system_precision
+      then value * pow10(delta)
+      else value / pow10(delta)
