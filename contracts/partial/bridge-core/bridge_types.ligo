@@ -18,13 +18,16 @@ type asset_id_t         is nat;
 type asset_t            is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  pow_above               : bool;
-  total_locked            : nat;
   enabled                 : bool;
 ]
 
+type source_token_t     is [@layout:comb] record[
+  chain_id                : bytes;
+  native_address          : bytes;
+]
+
 type asset_map_t        is big_map(asset_id_t, asset_t)
-type asset_map_ids_t    is big_map(asset_standard_t, asset_id_t)
+type asset_map_ids_t    is big_map(source_token_t, asset_id_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
@@ -46,31 +49,33 @@ type return_t           is list (operation) * storage_t
 type new_asset_t        is [@layout:comb] record[
   asset_type              : asset_standard_t;
   precision               : nat;
-  pow_above               : bool;
+  token_source            : source_token_t;
 ]
 
 type lock_asset_t       is [@layout:comb] record[
   chain_id                : chain_id_t;
   lock_id                 : lock_id_t;
-  asset_id                : asset_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   amount                  : nat;
   recipient               : bytes;
 ]
 
 type remove_asset_t     is [@layout:comb] record[
   asset_id                : asset_id_t;
+  amount                  : nat;
   recipient               : address;
+  token_source            : source_token_t;
 ]
 
 type unlock_asset_t     is [@layout:comb] record[
-  chain_id                : chain_id_t;
   lock_id                 : lock_id_t;
-  asset_id                : asset_id_t;
+  chain_from_id           : chain_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   amount                  : nat;
   recipient               : address;
   signature               : signature;
 ]
 
 type response_fee_t     is nat;
-
-type wabr_balance_t     is (address * nat)

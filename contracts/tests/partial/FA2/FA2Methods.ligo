@@ -3,35 +3,35 @@ function get_account(
   const user            : address;
   const s               : storage_type)
                         : account is
-  case s.account_info[user] of
+  case s.account_info[user] of [
     None -> record [
       balances            = (Map.empty : map(token_id, nat));
       permits             = (set [] : set(address));
     ]
   | Some(v) -> v
-  end
+  ]
 
 (* Helper function to get token info *)
 function get_token_info(
   const token_id        : token_id;
   const s               : storage_type)
                         : token_info is
-  case s.token_info[token_id] of
+  case s.token_info[token_id] of [
     None -> record [
       total_supply    = 0n;
     ]
   | Some(v) -> v
-  end
+  ]
 
 (* Helper function to get acount balance by token *)
 function get_balance_by_token(
   const user            : account;
   const token_id        : token_id)
                         : nat is
-  case user.balances[token_id] of
+  case user.balances[token_id] of [
   | None -> 0n
   | Some(v) -> v
-  end
+  ]
 
 (* Validates the operators for the given transfer batch
  * and the operator storage.
@@ -78,7 +78,7 @@ function transfer_sender_check(
   } with
       if is_approved_operator_for_all
       then store
-      else case params of
+      else case params of [
           nil -> store
         | first_param # rest -> block {
             (* check whether `from_` has issued a permit *)
@@ -96,7 +96,7 @@ function transfer_sender_check(
               rest
               )
           } with updated_store
-        end
+        ]
 
 (* Perform transfers *)
 function iterate_transfer(
@@ -161,7 +161,7 @@ function iterate_update_operators(
   const params          : update_operator_param)
                         : storage_type is
   block {
-    case params of
+    case params of [
       Add_operator(param) -> block {
       (* Check an owner *)
       if Tezos.sender =/= param.owner
@@ -192,7 +192,7 @@ function iterate_update_operators(
       (* Update storage *)
       s.account_info[param.owner] := src_account;
     }
-    end
+    ]
   } with s
 
 (* Perform balance lookup *)

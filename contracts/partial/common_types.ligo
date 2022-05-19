@@ -24,7 +24,8 @@ type validate_lock_t    is [@layout:comb] record[
   sender                  : address;
   recipient               : bytes;
   amount                  : nat;
-  asset                   : asset_standard_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   destination_chain_id    : chain_id_t;
 ]
 
@@ -33,7 +34,8 @@ type validate_unlock_t  is [@layout:comb] record[
   recipient               : address;
   amount                  : nat;
   chain_from_id           : chain_id_t;
-  asset                   : asset_standard_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
   signature               : signature;
 ]
 
@@ -41,8 +43,11 @@ type get_keccak_t       is [@layout:comb] record[
   lock_id                 : lock_id_t;
   recipient               : address;
   amount                  : nat;
-  chain_from_id           : bytes;
-  asset                   : asset_standard_t;
+  chain_from_id           : chain_id_t;
+  token_source            : bytes;
+  token_source_address    : bytes;
+  blockchain_id           : bytes;
+  operation_type          : string;
 ]
 
 type calculate_fee_t    is [@layout:comb] record[
@@ -68,4 +73,9 @@ type burn_params_t      is [@layout:comb] record [
   token_id                : token_id_t;
   account                 : address;
   amount                  : nat;
+]
+
+type unlock_key_t       is [@layout:comb] record [
+  chain                   : bytes;
+  lock_id                 : lock_id_t;
 ]

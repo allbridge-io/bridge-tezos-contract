@@ -29,12 +29,6 @@ module.exports = class Validator {
     const operation = await this.contract.methods.change_owner(newOwner).send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async сhangeStaking(newAddress) {
-    const operation = await this.contract.methods
-      .change_staking(newAddress)
-      .send();
-    await confirmOperation(Tezos, operation.hash);
-  }
   async сhangeFee(feeType, value) {
     let operation;
     switch (feeType) {

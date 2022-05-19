@@ -31,7 +31,7 @@ function main(
   const action          : parameter_t;
   const s               : storage_t)
                         : return_t is
-  case action of
+  case action of [
   (* Admin methods *)
   | Change_owner(params)          -> (Constants.no_operations, change_owner(params, s))
   | Change_bridge_manager(params) -> (Constants.no_operations, change_bridge_manager(params, s))
@@ -50,4 +50,4 @@ function main(
   (* Common methods *)
   | Lock_asset(params)     -> lock_asset(params, s)
   | Unlock_asset(params)   -> unlock_asset(params, s)
-  end
+  ]

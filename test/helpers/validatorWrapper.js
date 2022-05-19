@@ -44,140 +44,46 @@ module.exports = class Validator {
   async validateLock(
     lockId,
     sender,
+    recipient,
     amount,
-    receiver,
+    tokenSource,
+    tokenSourceAddress,
     destinationChainId,
-    assetType,
-    tokenAddress = null,
-    tokenId = null,
   ) {
-    let operation;
-    switch (assetType) {
-      case "fa12":
-        operation = await this.contract.methods
-          .validate_lock(
-            lockId,
-            sender,
-            receiver,
-            amount,
-            "fa12",
-            tokenAddress,
-            destinationChainId,
-          )
-          .send();
-        break;
-      case "fa2":
-        operation = await this.contract.methods
-          .validate_lock(
-            lockId,
-            sender,
-            receiver,
-            amount,
-            "fa2",
-            tokenAddress,
-            tokenId,
-            destinationChainId,
-          )
-          .send();
-        break;
-      case "tez":
-        operation = await this.contract.methods
-          .validate_lock(
-            lockId,
-            sender,
-            receiver,
-            amount,
-            "tez",
-            null,
-            destinationChainId,
-          )
-          .send();
-        break;
-      case "wrapped":
-        operation = await this.contract.methods
-          .validate_lock(
-            lockId,
-            sender,
-            receiver,
-            amount,
-            "wrapped",
-            tokenAddress,
-            tokenId,
-            destinationChainId,
-          )
-          .send();
-        break;
-    }
+    const operation = await this.contract.methods
+      .validate_lock(
+        lockId,
+        sender,
+        recipient,
+        amount,
+        tokenSource,
+        tokenSourceAddress,
+        destinationChainId,
+      )
+      .send();
 
     await confirmOperation(Tezos, operation.hash);
   }
   async validateUnlock(
     lockId,
-    receiver,
+    recipient,
     amount,
     chainFromId,
+    tokenSource,
+    tokenSourceAddress,
     signature,
-    assetType,
-    tokenAddress = null,
-    tokenId = null,
   ) {
-    let operation;
-    switch (assetType) {
-      case "fa12":
-        operation = await this.contract.methods
-          .validate_unlock(
-            lockId,
-            receiver,
-            amount,
-            chainFromId,
-            "fa12",
-            tokenAddress,
-            signature,
-          )
-          .send();
-        break;
-      case "fa2":
-        operation = await this.contract.methods
-          .validate_unlock(
-            lockId,
-            receiver,
-            amount,
-            chainFromId,
-            "fa2",
-            tokenAddress,
-            tokenId,
-            signature,
-          )
-          .send();
-        break;
-      case "tez":
-        operation = await this.contract.methods
-          .validate_unlock(
-            lockId,
-            receiver,
-            amount,
-            chainFromId,
-            "tez",
-            null,
-            signature,
-          )
-          .send();
-        break;
-      case "wrapped":
-        operation = await this.contract.methods
-          .validate_unlock(
-            lockId,
-            receiver,
-            amount,
-            chainFromId,
-            "wrapped",
-            tokenAddress,
-            tokenId,
-            signature,
-          )
-          .send();
-        break;
-    }
+    const operation = await this.contract.methods
+      .validate_unlock(
+        lockId,
+        recipient,
+        amount,
+        chainFromId,
+        tokenSource,
+        tokenSourceAddress,
+        signature,
+      )
+      .send();
 
     await confirmOperation(Tezos, operation.hash);
   }

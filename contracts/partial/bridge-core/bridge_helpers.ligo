@@ -8,26 +8,34 @@ function get_oracle_fee(
     Errors.oracle_not_found
   )
 
+function get_min_fee(
+  const token          : asset_standard_t;
+  const oracle_address : address)
+                       : response_fee_t is
+  unwrap(
+    (Tezos.call_view("min_fee", token, oracle_address) : option(response_fee_t)),
+    Errors.oracle_not_found
+  )
+
 function get_lock_contract(
   const validator       : address)
                         : contract(validate_lock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_lock",
-    validator)          : option(contract(validate_lock_t))) of
+    validator)          : option(contract(validate_lock_t))) of [
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_lock)
-  end;
+  ]
 
-// TODO::Replace with unwrap
 function get_unlock_contract(
   const validator       : address)
                         : contract(validate_unlock_t) is
   case (Tezos.get_entrypoint_opt(
     "%validate_unlock",
-    validator)          : option(contract(validate_unlock_t))) of
+    validator)          : option(contract(validate_unlock_t))) of [
   | Some(contr) -> contr
   | None -> failwith(Errors.not_validator_unlock)
-  end;
+  ]
 
 function wrap_transfer(
   const sender_          : address;
@@ -35,7 +43,7 @@ function wrap_transfer(
   const amount_          : nat;
   const token            : asset_standard_t)
                          : operation is
-    case token of
+    case token of [
     | Fa12(address_) -> Tezos.transaction(
         (sender_,
         (receiver, amount_)),
@@ -52,33 +60,46 @@ function wrap_transfer(
     | Tez -> Tezos.transaction(
         unit,
         amount_ * 1mutez,
-        (get_contract(receiver) : contract(unit)))
+        (Tezos.get_contract_with_error(receiver, Errors.not_contract) : contract(unit)))
     | Wrapped(token_) -> transfer_fa2(
         sender_,
         receiver,
         amount_,
         token_.id,
         token_.address)
-    end;
+    ]
 
-function to_precision(
-  const value           : nat;
-  const precision       : nat;
-  const pow_above       : bool)
+function pow10(
+  const value           : nat)
                         : nat is
-  if pow_above
-  then value / precision
-  else if precision > 0n
-    then value * precision
-    else value
+       if value = 0n then 1n
+  else if value = 1n then 10n
+  else if value = 2n then 100n
+  else if value = 3n then 1000n
+  else if value = 4n then 10000n
+  else if value = 5n then 100000n
+  else if value = 6n then 1000000n
+  else if value = 7n then 10000000n
+  else if value = 8n then 100000000n
+  else if value = 9n then 1000000000n
+  else failwith(Errors.wrong_precision)
 
-function from_precision(
+function to_system_precision(
   const value           : nat;
-  const precision       : nat;
-  const pow_above       : bool)
+  const precision       : nat)
                         : nat is
-  if pow_above
-  then value * precision
-  else if precision > 0n
-    then value / precision
-    else value
+  block {
+    const delta = abs(precision - Constants.system_precision)
+  } with if precision > Constants.system_precision
+      then value / pow10(delta)
+      else value * pow10(delta)
+
+function from_system_precision(
+  const value           : nat;
+  const precision       : nat)
+                        : nat is
+  block {
+    const delta = abs(precision - Constants.system_precision)
+  } with if precision > Constants.system_precision
+      then value * pow10(delta)
+      else value / pow10(delta)

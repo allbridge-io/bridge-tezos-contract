@@ -9,7 +9,10 @@
         recipient     = params.recipient;
         amount        = params.amount;
         chain_from_id = params.chain_from_id;
-        asset         = params.asset;
+        token_source  = params.token_source;
+        token_source_address = params.token_source_address;
+        blockchain_id = Constants.tezos_chain_id;
+        operation_type = "unlock";
       ] : get_keccak_t)
     ));
 

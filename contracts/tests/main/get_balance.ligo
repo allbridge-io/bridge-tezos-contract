@@ -35,10 +35,10 @@ function get_callback(
                         : contract(list(balance_of_response_type)) is
   case (Tezos.get_entrypoint_opt(
     "%receive_balance",
-    addr)      : option(contract(list(balance_of_response_type)))) of
+    addr)      : option(contract(list(balance_of_response_type)))) of [
     Some(contr) -> contr
   | None -> (failwith("Test/not-callback") : contract(list(balance_of_response_type)) )
-  end;
+  ];
 
 (* Helper to get the entrypoint of contract *)
 function get_balance_entrypoint(
@@ -46,10 +46,10 @@ function get_balance_entrypoint(
                         : contract(balance_params_type) is
   case (Tezos.get_entrypoint_opt(
     "%balance_of",
-    token_address) : option(contract(balance_params_type))) of
+    token_address) : option(contract(balance_params_type))) of [
     Some(contr) -> contr
     | None -> (failwith("Test/not-pool") : contract(balance_params_type) )
-  end;
+  ];
 
 function balance_of(
   const owner           : address;
@@ -75,10 +75,10 @@ function receive_balance(
   var s                 : storage_type)
                         : storage_type is
   block {
-    const response = case List.head_opt(l) of
+    const response = case List.head_opt(l) of [
       Some(r) -> r
     | None -> (failwith("Test/bad-response") : balance_of_response_type)
-    end;
+    ];
     s.response := response.balance;
   } with s
 
@@ -91,8 +91,8 @@ function main(
   const action          : param_type;
   const s               : storage_type)
                         : return_type is
-  case action of
+  case action of [
     Balance_of(params)        -> balance_of(params.0, params.1, s)
   | Receive_balance(params)   -> ((nil : list(operation)), receive_balance(params, s))
 
-  end
+  ]
