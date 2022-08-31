@@ -1,4 +1,4 @@
-[@view] function validate_siqnature(
+[@view] function validate_signature(
   const params          : validate_unlock_t;
   const s               : storage_t)
                         : bool is
