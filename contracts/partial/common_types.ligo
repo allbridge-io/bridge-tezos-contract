@@ -8,11 +8,6 @@ type token_t            is [@layout:comb] record[
   id                      : token_id_t;
 ]
 
-type wrapped_token_t    is [@layout:comb] record[
-  chain_id                : chain_id_t;
-  native_token_address    : native_address_t;
-]
-
 type asset_standard_t is
 | Fa12                    of address
 | Fa2                     of token_t
