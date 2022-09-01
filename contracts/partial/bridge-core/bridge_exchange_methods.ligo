@@ -16,7 +16,9 @@ function lock_asset(
 
     const locked_without_fee = case asset.asset_type of [
     | Tez -> Tezos.amount / 1mutez
-    | _ -> params.amount
+    | _ -> block {
+        require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount)
+      } with params.amount
     ];
 
     require(locked_without_fee > 0n, Errors.zero_transfer);
@@ -129,6 +131,11 @@ function unlock_asset(
 
     const unlocked_amount = get_nat_or_fail(amount_ - fee, Errors.amount_too_low);
 
+    case asset.asset_type of [
+    | Tez -> require(unlocked_amount > 0n, Errors.zero_unlocked_tez)
+    | _ -> require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount)
+    ];
+
     var operations := Constants.no_operations;
     case asset.asset_type of [
     | Wrapped(token_) -> {
@@ -158,10 +165,7 @@ function unlock_asset(
       ]
      }
     | _ -> {
-      case asset.asset_type of [
-      | Tez(_) -> require(unlocked_amount > 0n, Errors.zero_unlocked_tez)
-      | _ -> skip
-      ];
+
       operations := wrap_transfer(
         Tezos.self_address,
         params.recipient,

@@ -182,6 +182,23 @@ describe("BridgeCore Exchange tests", async function () {
   });
 
   describe("Testing entrypoint: Lock_asset", async function () {
+    it("Shouldn't lock if the xtz amount was transferred not for the xtz asset", async function () {
+      await rejects(
+        bridge.lockAsset(
+          bscChainId,
+          "01ffffffffffffffffffffffffffff53",
+          wrappedSource.chain_id,
+          wrappedSource.native_address,
+          10 * wrappedPrecision,
+          bscAddress,
+          1000,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/unexpected-xtz-amount");
+          return true;
+        },
+      );
+    });
     it("Should lock fa12 asset", async function () {
       const lockAmount = 10000 * precision;
       const fee = calculateFee(lockAmount);
@@ -363,6 +380,47 @@ describe("BridgeCore Exchange tests", async function () {
         ),
         err => {
           strictEqual(err.message, "Bridge-core/zero-unlocked-tez");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't unlock if the xtz amount was transferred not for the xtz asset", async function () {
+      Tezos.setSignerProvider(signerSecp);
+
+      const unlockAmount = 5000 * wrappedPrecision;
+      const fee = 1;
+
+      const prevAliceBalance = await fa12Token.getBalance(alice.pkh);
+      const prevBridgeBalance = await fa12Token.getBalance(bridge.address);
+      const prevFeeCollectorBalance = await fa12Token.getBalance(
+        bridge.storage.fee_collector,
+      );
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const lockId = "01ffffffffffffffffffffffffffff00";
+
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          unlockAmount,
+          alice.pkh,
+          signature.sig,
+          1,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/unexpected-xtz-amount");
           return true;
         },
       );

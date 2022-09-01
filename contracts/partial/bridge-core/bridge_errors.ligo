@@ -22,4 +22,5 @@ module Errors is {
   const amount_too_low          : string = "Bridge-core/amount-too-low";
   const not_contract            : string = "Bridge-core/not-implict-account";
   const zero_unlocked_tez       : string = "Bridge-core/zero-unlocked-tez";
+  const unexpected_xtz_amount   : string = "Bridge-core/unexpected-xtz-amount"
   }
