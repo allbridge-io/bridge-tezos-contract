@@ -158,6 +158,10 @@ function unlock_asset(
       ]
      }
     | _ -> {
+      case asset.asset_type of [
+      | Tez(_) -> require(unlocked_amount > 0n, Errors.zero_unlocked_tez)
+      | _ -> skip
+      ];
       operations := wrap_transfer(
         Tezos.self_address,
         params.recipient,
