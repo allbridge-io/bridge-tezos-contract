@@ -4,7 +4,7 @@ type ledger_key_t       is (address * nat)
 
 type ledger_t           is big_map(ledger_key_t, nat)
 
-type allowances_t       is big_map(ledger_key_t, set(address))
+type allowances_t       is big_map(ledger_key_t * address, unit)
 
 type token_t            is [@layout:comb] record[
   chain_id                : chain_id_t;

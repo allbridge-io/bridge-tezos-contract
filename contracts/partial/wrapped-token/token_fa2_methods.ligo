@@ -12,12 +12,14 @@ function iterate_transfer (
                         : storage_t is
       block {
         const sender_key : ledger_key_t = (trx_params.from_, transfer.token_id);
-        const sender_allowances = unwrap_or(s.allowances[sender_key], Constants.empty_allowances);
-        (* Check permissions *)
-        require(trx_params.from_ = Tezos.sender
-          or Set.mem(Tezos.sender, sender_allowances), Errors.fa2_not_operator);
 
-        const sender_balance = unwrap(s.ledger[sender_key], Errors.fa2_low_balance);
+        (* Check permissions *)
+        case s.allowances[(sender_key, Tezos.sender)] of [
+        | Some(_) -> skip
+        | None -> require(trx_params.from_ = Tezos.sender, Errors.fa2_not_operator)
+        ];
+
+        const sender_balance = unwrap_or(s.ledger[sender_key], 0n);
 
         (* Update sender account *)
         s.ledger[sender_key] := get_nat_or_fail(sender_balance - transfer.amount, Errors.fa2_low_balance);
@@ -37,20 +39,20 @@ function iterate_update_operators(
   var s                 : storage_t;
   const params          : update_operator_param_t)
                         : storage_t is
-  block {
-    const (param, should_add) = case params of [
-    | Add_operator(param)    -> (param, True)
-    | Remove_operator(param) -> (param, False)
-    ];
-
-    require(param.token_id < s.token_count, Errors.fa2_token_undefined);
-    require(Tezos.sender = param.owner, Errors.fa2_not_owner);
-
-    const account_key = (param.owner, param.token_id);
-    const account_allowances = unwrap_or(s.allowances[account_key], Constants.empty_allowances);
-    s.allowances[account_key] := Set.update(param.operator, should_add, account_allowances);
-
-  } with s
+  case params of [
+  | Add_operator(param) -> block {
+      require(param.token_id < s.token_count, Errors.fa2_token_undefined);
+      require(Tezos.sender = param.owner, Errors.fa2_not_owner);
+      const account_key = (param.owner, param.token_id);
+      s.allowances[(account_key, param.operator)] := unit;
+    } with s
+  | Remove_operator(param) -> block {
+      require(param.token_id < s.token_count, Errors.fa2_token_undefined);
+      require(Tezos.sender = param.owner, Errors.fa2_not_owner);
+      const account_key = (param.owner, param.token_id);
+      remove (account_key, param.operator) from map s.allowances;
+    } with s
+  ]
 
 (* Perform balance lookup *)
 function get_balance_of(

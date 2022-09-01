@@ -1,6 +1,6 @@
 const { Tezos, signerAlice, alice, bob, signerSecp } = require("./utils/cli");
 
-const { rejects, strictEqual } = require("assert");
+const { rejects, strictEqual, notStrictEqual } = require("assert");
 const { MichelsonMap } = require("@taquito/taquito");
 const WrappedToken = require("./helpers/wrappedTokenWrapper");
 const { migrate } = require("../scripts/helpers");
@@ -96,21 +96,23 @@ describe("Wrapped token FA2 methods test", async function () {
       it("Should allow add operator", async function () {
         await token.updateOperator("add_operator", alice.pkh, bob.pkh, 0);
         await token.updateStorage();
-        const aliceAllowances = await token.storage.allowances.get([
+        const senderAllowed = await token.storage.allowances.get([
           alice.pkh,
-          0,
+          "0",
+          bob.pkh,
         ]);
-        strictEqual(aliceAllowances[0], bob.pkh);
+        notStrictEqual(senderAllowed, undefined);
       });
 
       it("Should allow remove_operator", async function () {
         await token.updateOperator("remove_operator", alice.pkh, bob.pkh, 0);
         await token.updateStorage();
-        const aliceAllowances = await token.storage.allowances.get([
+        const senderAllowed = await token.storage.allowances.get([
           alice.pkh,
-          0,
+          "0",
+          bob.pkh,
         ]);
-        strictEqual(aliceAllowances[0], undefined);
+        strictEqual(senderAllowed, undefined);
       });
     });
   });
