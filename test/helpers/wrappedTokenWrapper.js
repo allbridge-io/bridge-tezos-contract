@@ -93,4 +93,9 @@ module.exports = class WrappedToken {
     account = await this.storage.account_info.get(address);
     return account.permits;
   }
+  async callView(viewName, params, caller = this.address) {
+    return await this.contract.contractViews[viewName](params).executeView({
+      viewCaller: caller,
+    });
+  }
 };

@@ -182,19 +182,18 @@ describe("BridgeCore Exchange tests", async function () {
   });
 
   describe("Testing entrypoint: Lock_asset", async function () {
-    it("Shouldn't lock if the xtz amount was transferred not for the xtz asset", async function () {
+    it("Shouldn't lock if transfer amount 0", async function () {
       await rejects(
         bridge.lockAsset(
           bscChainId,
           "01ffffffffffffffffffffffffffff53",
           wrappedSource.chain_id,
           wrappedSource.native_address,
-          10 * wrappedPrecision,
+          0,
           bscAddress,
-          1000,
         ),
         err => {
-          strictEqual(err.message, "Bridge-core/unexpected-xtz-amount");
+          strictEqual(err.message, "Bridge-core/zero-transfer");
           return true;
         },
       );
@@ -383,6 +382,81 @@ describe("BridgeCore Exchange tests", async function () {
           return true;
         },
       );
+    });
+    it("Shouldn't unlock if transfer amount less than fee", async function () {
+      Tezos.setSignerProvider(signerSecp);
+      const unlockAmount = 0;
+
+      const lockId = "01ffffffffffffffffffffffffffff02";
+      const keccakBytes = toBytes({
+        lockId: lockId,
+        recipient: eve.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: tezSource.chain_id,
+        tokenSourceAddress: tezSource.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerSecp.sign(keccakBytes);
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          tezSource.chain_id,
+          tezSource.native_address,
+          unlockAmount,
+          eve.pkh,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/amount-too-low");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't unlock if transfer amount 0", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa12",
+        tokenAddress: fa12Token.address,
+        fee: 0,
+      });
+      Tezos.setSignerProvider(signerSecp);
+      const unlockAmount = 0;
+
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const lockId = "01ffffffffffffffffffffffffffff00";
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          unlockAmount,
+          alice.pkh,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/zero-transfer");
+          return true;
+        },
+      );
+      Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa12",
+        tokenAddress: fa12Token.address,
+        fee: 1,
+      });
     });
     it("Shouldn't unlock if the xtz amount was transferred not for the xtz asset", async function () {
       Tezos.setSignerProvider(signerSecp);

@@ -93,6 +93,42 @@ describe("BridgeValidator Validate tests", async function () {
         },
       );
     });
+    it("Shouldn't validate if invalid lock_id wrong length", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(
+        validator.validateLock(
+          "01ffffffffffffffffffffffffff10",
+          bob.pkh,
+          recipient,
+          10000,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          bscChainId,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-id-length");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't validate if invalid lock version", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(
+        validator.validateLock(
+          "02ffffffffffffffffffffffffffff00",
+          bob.pkh,
+          recipient,
+          10000,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          bscChainId,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-version");
+          return true;
+        },
+      );
+    });
     it("Should validate lock fa12 asset", async function () {
       const lockAmount = 10000;
 
@@ -248,6 +284,62 @@ describe("BridgeValidator Validate tests", async function () {
         ),
         err => {
           strictEqual(err.message, "Validator-bridge/signature-not-validated");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't validate if invalid lock_id length", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: 1000,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerBob.sign(keccakBytes);
+      await rejects(
+        validator.validateUnlock(
+          "01ffffffffffffffffffffffffff00",
+          alice.pkh,
+          1000,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-id-length");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't validate if invalid lock version", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const keccakBytes = toBytes({
+        lockId: "02ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: 1000,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerBob.sign(keccakBytes);
+      await rejects(
+        validator.validateUnlock(
+          "02ffffffffffffffffffffffffffff00",
+          alice.pkh,
+          1000,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-version");
           return true;
         },
       );

@@ -5,11 +5,14 @@ const {
   bob,
   signerSecp,
   signerBob,
+  eve,
 } = require("./utils/cli");
 const { MichelsonMap } = require("@taquito/taquito");
 const { rejects, strictEqual, notStrictEqual } = require("assert");
 
 const WrappedToken = require("./helpers/wrappedTokenWrapper");
+
+const { confirmOperation } = require("../scripts/confirmation");
 
 describe("Wrapped token methods test", async function () {
   let token;
@@ -111,6 +114,24 @@ describe("Wrapped token methods test", async function () {
       strictEqual(tokenSupply.toNumber(), 10000);
       strictEqual(balance, 10000);
     });
+    it("Should allow batch mint tokens", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      const op = await token.contract.methods
+        .mint([
+          { token_id: 0, recipient: alice.pkh, amount: 10000 },
+          { token_id: 0, recipient: eve.pkh, amount: 10000 },
+        ])
+        .send();
+      await confirmOperation(Tezos, op.hash);
+      await token.updateStorage();
+      const tokenSupply = await token.storage.tokens_supply.get("0");
+      const aliceBalance = await token.getBalance(alice.pkh, "0");
+      const eveBalance = await token.getBalance(eve.pkh, "0");
+      strictEqual(tokenSupply.toNumber(), 30000);
+      strictEqual(aliceBalance, 10000);
+      strictEqual(eveBalance, 10000);
+    });
   });
   describe("Testing entrypoint: Burn", async function () {
     it("Shouldn't burn tokens if the user is not an bridge", async function () {
@@ -127,8 +148,41 @@ describe("Wrapped token methods test", async function () {
       await token.updateStorage();
       const tokenSupply = await token.storage.tokens_supply.get("0");
       const balance = await token.getBalance(bob.pkh, 0);
-      strictEqual(tokenSupply.toNumber(), 0);
+      strictEqual(tokenSupply.toNumber(), 20000);
       strictEqual(balance, 0);
+    });
+    it("Shouldn't burn tokens if low balance", async function () {
+      await rejects(token.burn(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
+        return true;
+      });
+    });
+  });
+  describe("Testing view entrypoint: Get_balance", async function () {
+    it("Should return Alice Balance", async function () {
+      const response = await token.callView("get_balance", [alice.pkh, "0"]);
+
+      strictEqual(response.toNumber(), 10000);
+    });
+    it("Should return 0 if account undefined", async function () {
+      const response = await token.callView("get_balance", [
+        token.address,
+        "0",
+      ]);
+
+      strictEqual(response.toNumber(), 0);
+    });
+  });
+  describe("Testing view entrypoint: Get_total_supply", async function () {
+    it("Should return total supply", async function () {
+      const response = await token.callView("get_total_supply", 0);
+      const totalSupply = await token.storage.tokens_supply.get("0");
+      strictEqual(response.toNumber(), totalSupply.toNumber());
+    });
+    it("Should return 0 if tokent undefined", async function () {
+      const response = await token.callView("get_total_supply", 10);
+
+      strictEqual(response.toNumber(), 0);
     });
   });
 });
