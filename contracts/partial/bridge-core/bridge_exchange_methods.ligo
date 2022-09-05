@@ -133,7 +133,10 @@ function unlock_asset(
 
     case asset.asset_type of [
     | Tez -> require(unlocked_amount > 0n, Errors.zero_unlocked_tez)
-    | _ -> require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount)
+    | _ -> {
+        require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
+        require(unlocked_amount > 0n, Errors.zero_transfer)
+      }
     ];
 
     var operations := Constants.no_operations;
