@@ -24,14 +24,16 @@ function main(
   const action          : action_t;
   const s               : storage_t)
                         : return_t is
-  case action of [
-  | Change_owner(params)      -> (Constants.no_operations, change_owner(params, s))
-  | Change_bridge(params)     -> (Constants.no_operations, change_bridge(params, s))
-  | Create_token(params)      -> (Constants.no_operations, create_token(params, s))
-  | Mint(params)              -> (Constants.no_operations, mint(params, s))
-  | Burn(params)              -> (Constants.no_operations, burn(params, s))
+  block {
+    require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
+  } with case action of [
+    | Change_owner(params)      -> (Constants.no_operations, change_owner(params, s))
+    | Change_bridge(params)     -> (Constants.no_operations, change_bridge(params, s))
+    | Create_token(params)      -> (Constants.no_operations, create_token(params, s))
+    | Mint(params)              -> (Constants.no_operations, mint(params, s))
+    | Burn(params)              -> (Constants.no_operations, burn(params, s))
 
-  | Transfer(params)          -> (Constants.no_operations, transfer(s, params))
-  | Update_operators(params)  -> (Constants.no_operations, update_operators(s, params))
-  | Balance_of(params)        -> (get_balance_of(s, params), s)
-  ]
+    | Transfer(params)          -> (Constants.no_operations, transfer(s, params))
+    | Update_operators(params)  -> (Constants.no_operations, update_operators(s, params))
+    | Balance_of(params)        -> (get_balance_of(s, params), s)
+    ]

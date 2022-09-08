@@ -38,8 +38,10 @@ module.exports = class WrappedToken {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async сhangeAddress(typeAddress, address) {
-    const operation = await this.contract.methods[typeAddress](address).send();
+  async сhangeAddress(typeAddress, address, amt = 0) {
+    const operation = await this.contract.methods[typeAddress](address).send({
+      amount: amt,
+    });
     await confirmOperation(Tezos, operation.hash);
   }
   async updateOperator(action, owner, operator, tokenId = 0) {

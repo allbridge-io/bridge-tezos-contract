@@ -26,6 +26,12 @@ describe("Wrapped token methods test", async function () {
     }
   });
   describe("Testing entrypoint: Change_owner", async function () {
+    it("Should fail (and all methods) if xtz is passed", async function () {
+      await rejects(token.сhangeAddress("change_owner", bob.pkh, 100), err => {
+        strictEqual(err.message, "Wrapped-token/unexpected-xtz-amount");
+        return true;
+      });
+    });
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(token.сhangeAddress("change_owner", bob.pkh), err => {
