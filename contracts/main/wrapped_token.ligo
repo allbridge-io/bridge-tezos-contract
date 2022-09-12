@@ -14,8 +14,8 @@ type action_t           is
 | Change_owner            of address
 | Change_bridge           of address
 | Create_token            of new_token_t
-| Mint                    of mint_params_t
-| Burn                    of burn_params_t
+| Mint                    of mint_burn_params_t
+| Burn                    of mint_burn_params_t
 | Transfer                of transfer_params_t
 | Update_operators        of update_operator_params_t
 | Balance_of              of balance_params_t

@@ -56,15 +56,7 @@ type token_metadata_t   is [@layout:comb] record [
   token_info              : map (string, bytes);
 ]
 
-type mint_param_t       is [@layout:comb] record [
-  token_id                : token_id_t;
-  recipient               : address;
-  amount                  : nat;
-]
-
-type mint_params_t      is list(mint_param_t)
-
-type burn_params_t      is [@layout:comb] record [
+type mint_burn_params_t is [@layout:comb] record [
   token_id                : token_id_t;
   account                 : address;
   amount                  : nat;

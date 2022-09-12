@@ -37,31 +37,29 @@ function lock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of [
     | Wrapped(token_) -> {
-      const burn_params : burn_params_t = record[
+      const burn_params : mint_burn_params_t = record[
         token_id = token_.id;
         account = Tezos.sender;
         amount = locked_without_fee
       ];
-      const mint_params : mint_params_t = list[
-        record[
+      const mint_params : mint_burn_params_t = record[
           token_id = token_.id;
-          recipient = s.fee_collector;
+          account = s.fee_collector;
           amount = fee
-        ]
-      ];
+        ];
       operations := list[
         Tezos.transaction(
           burn_params,
           0mutez,
           unwrap(
-            (Tezos.get_entrypoint_opt("%burn", token_.address) : option(contract(burn_params_t))),
+            (Tezos.get_entrypoint_opt("%burn", token_.address) : option(contract(mint_burn_params_t))),
             Errors.burn_etp_404)
         );
         Tezos.transaction(
           mint_params,
           0mutez,
           unwrap(
-            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
+            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_burn_params_t))),
             Errors.mint_etp_404
           )
         );
@@ -142,33 +140,35 @@ function unlock_asset(
     var operations := Constants.no_operations;
     case asset.asset_type of [
     | Wrapped(token_) -> {
-      var mint_params : mint_params_t := list[
-        record[
-          token_id = token_.id;
-          recipient = params.recipient;
-          amount = unlocked_amount
-        ];
-      ];
-      if fee > 0n
-      then mint_params := record[
+      operations := Tezos.transaction(
+          record[
             token_id = token_.id;
-            recipient = s.fee_collector;
-            amount = fee
-        ] # mint_params
-      else skip;
-      operations := list[
-        Tezos.transaction(
-          mint_params,
+            account = params.recipient;
+            amount = unlocked_amount
+          ],
           0mutez,
           unwrap(
-            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_params_t))),
+            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_burn_params_t))),
             Errors.mint_etp_404
           )
-        )
-      ]
+        ) # operations;
+
+      if fee > 0n
+      then operations := Tezos.transaction(
+          record[
+            token_id = token_.id;
+            account = s.fee_collector;
+            amount = fee
+          ],
+          0mutez,
+          unwrap(
+            (Tezos.get_entrypoint_opt("%mint", token_.address) : option(contract(mint_burn_params_t))),
+            Errors.mint_etp_404
+          )
+        ) # operations
+      else skip;
      }
     | _ -> {
-
       operations := wrap_transfer(
         Tezos.self_address,
         params.recipient,

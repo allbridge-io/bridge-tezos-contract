@@ -1,30 +1,23 @@
 (* Perform minting new tokens *)
 function mint (
-  const params          : mint_params_t;
-  const s               : storage_t)
+  const params          : mint_burn_params_t;
+  var s                 : storage_t)
                         : storage_t is
   block {
     require(Tezos.sender = s.bridge, Errors.not_bridge);
+    require(params.token_id < s.token_count, Errors.fa2_token_undefined);
 
-    function make_mint(
-      var s             : storage_t;
-      const param       : mint_param_t)
-                        : storage_t is
-      block {
-        require(param.token_id < s.token_count, Errors.fa2_token_undefined);
+    const destination_key = (params.account, params.token_id);
+    const destination_balance = unwrap_or(s.ledger[destination_key], 0n);
 
-        const destination_key = (param.recipient, param.token_id);
-        const destination_balance = unwrap_or(s.ledger[destination_key], 0n);
+    (* Mint new tokens *)
+    s.ledger[destination_key] := destination_balance + params.amount;
 
-        (* Mint new tokens *)
-        s.ledger[destination_key] := destination_balance + param.amount;
+    const token_supply = unwrap_or(s.tokens_supply[params.token_id], 0n);
 
-        const token_supply = unwrap_or(s.tokens_supply[param.token_id], 0n);
-
-        (* Update token total supply *)
-        s.tokens_supply[param.token_id] := token_supply + param.amount;
-      } with s
-  } with (List.fold(make_mint, params, s))
+    (* Update token total supply *)
+    s.tokens_supply[params.token_id] := token_supply + params.amount;
+  } with s
 
 function create_token(
   const new_token       : new_token_t;
@@ -43,7 +36,7 @@ function create_token(
   } with s
 
 function burn(
-  const params          : burn_params_t;
+  const params          : mint_burn_params_t;
   var s                 : storage_t)
                         : storage_t is
   block {

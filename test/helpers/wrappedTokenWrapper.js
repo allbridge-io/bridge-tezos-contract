@@ -28,7 +28,7 @@ module.exports = class WrappedToken {
   }
   async mint(amount, tokenId, recipient) {
     const operation = await this.contract.methods
-      .mint([{ token_id: tokenId, recipient: recipient, amount: amount }])
+      .mint(tokenId, recipient, amount)
       .send();
     await confirmOperation(Tezos, operation.hash);
   }

@@ -119,24 +119,7 @@ describe("Wrapped token methods test", async function () {
       const balance = await token.getBalance(bob.pkh, 0);
       strictEqual(tokenSupply.toNumber(), 10000);
       strictEqual(balance, 10000);
-    });
-    it("Should allow batch mint tokens", async function () {
-      Tezos.setSignerProvider(signerBob);
-
-      const op = await token.contract.methods
-        .mint([
-          { token_id: 0, recipient: alice.pkh, amount: 10000 },
-          { token_id: 0, recipient: eve.pkh, amount: 10000 },
-        ])
-        .send();
-      await confirmOperation(Tezos, op.hash);
-      await token.updateStorage();
-      const tokenSupply = await token.storage.tokens_supply.get("0");
-      const aliceBalance = await token.getBalance(alice.pkh, "0");
-      const eveBalance = await token.getBalance(eve.pkh, "0");
-      strictEqual(tokenSupply.toNumber(), 30000);
-      strictEqual(aliceBalance, 10000);
-      strictEqual(eveBalance, 10000);
+      await token.mint(10000, 0, alice.pkh);
     });
   });
   describe("Testing entrypoint: Burn", async function () {
@@ -154,7 +137,7 @@ describe("Wrapped token methods test", async function () {
       await token.updateStorage();
       const tokenSupply = await token.storage.tokens_supply.get("0");
       const balance = await token.getBalance(bob.pkh, 0);
-      strictEqual(tokenSupply.toNumber(), 20000);
+      strictEqual(tokenSupply.toNumber(), 10000);
       strictEqual(balance, 0);
     });
     it("Shouldn't burn tokens if low balance", async function () {
