@@ -4,12 +4,14 @@
 #include "../partial/validator/validator_errors.ligo"
 #include "../partial/common_helpers.ligo"
 #include "../partial/validator/validator_helpers.ligo"
+#include "../partial/common_methods.ligo"
 #include "../partial/validator/validator_admin_methods.ligo"
 #include "../partial/validator/validator_methods.ligo"
 #include "../partial/validator/validator_views.ligo"
 
 type parameter_t        is
 | Change_owner          of address
+| Confirm_owner         of unit
 | Change_bridge         of address
 | Change_validator_pk   of key
 | Validate_lock         of validate_lock_t
@@ -21,6 +23,7 @@ function main(
                         : return_t is
   case action of [
   | Change_owner(params)        -> (Constants.no_operations, change_owner(params, s))
+  | Confirm_owner               -> (Constants.no_operations, confirm_owner(s))
   | Change_bridge(params)       -> (Constants.no_operations, change_bridge(params, s))
   | Change_validator_pk(params) -> (Constants.no_operations, change_validator_pk(params, s))
   | Validate_lock(params)       -> (Constants.no_operations, validate_lock(params, s))

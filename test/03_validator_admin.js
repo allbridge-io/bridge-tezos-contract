@@ -3,6 +3,7 @@ const { rejects, strictEqual } = require("assert");
 const Validator = require("./helpers/validatorWrapper");
 
 const { bob } = require("../scripts/sandbox/accounts");
+const { confirmOperation } = require("../scripts/confirmation");
 
 describe("Validator Admin tests", async function() {
   let validator;
@@ -24,11 +25,29 @@ describe("Validator Admin tests", async function() {
         return true;
       });
     });
-    it("Should allow change owner", async function() {
+    it("Should allow start transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
 
       await validator.сhangeAddress("change_owner", bob.pkh);
       await validator.updateStorage();
+      strictEqual(validator.storage.pending_owner, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint: Confirm_owner", async function () {
+    it("Shouldn't confirm owner if the user is not an pending owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(validator.contract.methods.confirm_owner().send(), err => {
+        strictEqual(err.message, "Validator-bridge/not-pending-owner");
+        return true;
+      });
+    });
+    it("Should allow confirm transfer ownership", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      const op = await validator.contract.methods.confirm_owner().send();
+      await confirmOperation(Tezos, op.hash);
+      await validator.updateStorage();
+
       strictEqual(validator.storage.owner, bob.pkh);
     });
   });

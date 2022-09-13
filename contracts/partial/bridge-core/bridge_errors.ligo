@@ -1,6 +1,7 @@
 module Errors is {
   (* Permission erros *)
   const not_owner               : string = "Bridge-core/not-owner";
+  const not_pending_owner       : string = "Bridge-core/not-pending-owner";
   const not_manager             : string = "Bridge-core/not-manager";
   (* Asset/token erros*)
   const bridge_disabled         : string = "Bridge-core/bridge-disabled";
