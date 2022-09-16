@@ -17,13 +17,11 @@ module.exports = {
       syncInterval: 0,
       confirmTimeout: 5000,
     },
-    ithaca: {
-      rpc: "https://ithacanet.ecadinfra.com/",
+    ghostnet: {
+      rpc: "https://rpc.ghostnet.teztnets.xyz",
       port: 443,
       network_id: "*",
       secretKey: dev.sk,
-      syncInterval: 10000,
-      confirmTimeout: 60000,
     },
     mainnet: {
       rpc: "https://mainnet.smartpy.io",
