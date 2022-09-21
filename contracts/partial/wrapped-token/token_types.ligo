@@ -31,6 +31,7 @@ type storage_t          is [@layout:comb] record [
   token_ids               : token_ids_map_t;
   metadata                : big_map(string, bytes);
   token_metadata          : big_map(token_id_t, token_metadata_t);
+  paused                  : bool;
 ]
 
 type return_t           is list(operation) * storage_t

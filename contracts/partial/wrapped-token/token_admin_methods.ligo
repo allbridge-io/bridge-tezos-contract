@@ -15,3 +15,11 @@ function change_bridge(
     require(Tezos.sender = s.owner, Errors.not_owner);
     s.bridge := new_address;
   } with s
+
+function toggle_pause(
+  var s                 : storage_t)
+                        : storage_t is
+  block {
+    require(Tezos.sender = s.owner, Errors.not_owner);
+    s.paused := not s.paused;
+  } with s

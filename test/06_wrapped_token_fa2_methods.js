@@ -40,6 +40,18 @@ describe("Wrapped token FA2 methods test", async function () {
   });
   describe("Scope: Test Transfer entrypoint", async function () {
     describe("Scenario 1: Shouldn't Transfer cases", async function () {
+      it("Shouldn't transfer if token is paused", async function () {
+        Tezos.setSignerProvider(signerAlice);
+        await token.togglePause();
+        await rejects(
+          token.transfer(bob.pkh, alice.pkh, 999999 * 10 ** 9),
+          err => {
+            strictEqual(err.message, "Wrapped-token/contract-paused");
+            return true;
+          },
+        );
+        await token.togglePause();
+      });
       it("Shouldn't Transfer if not operator or owner", async function () {
         Tezos.setSignerProvider(signerAlice);
 

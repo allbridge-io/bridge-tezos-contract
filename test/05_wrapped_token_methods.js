@@ -63,6 +63,22 @@ describe("Wrapped token methods test", async function () {
       strictEqual(token.storage.bridge, bob.pkh);
     });
   });
+  describe("Testing entrypoint Toggle_pause", async function () {
+    it("Shouldn't toggle pause if the user is not an owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(token.togglePause(), err => {
+        strictEqual(err.message, "NOT_ADMIN");
+        return true;
+      });
+    });
+    it("Should allow toggle pause", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      await token.togglePause();
+      await token.updateStorage();
+      strictEqual(token.storage.paused, true);
+    });
+  });
   describe("Testing entrypoint: Create_token", async function () {
     it("Shouldn't create_token if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
@@ -110,9 +126,15 @@ describe("Wrapped token methods test", async function () {
         return true;
       });
     });
-    it("Should allow mint tokens", async function () {
+    it("Shouldn't mint token if token is paused", async function () {
       Tezos.setSignerProvider(signerBob);
-
+      await rejects(token.mint(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "Wrapped-token/contract-paused");
+        return true;
+      });
+      await token.togglePause();
+    });
+    it("Should allow mint tokens", async function () {
       await token.mint(10000, 0, bob.pkh);
       await token.updateStorage();
       const tokenSupply = await token.storage.tokens_supply.get("0");
@@ -129,6 +151,15 @@ describe("Wrapped token methods test", async function () {
         strictEqual(err.message, "Wrapped-token/not-bridge");
         return true;
       });
+    });
+    it("Shouldn't burn token if token is paused", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await token.togglePause();
+      await rejects(token.burn(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "Wrapped-token/contract-paused");
+        return true;
+      });
+      await token.togglePause();
     });
     it("Should allow burn tokens", async function () {
       Tezos.setSignerProvider(signerBob);

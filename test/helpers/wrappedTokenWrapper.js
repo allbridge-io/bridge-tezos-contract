@@ -44,6 +44,10 @@ module.exports = class WrappedToken {
     });
     await confirmOperation(Tezos, operation.hash);
   }
+  async togglePause() {
+    const operation = await this.contract.methods.toggle_pause().send();
+    await confirmOperation(Tezos, operation.hash);
+  }
   async updateOperator(action, owner, operator, tokenId = 0) {
     const operation = await this.contract.methods
       .update_operators([

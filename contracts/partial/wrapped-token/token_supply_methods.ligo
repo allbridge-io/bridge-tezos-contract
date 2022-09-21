@@ -6,6 +6,7 @@ function mint (
   block {
     require(Tezos.sender = s.bridge, Errors.not_bridge);
     require(params.token_id < s.token_count, Errors.fa2_token_undefined);
+    require(not(s.paused), Errors.contract_paused);
 
     const destination_key = (params.account, params.token_id);
     const destination_balance = unwrap_or(s.ledger[destination_key], 0n);
@@ -41,6 +42,7 @@ function burn(
                         : storage_t is
   block {
     require(Tezos.sender = s.bridge, Errors.not_bridge);
+    require(not(s.paused), Errors.contract_paused);
 
     const token_supply = unwrap(s.tokens_supply[params.token_id], Errors.token_undefined);
     s.tokens_supply[params.token_id] := get_nat_or_fail(token_supply - params.amount, Errors.not_nat);

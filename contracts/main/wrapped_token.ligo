@@ -12,6 +12,7 @@
 
 type action_t           is
 | Change_owner            of address
+| Toggle_pause            of unit
 | Change_bridge           of address
 | Create_token            of new_token_t
 | Mint                    of mint_burn_params_t
@@ -28,6 +29,7 @@ function main(
     require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
   } with case action of [
     | Change_owner(params)      -> (Constants.no_operations, change_owner(params, s))
+    | Toggle_pause              -> (Constants.no_operations, toggle_pause(s))
     | Change_bridge(params)     -> (Constants.no_operations, change_bridge(params, s))
     | Create_token(params)      -> (Constants.no_operations, create_token(params, s))
     | Mint(params)              -> (Constants.no_operations, mint(params, s))

@@ -4,7 +4,7 @@ function iterate_transfer (
   const trx_params      : transfer_param_t)
                         : storage_t is
   block {
-
+    require(not(s.paused), Errors.contract_paused);
     (* Perform single transfer *)
     function make_transfer(
       var s             : storage_t;
