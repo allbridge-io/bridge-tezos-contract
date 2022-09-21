@@ -122,6 +122,8 @@ function unlock_asset(
 
     require(s.enabled, Errors.bridge_disabled);
     require(asset.enabled, Errors.asset_disabled);
+    require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
+
     const amount_ = from_system_precision(params.amount, asset.precision);
     const fee = if s.approved_claimer = Tezos.sender
       then get_min_fee(asset.asset_type, s.fee_oracle)
@@ -131,10 +133,7 @@ function unlock_asset(
 
     case asset.asset_type of [
     | Tez -> require(unlocked_amount > 0n, Errors.zero_unlocked_tez)
-    | _ -> {
-        require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
-        require(unlocked_amount > 0n, Errors.zero_transfer)
-      }
+    | _ -> require(unlocked_amount > 0n, Errors.zero_transfer)
     ];
 
     var operations := Constants.no_operations;
