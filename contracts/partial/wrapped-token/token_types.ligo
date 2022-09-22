@@ -22,6 +22,7 @@ type token_metadata_t   is [@layout:comb] record [
 
 type storage_t          is [@layout:comb] record [
   owner                   : address;
+  pending_owner           : option(address);
   bridge                  : address;
   ledger                  : ledger_t;
   allowances              : allowances_t;

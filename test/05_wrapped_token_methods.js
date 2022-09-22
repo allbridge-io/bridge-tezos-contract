@@ -39,14 +39,33 @@ describe("Wrapped token methods test", async function () {
         return true;
       });
     });
-    it("Should allow change owner", async function () {
+    it("Should allow start transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
 
       await token.сhangeAddress("change_owner", bob.pkh);
       await token.updateStorage();
+      strictEqual(token.storage.pending_owner, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint: Confirm_owner", async function () {
+    it("Shouldn't confirm owner if the user is not an pending owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(token.contract.methods.confirm_owner().send(), err => {
+        strictEqual(err.message, "NOT_PENDING_ADMIN");
+        return true;
+      });
+    });
+    it("Should allow confirm transfer ownership", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      const op = await token.contract.methods.confirm_owner().send();
+      await confirmOperation(Tezos, op.hash);
+      await token.updateStorage();
+
       strictEqual(token.storage.owner, bob.pkh);
     });
   });
+
   describe("Testing entrypoint: Change_bridge", async function () {
     it("Shouldn't changing bridge if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);

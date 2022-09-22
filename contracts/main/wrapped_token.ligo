@@ -5,6 +5,7 @@
 #include "../partial/wrapped-token/token_types.ligo"
 #include "../partial/common_constants.ligo"
 #include "../partial/wrapped-token/token_errors.ligo"
+#include "../partial/common_methods.ligo"
 #include "../partial/wrapped-token/token_admin_methods.ligo"
 #include "../partial/wrapped-token/token_supply_methods.ligo"
 #include "../partial/wrapped-token/token_fa2_methods.ligo"
@@ -12,6 +13,7 @@
 
 type action_t           is
 | Change_owner            of address
+| Confirm_owner           of unit
 | Toggle_pause            of unit
 | Change_bridge           of address
 | Create_token            of new_token_t
@@ -29,6 +31,7 @@ function main(
     require(Tezos.amount = 0mutez, Errors.unexpected_xtz_amount);
   } with case action of [
     | Change_owner(params)      -> (Constants.no_operations, change_owner(params, s))
+    | Confirm_owner             -> (Constants.no_operations, confirm_owner(s))
     | Toggle_pause              -> (Constants.no_operations, toggle_pause(s))
     | Change_bridge(params)     -> (Constants.no_operations, change_bridge(params, s))
     | Create_token(params)      -> (Constants.no_operations, create_token(params, s))
