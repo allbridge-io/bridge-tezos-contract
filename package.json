@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Bridge",
   "dependencies": {
-    "@taquito/signer": "11.0.1",
-    "@taquito/taquito": "11.0.1",
-    "@taquito/tzip16": "11.0.1",
+    "@taquito/signer": "11.2.0",
+    "@taquito/taquito": "11.2.0",
+    "@taquito/tzip16": "11.2.0",
     "dotenv": "10.0.0",
     "fs": "0.0.2",
     "keccak256": "1.0.3",
@@ -13,7 +13,7 @@
     "yargs": "17.0.1"
   },
   "engines": {
-    "yarn": "^1.22.10"
+    "yarn": "1.22.19"
   },
   "scripts": {
     "clean": "rm -rf ./builds",
