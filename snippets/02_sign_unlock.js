@@ -12,7 +12,8 @@ const { Parser, packDataBytes } = require("@taquito/michel-codec");
 const keccak256 = require("keccak256");
 
 const params = {
-  assetType: "fa12",
+  tokenSource: "1042",
+  tokenSourceAddress: "FfF456cc8990D78591e6689DC5B185F99ee66e13",
   lockId: "01ffffffffffffffffffffffffffff00",
   recipient: "tz1VSUr8wwNhLAzempoch5d6hLRiTh8Cjcjb",
   chainFromId: 3536,
@@ -22,44 +23,26 @@ const params = {
 
 async function sign() {
   const parser = new Parser();
-  const type = `(pair (bytes %lock_id)
-          (pair (address %recipient)
-                (pair (nat %amount)
-                      (pair (bytes %chain_from_id)
-                            (or %asset
-                               (or (address %fa12_) (pair %fa2_ (address %address) (nat %id)))
-                               (or (unit %tez_) (pair %wrapped_ (address %address) (nat %id))))))))`;
-  let data;
-  switch (params.assetType) {
-    case "fa12":
-      data = `(Pair 0x${params.lockId}
+  const type = `
+        (pair (bytes %lock_id)
+          (address %recipient)
+          (nat %amount)
+          (bytes %chain_from_id)
+          (bytes %token_source)
+          (bytes %token_source_address)
+          (bytes %blockchain_id)
+          (string %operation_type)
+        )`;
+  let data = `
+    (Pair 0x${params.lockId}
       "${params.recipient}"
       ${params.amount}
       0x${params.chainFromId}
-      (Left (Left "${params.tokenAddress}")))`;
-      break;
-    case "fa2":
-      data = `(Pair 0x${params.lockId}
-      "${params.recipient}"
-      ${params.amount}
-      0x${params.chainFromId}
-      (Left (Right (Pair "${params.tokenAddress}" ${params.tokenId}))))`;
-      break;
-    case "tez":
-      data = `(Pair 0x${params.lockId}
-      "${params.recipient}"
-      ${params.amount}
-      0x${params.chainFromId}
-      (Right (Left Unit)))`;
-      break;
-    case "wrapped":
-      data = `(Pair 0x${params.lockId}
-      "${params.recipient}"
-      ${params.amount}
-      0x${params.chainFromId}
-      (Right (Right (Pair "${params.tokenAddress}" ${params.tokenId}))))`;
-      break;
-  }
+      0x${params.tokenSource}
+      0x${params.tokenSourceAddress}
+      0x${params.blockchainId}
+      "unlock")`;
+
   const dataJSON = parser.parseMichelineExpression(data);
   const typeJSON = parser.parseMichelineExpression(type);
 
