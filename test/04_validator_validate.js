@@ -10,7 +10,7 @@ const Validator = require("./helpers/validatorWrapper");
 const { alice, bob } = require("../scripts/sandbox/accounts");
 const toBytes = require("../scripts/toBytesForSign");
 
-describe("BridgeValidator Validate tests", async function() {
+describe("BridgeValidator Validate tests", async function () {
   let validator;
 
   const bscChainId = "11223344";
@@ -35,8 +35,8 @@ describe("BridgeValidator Validate tests", async function() {
     }
   });
 
-  describe("Testing entrypoint: Validate_lock", async function() {
-    it("Shouldn't validate if sender is not bridge-contract", async function() {
+  describe("Testing entrypoint: Validate_lock", async function () {
+    it("Shouldn't validate if sender is not bridge-contract", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(
         validator.validateLock(
@@ -54,7 +54,7 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Shouldn't validate if the destination chain id is tezos chain id", async function() {
+    it("Shouldn't validate if the destination chain id is tezos chain id", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         validator.validateLock(
@@ -75,7 +75,7 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Shouldn't validate if the recipient wrong recipient", async function() {
+    it("Shouldn't validate if the recipient wrong recipient", async function () {
       Tezos.setSignerProvider(signerAlice);
       await rejects(
         validator.validateLock(
@@ -93,7 +93,43 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Should validate lock fa12 asset", async function() {
+    it("Shouldn't validate if invalid lock_id wrong length", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(
+        validator.validateLock(
+          "01ffffffffffffffffffffffffff10",
+          bob.pkh,
+          recipient,
+          10000,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          bscChainId,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-id-length");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't validate if invalid lock version", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(
+        validator.validateLock(
+          "02ffffffffffffffffffffffffffff00",
+          bob.pkh,
+          recipient,
+          10000,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          bscChainId,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-version");
+          return true;
+        },
+      );
+    });
+    it("Should validate lock fa12 asset", async function () {
       const lockAmount = 10000;
 
       await validator.validateLock(
@@ -111,7 +147,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newLock, undefined);
     });
-    it("Should validate lock fa2 asset", async function() {
+    it("Should validate lock fa2 asset", async function () {
       const lockAmount = 10000;
 
       await validator.validateLock(
@@ -129,7 +165,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newLock, undefined);
     });
-    it("Should validate lock tez asset", async function() {
+    it("Should validate lock tez asset", async function () {
       const lockAmount = 10000;
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff02",
@@ -146,7 +182,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newLock, undefined);
     });
-    it("Should validate lock wrapped asset", async function() {
+    it("Should validate lock wrapped asset", async function () {
       const lockAmount = 10000;
       await validator.validateLock(
         "01ffffffffffffffffffffffffffff03",
@@ -163,7 +199,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newLock, undefined);
     });
-    it("Shouldn't validate if lock is validated", async function() {
+    it("Shouldn't validate if lock is validated", async function () {
       await rejects(
         validator.validateLock(
           "01ffffffffffffffffffffffffffff00",
@@ -181,8 +217,8 @@ describe("BridgeValidator Validate tests", async function() {
       );
     });
   });
-  describe("Testing entrypoint: Validate_unlock", async function() {
-    it("Shouldn't validate if sender is not bridge-contract", async function() {
+  describe("Testing entrypoint: Validate_unlock", async function () {
+    it("Shouldn't validate if sender is not bridge-contract", async function () {
       Tezos.setSignerProvider(signerBob);
       const signature = await signerAlice.sign(
         Buffer.from("dasdsa", "ascii").toString("hex"),
@@ -203,7 +239,7 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Shouldn't validate if signature is not validated", async function() {
+    it("Shouldn't validate if signature is not validated", async function () {
       Tezos.setSignerProvider(signerAlice);
       const signature = await signerAlice.sign(
         Buffer.from("dasdsa", "ascii").toString("hex"),
@@ -224,7 +260,7 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Shouldn't validate if signer is unknown", async function() {
+    it("Shouldn't validate if signer is unknown", async function () {
       Tezos.setSignerProvider(signerAlice);
       const keccakBytes = toBytes({
         lockId: "01ffffffffffffffffffffffffffff00",
@@ -252,7 +288,63 @@ describe("BridgeValidator Validate tests", async function() {
         },
       );
     });
-    it("Should validate unlock fa12 asset", async function() {
+    it("Shouldn't validate if invalid lock_id length", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: 1000,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerBob.sign(keccakBytes);
+      await rejects(
+        validator.validateUnlock(
+          "01ffffffffffffffffffffffffff00",
+          alice.pkh,
+          1000,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-id-length");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't validate if invalid lock version", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const keccakBytes = toBytes({
+        lockId: "02ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: 1000,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerBob.sign(keccakBytes);
+      await rejects(
+        validator.validateUnlock(
+          "02ffffffffffffffffffffffffffff00",
+          alice.pkh,
+          1000,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Validator-bridge/wrong-lock-version");
+          return true;
+        },
+      );
+    });
+    it("Should validate unlock fa12 asset", async function () {
       Tezos.setSignerProvider(signerAlice);
       const unlockAmount = 10000;
       const keccakBytes = toBytes({
@@ -285,7 +377,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newUnlock, undefined);
     });
-    it("Should validate unlock fa2 asset", async function() {
+    it("Should validate unlock fa2 asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = toBytes({
         lockId: "01ffffffffffffffffffffffffffff01",
@@ -317,7 +409,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newUnlock, undefined);
     });
-    it("Should validate unlock tez asset", async function() {
+    it("Should validate unlock tez asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = await toBytes({
         lockId: "01ffffffffffffffffffffffffffff02",
@@ -349,7 +441,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newUnlock, undefined);
     });
-    it("Should validate unlock wrapped asset", async function() {
+    it("Should validate unlock wrapped asset", async function () {
       const unlockAmount = 10000;
       const keccakBytes = await toBytes({
         lockId: "01ffffffffffffffffffffffffffff03",
@@ -381,7 +473,7 @@ describe("BridgeValidator Validate tests", async function() {
       );
       notStrictEqual(newUnlock, undefined);
     });
-    it("Should validate unlock if the lock ID is repeated, but the original blockchain is different", async function() {
+    it("Should validate unlock if the lock ID is repeated, but the original blockchain is different", async function () {
       const unlockAmount = 10000;
       const ethChainId = "11001122";
       const keccakBytes = toBytes({
@@ -415,7 +507,7 @@ describe("BridgeValidator Validate tests", async function() {
       notStrictEqual(newUnlock, undefined);
     });
 
-    it("Shouldn't validate if unlock is validated", async function() {
+    it("Shouldn't validate if unlock is validated", async function () {
       const signature = await signerSecp.sign(
         Buffer.from("dasdsa", "ascii").toString("hex"),
       );
@@ -434,6 +526,59 @@ describe("BridgeValidator Validate tests", async function() {
           return true;
         },
       );
+    });
+  });
+  describe("Testing view entrypoint: Validate_signature", async function () {
+    it("Should return validate true", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      const unlockAmount = 10000;
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const response = await validator.callView("validate_signature", {
+        lock_id: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chain_from_id: bscChainId,
+        token_source: fa12Source.chain_id,
+        token_source_address: fa12Source.native_address,
+        signature: signature.sig,
+      });
+
+      strictEqual(response, true);
+    });
+    it("Should return validate false", async function () {
+      const unlockAmount = 10000;
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff01",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa2Source.chain_id,
+        tokenSourceAddress: fa2Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const response = await validator.callView("validate_signature", {
+        lock_id: "01ffffffffffffffffffffffffffff10",
+        recipient: bob.pkh,
+        amount: unlockAmount,
+        chain_from_id: bscChainId,
+        token_source: fa12Source.chain_id,
+        token_source_address: fa12Source.native_address,
+        signature: signature.sig,
+      });
+
+      strictEqual(response, false);
     });
   });
 });

@@ -1,20 +1,10 @@
-function change_owner(
-  const new_address     : address;
-  var s                 : storage_t)
-                        : storage_t is
-  block {
-    check_permission(s.owner, Errors.not_owner);
-    s.owner := new_address;
-  } with s
-
 function change_bridge(
   const new_address     : address;
   var s                 : storage_t)
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.bridge := new_address;
-  } with s
+  } with s with record[bridge = new_address]
 
 (* Change validator public key entrypoint *)
 function change_validator_pk(
@@ -23,5 +13,4 @@ function change_validator_pk(
                         : storage_t is
   block {
     check_permission(s.owner, Errors.not_owner);
-    s.validator_pk := new_key;
-  } with s
+  } with s with record[validator_pk = new_key]

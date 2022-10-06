@@ -67,7 +67,7 @@ describe("BridgeCore Exchange tests", async function () {
           name: Buffer.from("Wrapped ABR").toString("hex"),
           decimals: Buffer.from("6").toString("hex"),
           icon: Buffer.from("").toString("hex"),
-        })
+        }),
       );
 
       const fa12Asset = {
@@ -133,7 +133,7 @@ describe("BridgeCore Exchange tests", async function () {
         bridge.address,
         10000 * fa2Precision,
         alice.pkh,
-        fa2Token.tokenId
+        fa2Token.tokenId,
       );
       const keccakBytes1 = toBytes({
         lockId: "01ffffffffffffffffffffffffffff24",
@@ -153,7 +153,7 @@ describe("BridgeCore Exchange tests", async function () {
         wrappedSource.native_address,
         10000 * wrappedPrecision,
         alice.pkh,
-        signature1.sig
+        signature1.sig,
       );
 
       const keccakBytes2 = toBytes({
@@ -174,7 +174,7 @@ describe("BridgeCore Exchange tests", async function () {
         wrappedSource.native_address,
         10000 * wrappedPrecision,
         secpSigner.pkh,
-        signature2.sig
+        signature2.sig,
       );
     } catch (e) {
       console.log(e);
@@ -182,13 +182,29 @@ describe("BridgeCore Exchange tests", async function () {
   });
 
   describe("Testing entrypoint: Lock_asset", async function () {
+    it("Shouldn't lock if transfer amount 0", async function () {
+      await rejects(
+        bridge.lockAsset(
+          bscChainId,
+          "01ffffffffffffffffffffffffffff53",
+          wrappedSource.chain_id,
+          wrappedSource.native_address,
+          0,
+          bscAddress,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/zero-transfer");
+          return true;
+        },
+      );
+    });
     it("Should lock fa12 asset", async function () {
       const lockAmount = 10000 * precision;
       const fee = calculateFee(lockAmount);
       const prevAsset = await bridge.storage.bridge_assets.get(fa12AssetId);
       const prevBridgeBalance = await fa12Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa12Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lockId = "01ffffffffffffffffffffffffffff00";
       await bridge.lockAsset(
@@ -197,13 +213,13 @@ describe("BridgeCore Exchange tests", async function () {
         fa12Source.chain_id,
         fa12Source.native_address,
         lockAmount,
-        bscAddress
+        bscAddress,
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(fa12AssetId);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
       const feeCollectorBalance = await fa12Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lock = await bridge.validator.storage.validated_locks.get(lockId);
       strictEqual(lock.amount.toNumber(), lockAmount * 1000 - fee * 1000);
@@ -216,7 +232,7 @@ describe("BridgeCore Exchange tests", async function () {
       const prevAsset = await bridge.storage.bridge_assets.get(fa2AssetId);
       const prevBridgeBalance = await fa2Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa2Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lockId = "01ffffffffffffffffffffffffffff01";
       await bridge.lockAsset(
@@ -225,18 +241,18 @@ describe("BridgeCore Exchange tests", async function () {
         fa2Source.chain_id,
         fa2Source.native_address,
         lockAmount,
-        bscAddress
+        bscAddress,
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(fa2AssetId);
       const bridgeBalance = await fa2Token.getBalance(bridge.address);
       const feeCollectorBalance = await fa2Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lock = await bridge.validator.storage.validated_locks.get(lockId);
       strictEqual(
         lock.amount.toNumber(),
-        Math.floor(lockAmount / 1000 - fee / 1000)
+        Math.floor(lockAmount / 1000 - fee / 1000),
       );
       strictEqual(bridgeBalance, prevBridgeBalance + lockAmount - fee);
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
@@ -247,12 +263,12 @@ describe("BridgeCore Exchange tests", async function () {
       const prevAsset = await bridge.storage.bridge_assets.get(tezAssetId);
       const prevBridgeBalance = await Tezos.tz
         .getBalance(bridge.address)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       const prevFeeCollectorBalance = await Tezos.tz
         .getBalance(bridge.storage.fee_collector)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       const lockId = "01ffffffffffffffffffffffffffff02";
       await bridge.lockAsset(
         bscChainId,
@@ -261,23 +277,23 @@ describe("BridgeCore Exchange tests", async function () {
         tezSource.native_address,
         100000000,
         bscAddress,
-        lockAmount
+        lockAmount,
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(tezAssetId);
       const lock = await bridge.validator.storage.validated_locks.get(lockId);
       const bridgeBalance = await Tezos.tz
         .getBalance(bridge.address)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       const feeCollectorBalance = await Tezos.tz
         .getBalance(bridge.storage.fee_collector)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       strictEqual(lock.amount.toNumber(), lockAmount * 1e6 * 1000 - fee * 1000);
       strictEqual(
         bridgeBalance,
-        prevBridgeBalance + lockAmount * 10 ** 6 - fee
+        prevBridgeBalance + lockAmount * 10 ** 6 - fee,
       );
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
     });
@@ -292,7 +308,7 @@ describe("BridgeCore Exchange tests", async function () {
       const prevAliceBalance = await bridge.wrappedToken.getBalance(alice.pkh);
 
       const prevFeeCollectorBalance = await bridge.wrappedToken.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       await bridge.lockAsset(
         bscChainId,
@@ -300,14 +316,14 @@ describe("BridgeCore Exchange tests", async function () {
         wrappedSource.chain_id,
         wrappedSource.native_address,
         lockAmount,
-        bscAddress
+        bscAddress,
       );
       await bridge.updateStorage();
       const asset = await bridge.storage.bridge_assets.get(wrappedAssetId);
 
       const aliceBalance = await bridge.wrappedToken.getBalance(alice.pkh);
       const feeCollectorBalance = await bridge.wrappedToken.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lock = await bridge.validator.storage.validated_locks.get(lockId);
       strictEqual(lock.amount.toNumber(), lockAmount - fee);
@@ -322,16 +338,167 @@ describe("BridgeCore Exchange tests", async function () {
           wrappedSource.chain_id,
           wrappedSource.native_address,
           6000 * wrappedPrecision,
-          bscAddress
+          bscAddress,
         ),
-        (err) => {
+        err => {
           strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
           return true;
-        }
+        },
       );
     });
   });
   describe("Testing entrypoint: Unlock_asset", async function () {
+    it("Shouldn't unlock tez asset if zero unlocked tez", async function () {
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "tez",
+        fee: 5 * 10 ** 6,
+      });
+      Tezos.setSignerProvider(signerSecp);
+      const unlockAmount = 5 * wrappedPrecision;
+
+      const lockId = "01ffffffffffffffffffffffffffff02";
+      const keccakBytes = toBytes({
+        lockId: lockId,
+        recipient: eve.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: tezSource.chain_id,
+        tokenSourceAddress: tezSource.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerSecp.sign(keccakBytes);
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          tezSource.chain_id,
+          tezSource.native_address,
+          unlockAmount,
+          eve.pkh,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/zero-unlocked-tez");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't unlock if transfer amount less than fee", async function () {
+      Tezos.setSignerProvider(signerSecp);
+      const unlockAmount = 0;
+
+      const lockId = "01ffffffffffffffffffffffffffff02";
+      const keccakBytes = toBytes({
+        lockId: lockId,
+        recipient: eve.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: tezSource.chain_id,
+        tokenSourceAddress: tezSource.native_address,
+        blockchainId: tezosChainId,
+      });
+      const signature = await signerSecp.sign(keccakBytes);
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          tezSource.chain_id,
+          tezSource.native_address,
+          unlockAmount,
+          eve.pkh,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/amount-too-low");
+          return true;
+        },
+      );
+    });
+    it("Shouldn't unlock if transfer amount 0", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa12",
+        tokenAddress: fa12Token.address,
+        fee: 0,
+      });
+      Tezos.setSignerProvider(signerSecp);
+      const unlockAmount = 0;
+
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const lockId = "01ffffffffffffffffffffffffffff00";
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          unlockAmount,
+          alice.pkh,
+          signature.sig,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/zero-transfer");
+          return true;
+        },
+      );
+      Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "fa12",
+        tokenAddress: fa12Token.address,
+        fee: 1,
+      });
+    });
+    it("Shouldn't unlock if the xtz amount was transferred not for the xtz asset", async function () {
+      Tezos.setSignerProvider(signerSecp);
+
+      const unlockAmount = 5000 * wrappedPrecision;
+      const fee = 1;
+
+      const prevAliceBalance = await fa12Token.getBalance(alice.pkh);
+      const prevBridgeBalance = await fa12Token.getBalance(bridge.address);
+      const prevFeeCollectorBalance = await fa12Token.getBalance(
+        bridge.storage.fee_collector,
+      );
+      const keccakBytes = toBytes({
+        lockId: "01ffffffffffffffffffffffffffff00",
+        recipient: alice.pkh,
+        amount: unlockAmount,
+        chainFromId: bscChainId,
+        tokenSource: fa12Source.chain_id,
+        tokenSourceAddress: fa12Source.native_address,
+        blockchainId: tezosChainId,
+      });
+
+      const signature = await signerSecp.sign(keccakBytes);
+      const lockId = "01ffffffffffffffffffffffffffff00";
+
+      await rejects(
+        bridge.unlockAsset(
+          lockId,
+          bscChainId,
+          fa12Source.chain_id,
+          fa12Source.native_address,
+          unlockAmount,
+          alice.pkh,
+          signature.sig,
+          1,
+        ),
+        err => {
+          strictEqual(err.message, "Bridge-core/unexpected-xtz-amount");
+          return true;
+        },
+      );
+    });
     it("Should unlock fa12 asset with fee", async function () {
       Tezos.setSignerProvider(signerSecp);
 
@@ -341,7 +508,7 @@ describe("BridgeCore Exchange tests", async function () {
       const prevAliceBalance = await fa12Token.getBalance(alice.pkh);
       const prevBridgeBalance = await fa12Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa12Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const keccakBytes = toBytes({
         lockId: "01ffffffffffffffffffffffffffff00",
@@ -362,20 +529,20 @@ describe("BridgeCore Exchange tests", async function () {
         fa12Source.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const aliceBalance = await fa12Token.getBalance(alice.pkh);
       const bridgeBalance = await fa12Token.getBalance(bridge.address);
       const feeCollectorBalance = await fa12Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const unlockKey = {
         chain: bscChainId,
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       const fromPrecUnlockAmount = Math.ceil(unlockAmount / 1000);
       strictEqual(unlock.amount.toNumber(), unlockAmount);
@@ -389,7 +556,7 @@ describe("BridgeCore Exchange tests", async function () {
       const prevAliceBalance = await fa2Token.getBalance(alice.pkh);
       const prevBridgeBalance = await fa2Token.getBalance(bridge.address);
       const prevFeeCollectorBalance = await fa2Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const lockId = "01ffffffffffffffffffffffffffff01";
       const keccakBytes = toBytes({
@@ -410,20 +577,20 @@ describe("BridgeCore Exchange tests", async function () {
         fa2Source.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const aliceBalance = await fa2Token.getBalance(alice.pkh);
       const bridgeBalance = await fa2Token.getBalance(bridge.address);
       const feeCollectorBalance = await fa2Token.getBalance(
-        bridge.storage.fee_collector
+        bridge.storage.fee_collector,
       );
       const unlockKey = {
         chain: bscChainId,
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       const fromPrecUnlockAmount = unlockAmount * 1000;
       strictEqual(unlock.amount.toNumber(), unlockAmount);
@@ -432,9 +599,15 @@ describe("BridgeCore Exchange tests", async function () {
       strictEqual(feeCollectorBalance, prevFeeCollectorBalance + fee);
     });
     it("Should unlock tez asset with fee", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await bridge.feeOracle.сhangeFee("change_token_fee", {
+        tokenType: "tez",
+        fee: 1 * 10 ** 6,
+      });
+      await bridge.сhangeAddress("change_fee_collector", alice.pkh);
+      await bridge.updateStorage();
       Tezos.setSignerProvider(signerSecp);
       const unlockAmount = 5 * wrappedPrecision;
-      //TODO: Fee is not accounted for here
 
       const lockId = "01ffffffffffffffffffffffffffff02";
       const keccakBytes = toBytes({
@@ -449,8 +622,12 @@ describe("BridgeCore Exchange tests", async function () {
       const signature = await signerSecp.sign(keccakBytes);
       const prevEveBalance = await Tezos.tz
         .getBalance(eve.pkh)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+      const prevFeeBalance = await Tezos.tz
+        .getBalance(bridge.storage.fee_collector)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
 
       await bridge.unlockAsset(
         lockId,
@@ -459,22 +636,36 @@ describe("BridgeCore Exchange tests", async function () {
         tezSource.native_address,
         unlockAmount,
         eve.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
+      const feeBalance = await Tezos.tz
+        .getBalance(bridge.storage.fee_collector)
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
+      const fee = feeBalance - prevFeeBalance;
       const eveBalance = await Tezos.tz
         .getBalance(eve.pkh)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       const unlockKey = {
         chain: bscChainId,
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
-      strictEqual(eveBalance, prevEveBalance + Math.ceil(unlockAmount / 1000));
+      strictEqual(feeBalance > prevFeeBalance, true);
+      strictEqual(
+        eveBalance,
+        prevEveBalance + Math.ceil(unlockAmount / 1000) - fee,
+      );
+
+      Tezos.setSignerProvider(signerAlice);
+
+      await bridge.сhangeAddress("change_fee_collector", eve.pkh);
+      await bridge.updateStorage();
     });
     it("Should unlock wrapped asset with fee", async function () {
       Tezos.setSignerProvider(signerSecp);
@@ -493,11 +684,11 @@ describe("BridgeCore Exchange tests", async function () {
       const signature = await signerSecp.sign(keccakBytes);
       const prevAliceBalance = await bridge.wrappedToken.getBalance(
         alice.pkh,
-        0
+        0,
       );
       const prevFeeCollectorBalance = await bridge.wrappedToken.getBalance(
         bridge.storage.fee_collector,
-        0
+        0,
       );
       await bridge.unlockAsset(
         lockId,
@@ -506,20 +697,20 @@ describe("BridgeCore Exchange tests", async function () {
         wrappedSource.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const aliceBalance = await bridge.wrappedToken.getBalance(alice.pkh, 0);
       const feeCollectorBalance = await bridge.wrappedToken.getBalance(
         bridge.storage.fee_collector,
-        0
+        0,
       );
       const unlockKey = {
         chain: bscChainId,
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount - fee);
@@ -549,7 +740,7 @@ describe("BridgeCore Exchange tests", async function () {
         fa12Source.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
 
       await bridge.updateStorage();
@@ -560,16 +751,16 @@ describe("BridgeCore Exchange tests", async function () {
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(
         bridgeBalance,
-        prevBridgeBalance - Math.ceil(unlockAmount / 1000)
+        prevBridgeBalance - Math.ceil(unlockAmount / 1000),
       );
       strictEqual(
         aliceBalance,
-        prevAliceBalance + Math.ceil(unlockAmount / 1000)
+        prevAliceBalance + Math.ceil(unlockAmount / 1000),
       );
     });
     it("Should unlock fa2 asset without fee", async function () {
@@ -597,7 +788,7 @@ describe("BridgeCore Exchange tests", async function () {
         fa2Source.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const aliceBalance = await fa2Token.getBalance(alice.pkh);
@@ -607,7 +798,7 @@ describe("BridgeCore Exchange tests", async function () {
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(bridgeBalance, prevBridgeBalance - unlockAmount * 1000);
@@ -629,8 +820,8 @@ describe("BridgeCore Exchange tests", async function () {
       const signature = await signerSecp.sign(keccakBytes);
       const prevEveBalance = await Tezos.tz
         .getBalance(eve.pkh)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       await bridge.unlockAsset(
         lockId,
         bscChainId,
@@ -638,19 +829,19 @@ describe("BridgeCore Exchange tests", async function () {
         tezSource.native_address,
         unlockAmount,
         eve.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const eveBalance = await Tezos.tz
         .getBalance(eve.pkh)
-        .then((balance) => Math.floor(balance.toNumber()))
-        .catch((error) => console.log(JSON.stringify(error)));
+        .then(balance => Math.floor(balance.toNumber()))
+        .catch(error => console.log(JSON.stringify(error)));
       const unlockKey = {
         chain: bscChainId,
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(eveBalance, prevEveBalance + Math.ceil(unlockAmount / 1000));
@@ -671,7 +862,7 @@ describe("BridgeCore Exchange tests", async function () {
 
       const prevAliceBalance = await bridge.wrappedToken.getBalance(
         alice.pkh,
-        0
+        0,
       );
 
       await bridge.unlockAsset(
@@ -681,7 +872,7 @@ describe("BridgeCore Exchange tests", async function () {
         wrappedSource.native_address,
         unlockAmount,
         alice.pkh,
-        signature.sig
+        signature.sig,
       );
       await bridge.updateStorage();
       const aliceBalance = await bridge.wrappedToken.getBalance(alice.pkh, 0);
@@ -690,7 +881,7 @@ describe("BridgeCore Exchange tests", async function () {
         lock_id: lockId,
       };
       const unlock = await bridge.validator.storage.validated_unlocks.get(
-        unlockKey
+        unlockKey,
       );
       strictEqual(unlock.amount.toNumber(), unlockAmount);
       strictEqual(aliceBalance, prevAliceBalance + unlockAmount);

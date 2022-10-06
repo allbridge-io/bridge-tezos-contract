@@ -12,6 +12,7 @@ const Token = require("./helpers/tokenWrapper");
 const { alice, bob, secpSigner } = require("../scripts/sandbox/accounts");
 const { MichelsonMap } = require("@taquito/taquito");
 const toBytes = require("../scripts/toBytesForSign");
+const { confirmOperation } = require("../scripts/confirmation");
 
 describe("BridgeCore Admin tests", async function() {
   let bridge;
@@ -48,19 +49,37 @@ describe("BridgeCore Admin tests", async function() {
     }
   });
 
-  describe("Testing entrypoint: Change_owner", async function() {
-    it("Shouldn't changing owner if the user is not an owner", async function() {
+  describe("Testing entrypoint: Change_owner", async function () {
+    it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(bridge.сhangeAddress("change_owner", bob.pkh), err => {
         strictEqual(err.message, "Bridge-core/not-owner");
         return true;
       });
     });
-    it("Should allow change owner", async function() {
+    it("Should allow start transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
 
       await bridge.сhangeAddress("change_owner", bob.pkh);
       await bridge.updateStorage();
+      strictEqual(bridge.storage.pending_owner, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint: Confirm_owner", async function () {
+    it("Shouldn't confirm owner if the user is not an pending owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(bridge.contract.methods.confirm_owner().send(), err => {
+        strictEqual(err.message, "Bridge-core/not-pending-owner");
+        return true;
+      });
+    });
+    it("Should allow confirm transfer ownership", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      const op = await bridge.contract.methods.confirm_owner().send();
+      await confirmOperation(Tezos, op.hash);
+      await bridge.updateStorage();
+
       strictEqual(bridge.storage.owner, bob.pkh);
     });
   });

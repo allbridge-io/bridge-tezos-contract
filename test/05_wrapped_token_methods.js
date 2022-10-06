@@ -5,11 +5,14 @@ const {
   bob,
   signerSecp,
   signerBob,
+  eve,
 } = require("./utils/cli");
 const { MichelsonMap } = require("@taquito/taquito");
 const { rejects, strictEqual, notStrictEqual } = require("assert");
 
 const WrappedToken = require("./helpers/wrappedTokenWrapper");
+
+const { confirmOperation } = require("../scripts/confirmation");
 
 describe("Wrapped token methods test", async function () {
   let token;
@@ -23,6 +26,12 @@ describe("Wrapped token methods test", async function () {
     }
   });
   describe("Testing entrypoint: Change_owner", async function () {
+    it("Should fail (and all methods) if xtz is passed", async function () {
+      await rejects(token.сhangeAddress("change_owner", bob.pkh, 100), err => {
+        strictEqual(err.message, "Wrapped-token/unexpected-xtz-amount");
+        return true;
+      });
+    });
     it("Shouldn't changing owner if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerBob);
       await rejects(token.сhangeAddress("change_owner", bob.pkh), err => {
@@ -30,14 +39,33 @@ describe("Wrapped token methods test", async function () {
         return true;
       });
     });
-    it("Should allow change owner", async function () {
+    it("Should allow start transfer ownership", async function () {
       Tezos.setSignerProvider(signerAlice);
 
       await token.сhangeAddress("change_owner", bob.pkh);
       await token.updateStorage();
+      strictEqual(token.storage.pending_owner, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint: Confirm_owner", async function () {
+    it("Shouldn't confirm owner if the user is not an pending owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(token.contract.methods.confirm_owner().send(), err => {
+        strictEqual(err.message, "NOT_PENDING_ADMIN");
+        return true;
+      });
+    });
+    it("Should allow confirm transfer ownership", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      const op = await token.contract.methods.confirm_owner().send();
+      await confirmOperation(Tezos, op.hash);
+      await token.updateStorage();
+
       strictEqual(token.storage.owner, bob.pkh);
     });
   });
+
   describe("Testing entrypoint: Change_bridge", async function () {
     it("Shouldn't changing bridge if the user is not an owner", async function () {
       Tezos.setSignerProvider(signerAlice);
@@ -52,6 +80,22 @@ describe("Wrapped token methods test", async function () {
       await token.сhangeAddress("change_bridge", bob.pkh);
       await token.updateStorage();
       strictEqual(token.storage.bridge, bob.pkh);
+    });
+  });
+  describe("Testing entrypoint Toggle_pause", async function () {
+    it("Shouldn't toggle pause if the user is not an owner", async function () {
+      Tezos.setSignerProvider(signerAlice);
+      await rejects(token.togglePause(), err => {
+        strictEqual(err.message, "NOT_ADMIN");
+        return true;
+      });
+    });
+    it("Should allow toggle pause", async function () {
+      Tezos.setSignerProvider(signerBob);
+
+      await token.togglePause();
+      await token.updateStorage();
+      strictEqual(token.storage.paused, true);
     });
   });
   describe("Testing entrypoint: Create_token", async function () {
@@ -101,15 +145,22 @@ describe("Wrapped token methods test", async function () {
         return true;
       });
     });
-    it("Should allow mint tokens", async function () {
+    it("Shouldn't mint token if token is paused", async function () {
       Tezos.setSignerProvider(signerBob);
-
+      await rejects(token.mint(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "Wrapped-token/contract-paused");
+        return true;
+      });
+      await token.togglePause();
+    });
+    it("Should allow mint tokens", async function () {
       await token.mint(10000, 0, bob.pkh);
       await token.updateStorage();
       const tokenSupply = await token.storage.tokens_supply.get("0");
       const balance = await token.getBalance(bob.pkh, 0);
       strictEqual(tokenSupply.toNumber(), 10000);
       strictEqual(balance, 10000);
+      await token.mint(10000, 0, alice.pkh);
     });
   });
   describe("Testing entrypoint: Burn", async function () {
@@ -120,6 +171,15 @@ describe("Wrapped token methods test", async function () {
         return true;
       });
     });
+    it("Shouldn't burn token if token is paused", async function () {
+      Tezos.setSignerProvider(signerBob);
+      await token.togglePause();
+      await rejects(token.burn(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "Wrapped-token/contract-paused");
+        return true;
+      });
+      await token.togglePause();
+    });
     it("Should allow burn tokens", async function () {
       Tezos.setSignerProvider(signerBob);
 
@@ -127,8 +187,41 @@ describe("Wrapped token methods test", async function () {
       await token.updateStorage();
       const tokenSupply = await token.storage.tokens_supply.get("0");
       const balance = await token.getBalance(bob.pkh, 0);
-      strictEqual(tokenSupply.toNumber(), 0);
+      strictEqual(tokenSupply.toNumber(), 10000);
       strictEqual(balance, 0);
+    });
+    it("Shouldn't burn tokens if low balance", async function () {
+      await rejects(token.burn(1000, 0, bob.pkh), err => {
+        strictEqual(err.message, "FA2_INSUFFICIENT_BALANCE");
+        return true;
+      });
+    });
+  });
+  describe("Testing view entrypoint: Get_balance", async function () {
+    it("Should return Alice Balance", async function () {
+      const response = await token.callView("get_balance", [alice.pkh, "0"]);
+
+      strictEqual(response.toNumber(), 10000);
+    });
+    it("Should return 0 if account undefined", async function () {
+      const response = await token.callView("get_balance", [
+        token.address,
+        "0",
+      ]);
+
+      strictEqual(response.toNumber(), 0);
+    });
+  });
+  describe("Testing view entrypoint: Get_total_supply", async function () {
+    it("Should return total supply", async function () {
+      const response = await token.callView("get_total_supply", 0);
+      const totalSupply = await token.storage.tokens_supply.get("0");
+      strictEqual(response.toNumber(), totalSupply.toNumber());
+    });
+    it("Should return 0 if tokent undefined", async function () {
+      const response = await token.callView("get_total_supply", 10);
+
+      strictEqual(response.toNumber(), 0);
     });
   });
 });

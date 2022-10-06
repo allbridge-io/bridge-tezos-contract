@@ -4,7 +4,7 @@ type ledger_key_t       is (address * nat)
 
 type ledger_t           is big_map(ledger_key_t, nat)
 
-type allowances_t       is big_map(ledger_key_t, set(address))
+type allowances_t       is big_map(ledger_key_t * address, unit)
 
 type token_t            is [@layout:comb] record[
   chain_id                : chain_id_t;
@@ -22,6 +22,7 @@ type token_metadata_t   is [@layout:comb] record [
 
 type storage_t          is [@layout:comb] record [
   owner                   : address;
+  pending_owner           : option(address);
   bridge                  : address;
   ledger                  : ledger_t;
   allowances              : allowances_t;
@@ -31,6 +32,7 @@ type storage_t          is [@layout:comb] record [
   token_ids               : token_ids_map_t;
   metadata                : big_map(string, bytes);
   token_metadata          : big_map(token_id_t, token_metadata_t);
+  paused                  : bool;
 ]
 
 type return_t           is list(operation) * storage_t

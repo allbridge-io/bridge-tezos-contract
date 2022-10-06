@@ -28,7 +28,7 @@ module.exports = class WrappedToken {
   }
   async mint(amount, tokenId, recipient) {
     const operation = await this.contract.methods
-      .mint([{ token_id: tokenId, recipient: recipient, amount: amount }])
+      .mint(tokenId, recipient, amount)
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
@@ -38,8 +38,14 @@ module.exports = class WrappedToken {
       .send();
     await confirmOperation(Tezos, operation.hash);
   }
-  async сhangeAddress(typeAddress, address) {
-    const operation = await this.contract.methods[typeAddress](address).send();
+  async сhangeAddress(typeAddress, address, amt = 0) {
+    const operation = await this.contract.methods[typeAddress](address).send({
+      amount: amt,
+    });
+    await confirmOperation(Tezos, operation.hash);
+  }
+  async togglePause() {
+    const operation = await this.contract.methods.toggle_pause().send();
     await confirmOperation(Tezos, operation.hash);
   }
   async updateOperator(action, owner, operator, tokenId = 0) {
@@ -92,5 +98,10 @@ module.exports = class WrappedToken {
     await this.updateStorage();
     account = await this.storage.account_info.get(address);
     return account.permits;
+  }
+  async callView(viewName, params, caller = this.address) {
+    return await this.contract.contractViews[viewName](params).executeView({
+      viewCaller: caller,
+    });
   }
 };

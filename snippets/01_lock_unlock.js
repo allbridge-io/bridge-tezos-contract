@@ -13,7 +13,8 @@ const contractAddress = "KT";
 module.exports.lockAsset = async function (
   chainId,
   lockId,
-  assetId,
+  token_source,
+  token_source_address,
   amount,
   receiver,
   tezAmount = 0,
@@ -21,7 +22,14 @@ module.exports.lockAsset = async function (
   try {
     const contract = await Tezos.contract.at(contractAddress);
     const operation = await contract.methods
-      .lock_asset(chainId, lockId, assetId, amount, receiver)
+      .lock_asset(
+        chainId,
+        lockId,
+        token_source,
+        token_source_address,
+        amount,
+        receiver,
+      )
       .send({ amount: tezAmount });
 
     await confirmOperation(Tezos, operation.hash);
@@ -33,7 +41,8 @@ module.exports.lockAsset = async function (
 module.exports.unlockAsset = async function (
   chainId,
   lockId,
-  assetId,
+  token_source,
+  token_source_address,
   amount,
   receiver,
   signature,
@@ -41,7 +50,15 @@ module.exports.unlockAsset = async function (
   try {
     const contract = await Tezos.contract.at(contractAddress);
     const operation = await contract.methods
-      .unlock_asset(chainId, lockId, assetId, amount, receiver, signature)
+      .unlock_asset(
+        chainId,
+        lockId,
+        token_source,
+        token_source_address,
+        amount,
+        receiver,
+        signature,
+      )
       .send();
     await confirmOperation(Tezos, operation.hash);
   } catch (err) {

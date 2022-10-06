@@ -87,4 +87,9 @@ module.exports = class Validator {
 
     await confirmOperation(Tezos, operation.hash);
   }
+  async callView(viewName, params, caller = this.address) {
+    return await this.contract.contractViews[viewName](params).executeView({
+      viewCaller: caller,
+    });
+  }
 };

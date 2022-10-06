@@ -31,6 +31,7 @@ type asset_map_ids_t    is big_map(source_token_t, asset_id_t)
 
 type storage_t          is [@layout:comb] record[
   owner                   : address;
+  pending_owner           : option(address);
   bridge_manager          : address;
   stop_manager            : address;
   validator               : address;

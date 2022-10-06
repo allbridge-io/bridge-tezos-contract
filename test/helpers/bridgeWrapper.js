@@ -150,6 +150,7 @@ module.exports = class BridgeCore {
     amount,
     recipient,
     signature,
+    tezAmount = 0,
   ) {
     const operation = await this.contract.methods
       .unlock_asset(
@@ -161,7 +162,7 @@ module.exports = class BridgeCore {
         tokenSourceAddress,
         signature,
       )
-      .send();
+      .send({ amount: tezAmount });
     await confirmOperation(Tezos, operation.hash);
   }
   async removeAsset(assetId, amount, receiver, chainId, nativeAddress) {

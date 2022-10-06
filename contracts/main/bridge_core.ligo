@@ -6,11 +6,13 @@
 #include "../partial/fa2_types.ligo"
 #include "../partial/fa2_helpers.ligo"
 #include "../partial/bridge-core/bridge_helpers.ligo"
+#include "../partial/common_methods.ligo"
 #include "../partial/bridge-core/bridge_admin_methods.ligo"
 #include "../partial/bridge-core/bridge_exchange_methods.ligo"
 
 type parameter_t        is
   | Change_owner          of address
+  | Confirm_owner         of unit
   | Change_bridge_manager of address
   | Change_stop_manager   of address
   | Change_validator      of address
@@ -34,6 +36,7 @@ function main(
   case action of [
   (* Admin methods *)
   | Change_owner(params)          -> (Constants.no_operations, change_owner(params, s))
+  | Confirm_owner                 -> (Constants.no_operations, confirm_owner(s))
   | Change_bridge_manager(params) -> (Constants.no_operations, change_bridge_manager(params, s))
   | Change_stop_manager(params)   -> (Constants.no_operations, change_stop_manager(params, s))
   | Change_validator(params)      -> (Constants.no_operations, change_validator(params, s))
